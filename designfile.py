@@ -888,7 +888,6 @@ delete_row_button = dbc.Button("Delete Row", id="delete-row-btn", color="danger"
 allometry_tab = dbc.Container([
     dbc.Row([
         allometry_multi_input,
-        dbc.Col(html.Div("PLACEHOLDER FOR TEXT",id="allometry_debug", style={"height":"100%", "background-color":"gray"}), width=6)
 
     
     ], justify="start")
@@ -909,29 +908,28 @@ structural_tab = dbc.Container([
         dbc.Col(children=[dbc.Badge("Distribution", color="success", style={"font-size": "large"}),
             periheral_toggle, collapse_peripheral])
     ]),
-    dbc.Row([dbc.Col(bioavailability_toggle), html.Div("Biodebug",id="biodebug")])
+    dbc.Row([dbc.Col(bioavailability_toggle)])
 ])
 
 par_var_tab = dbc.Container([
     dbc.Row(children=[
     dbc.Col([dbc.Badge("Model IIVs", color="success", style={"font-size": "large"}),
-             iiv_table, html.Div(id="iiv_debug")
+             iiv_table, 
              ])
     ]),
     dbc.Row(children=[
     dbc.Col([dbc.Badge("Model IOVs", color="success", style={"font-size": "large"}),
-            iov_table, html.Div(id="iov_debug")
+            iov_table, 
             ])
 ]),
     
 ])
 
 parameter_tab = dbc.Container(
-    [   ##dcc.Store(id="param-store", storage_type="session"),
+    [
         html.P("Parameters"),
         fix_all_toggle, html.Hr(), pop_parameters, html.Hr(),
         all_parameters_table,
-        html.Div("DEBUG", id = "parameter-debug")
     ],
     className="mt-4"
 )
@@ -1012,16 +1010,10 @@ datainfo_tab = dbc.Container([
     editable=True,
     dropdown = dd,),
 
-    dbc.Alert("DATAINFO DEBUG", id="datainfo_debug"),
     dbc.Container([
         dbc.Button("Download DataInfo", id="makedatainf", n_clicks = 0, color="success"), 
         dcc.Download("download_dtainf")]),
-    dbc.Container([
-        dcc.Upload(id = "upload_dtainf", children=[
-            dbc.Button("Upload DataInfo", color="success")
-            ])
-        ])
-           
+
 
 
 
@@ -1032,14 +1024,8 @@ estimation_tab = dbc.Container([
     dbc.Col([estimation_multi_input, covariance_estimation]),
     dbc.Col([eval_multi_input, estimation_remove_multi])
     ]),
-    dbc.Row([
-        dbc.Col([html.Hr(),
-                html.Div(id="estimation_debug", style={"height":"100%", "backgroundColor": 'pink'}) ]),
-        
-    ])
-    
-]
-)
+
+])
 
 
 all_tabs = html.Div(dcc.Tabs(id="all-tabs", value='base-tab', 

@@ -316,7 +316,7 @@ def peripheral_compartments(n, toggle):
     return True
 
 @app.callback(
-        Output("biodebug", "children"), #allow_duplicate=True),
+        Output("data-dump", "clear_data", allow_duplicate=True),
         Input("bio_toggle", "value"),
         prevent_initial_call = True
 )
@@ -360,7 +360,7 @@ def get_parameters(fixed, tab):
         raise PreventUpdate
 
 @app.callback(
-        Output("parameter-debug", "children"),
+        Output("data-dump", "clear_data", allow_duplicate=True),
         Input("parameter-table", "data"),
         prevent_initial_call = True
 )
@@ -380,7 +380,7 @@ def visualise_data(data):
         globals()["model"] = globals()["model"].update_source()
     except: return f'Error in {data} and {globals()["model"].replace(parameters= Parameters.from_dict(current))}'
 
-    return f'DEBUG PARAMETERS ARE \n {globals()["model"].parameters.to_dict()}'
+    return True
 
    
 
@@ -461,7 +461,7 @@ def render_iiv_iov_data(tab):
     else:
         raise PreventUpdate
 @app.callback(
-    Output("iiv_debug", "children"),
+    Output("data-dump", "clear_data", allow_duplicate=True),
     Input("iiv_table", "selected_rows"),
     State("iiv_table", "data"),
     prevent_initial_call=True
@@ -490,11 +490,11 @@ def set_iivs(selected_index, data):
             
         created[i["parameter"]] = [frozenset(i.values()),has_random_effect(model=globals()["model"], parameter=i["parameter"])]
 
-    return str([created])
+    return True
 
 
 @app.callback(
-        Output('iov_debug', 'children'),
+        Output("data-dump", "clear_data", allow_duplicate=True),
         Input('iov_table', 'selected_rows'),
         State('iov_table', 'data'),
         prevent_initial_call=True
@@ -519,7 +519,7 @@ def set_iov(selected_index, data):
         else:         
             globals()["model"] = add_iov(model=globals()["model"],occ=i["occasion"] ,list_of_parameters=i["parameter"], eta_names=i["eta_names"])    
         creator[i["parameter"]] = [frozenset(i.values()),has_random_effect(model=globals()["model"], parameter=i["parameter"])]
-    return str([creator])
+    return True
 
 @app.callback(
         Output('iiv_table', 'selected_rows'),
@@ -743,7 +743,7 @@ def render_datatable(tab):
             return usable
         except: PreventUpdate
 @app.callback(
-    Output("datainfo_debug", "children"),
+    Output("data-dump", "clear_data", allow_duplicate=True),
     Input("datatable", "data"),
     prevent_initial_call = True
 )
@@ -754,8 +754,8 @@ def update_datainf(data):
         datainf["columns"] = data
         datainf = globals()["model"].datainfo.from_dict(datainf)
         globals()["model"] = globals()["model"].replace(datainfo=datainf)
-        return f'DEBUG \t Current Model DataInfo is: \n {str(globals()["model"].datainfo)}' 
-    except: PreventUpdate
+        return True 
+    except: raise PreventUpdate
 
 
 @app.callback(
@@ -769,7 +769,7 @@ def makeNone(clicked):
 
 
 @app.callback(
-    Output("estimation_debug", "children", allow_duplicate=True),
+    Output("data-dump", "clear_data", allow_duplicate=True),
     Input("estimation_btn", "n_clicks"),
     State("estimation_method","value"),
     State("estimation_index","value"),
@@ -824,20 +824,19 @@ def create_estimation_step(clicked, method, index,cov,int_ev_lapl,solver,atol,rt
     return str(globals()["model"].estimation_steps)
 
 @app.callback(
-        Output("estimation_debug", "children", allow_duplicate=True),
-        
+        Output("data-dump", "clear_data", allow_duplicate=True),        
         Input("covariance_check", "value"),
         prevent_initial_call = True
 )
 def add_covariance(checked):
     if checked:
         globals()["model"] = add_covariance_step(globals()["model"])
-        return str(globals()["model"].estimation_steps)
+        True
     else:
-        return str(globals()["model"].estimation_steps)
+        True
 
 @app.callback(
-        Output("estimation_debug", "children", allow_duplicate=True),
+        Output("data-dump", "clear_data", allow_duplicate=True),
         Input("remove_est_btn", "n_clicks"),
         State("remove_estimation", "value"),
         prevent_initial_call = True
@@ -845,11 +844,11 @@ def add_covariance(checked):
 def remove_estimation_idx(clicked, index):
     if clicked:
         globals()["model"] = remove_estimation_step(globals()["model"], index if index else 0)
-        return str(globals()["model"].estimation_steps)
-    return str(globals()["model"].estimation_steps)
+        return True
+    return True
 
 @app.callback(
-        Output("estimation_debug", "children", allow_duplicate=True), 
+        Output("data-dump", "clear_data", allow_duplicate=True), 
         Input("eval_btn", "n_clicks"),
         State("evaluation_index", "value"),
         prevent_initial_call = True
@@ -857,8 +856,8 @@ def remove_estimation_idx(clicked, index):
 def estimation(clicked, index):
     if clicked:
         globals()["model"] = set_evaluation_step(globals()["model"], index if index else 0)
-        return str(globals()["model"].estimation_steps)
-    return str(globals()["model"].estimation_steps)
+        return True
+    return True
 @app.callback(
     Output("data_dump","clear_data" ,allow_duplicate=True),
     Input("eval_btn", "n_clicks"),
@@ -909,7 +908,7 @@ def give_options(tab):
     else: return [], []
 
 @app.callback(
-    Output("allometry_debug", "children"),
+    Output("data-dump", "clear_data", allow_duplicate=True),
     Output("allo_custom", "invalid"),
     Input("allo_btn", "n_clicks"),
     State("allo_variable", "value"),
@@ -956,9 +955,9 @@ def create_allometry(clicked, variable, custom, ref_val, params, inits, lower, u
                     lower_bounds=standard_values["lower"],
                     upper_bounds=standard_values["upper"], fixed=standard_values["fix"] )
             
-            return f' Allometry set, standard values are : {standard_values}', pattern
-        except: return f'standard values are : {standard_values}', pattern
-    else: return "No allometry", pattern
+            return True, pattern
+        except: True, pattern
+    else: True, pattern
 
 if __name__ == '__main__':
     app.run_server(debug=True)
