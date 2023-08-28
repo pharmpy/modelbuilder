@@ -107,20 +107,34 @@ def change_name_desc(name, description):
         prevent_initial_call=True
 )
 def change_format(format):
-    globals()["model"] = convert_model(globals()["model"], format)
-    return get_model_code(globals()["model"])
+    if format != "generic":
+        globals()["model"] = convert_model(globals()["model"], format)
+        return get_model_code(globals()["model"])
+    elif format == "generic":
+        globals()["model"] = convert_model(globals()["model"], format)
+        text_renderer = ""
+        text_renderer += str(globals()["model"].statements)
+        text_renderer += str(globals()["model"].random_variables.etas)
+        return text_renderer
+    
 
 @app.callback(
     Output("output-model", "value"),
     Input("text-refresh", "n_intervals"),
+    State("modelformat", 'value'),
     
 )
 
-def get_code(n):   
+def get_code(n, format):   
     try:
-        return get_model_code(globals()["model"])
+        if format != "generic":
+            return get_model_code(globals()["model"])
+        else: 
+            text_renderer = str(globals()["model"].statements)
+            text_renderer += str(globals()["model"].random_variables.etas)
+            return text_renderer
     except: 
-        PreventUpdate 
+        raise PreventUpdate 
 
 #Dataset-parsing
 @app.callback(
@@ -149,17 +163,7 @@ def parse_dataset(contents, editable, filename):
 
         return str(filename), dis, dis
     else: return f'No dataset, editable ={editable}', dis, dis 
-    
-#Statements
-@app.callback(
-    Output("statements-body", "value"),
-    Input("statements-pop", "is_open")
         
-)
-def render_statements(open):
-    if open:
-        statements = str(globals()["model"].statements)
-        return statements    
 
 #Callback for absorption, elimination
 @app.callback(

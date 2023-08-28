@@ -8,8 +8,6 @@ import pandas as pd
 import dash_bootstrap_components as dbc
 
 
-#import modeltest as mt
-
 btn_color = "primary"
 refreshtime = 0.5 #How often the model-code refreshes seconds
 
@@ -184,9 +182,9 @@ navbar = dbc.Navbar(dbc.Container(
     [html.A(
         dbc.Row([
             dbc.Col(html.Img(src="https://pharmpy.github.io/latest/_images/Pharmpy_logo.svg"
-            , height="30px")),
+            , height="40px")),
             ]),href="https://pharmpy.github.io"),
-            dbc.Col(dbc.NavbarBrand("PLACEHOLDER Pharmpy GUI Navbar", className="ms-4")),
+            dbc.Col(dbc.NavbarBrand("Pharmpy Model Builder", className="ms-5", style={"font-size" : "25px", "font-weight":"bold"}))
            ]
             ))
 
@@ -969,7 +967,7 @@ base_tab = dbc.Container([
                 dbc.Col(children=[model_name, model_description
                                   ], style={},),
                 dbc.Col(children=[
-                    model_statements
+                    
                     ], style={"height":"20vh"}),
                 ], style={}),
             dbc.Row([
