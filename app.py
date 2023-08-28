@@ -5,6 +5,7 @@ import dash_bootstrap_components as dbc
 import designfile as df
 from dash.exceptions import PreventUpdate
 import pandas as pd
+import numpy as np
 import base64
 import json
 import io
@@ -16,7 +17,7 @@ def make_label_value(key, value):
 
 
 
-app = Dash(__name__, title="Pharmpy GUI", external_stylesheets=[dbc.themes.FLATLY], suppress_callback_exceptions=True,)
+app = Dash(__name__, title="Pharmpy GUI", external_stylesheets=[dbc.themes.FLATLY], suppress_callback_exceptions=True, update_title=None)
 
 
 app.layout = dbc.Container([
@@ -378,7 +379,7 @@ def visualise_data(data):
     try:
         globals()["model"] = globals()["model"].replace(parameters= Parameters.from_dict(current))
         globals()["model"] = globals()["model"].update_source()
-    except: return f'Error in {data} and {globals()["model"].replace(parameters= Parameters.from_dict(current))}'
+    except: raise PreventUpdate
 
     return True
 
@@ -959,6 +960,84 @@ def create_allometry(clicked, variable, custom, ref_val, params, inits, lower, u
         except: True, pattern
     else: True, pattern
 
+@app.callback(
+    Output("covariance_matrix", "data", allow_duplicate=True),
+    Output("covariance_matrix", "columns"),
+    Output("covariance_matrix", "style_data_conditional"),
+    Output("covariance_matrix", "dropdown"),
+    Output("covariance_matrix", "dropdown_conditional"),
+    Input("all-tabs", "value"),
+    prevent_initial_call = True
+)
+
+def get_cov_matrix(tab):
+    try:
+        model = globals()["model"]
+        matrix = model.random_variables.etas.names
+        data = model.random_variables.etas.covariance_matrix
+        df = pd.DataFrame(np.array(data).astype(str), columns=matrix)
+        df.replace(str(0), None, inplace=True)
+        df = df.applymap(lambda x: isinstance(x, str))
+        df.insert(0, "parameter" ,matrix, True)
+        data = df.to_dict('records')
+
+        columns=[{"name": i, "id": i, "editable": i != "parameter", "presentation": "dropdown"} for i in df.columns]
+
+        style_data_conditional=[{
+                                'if':{'column_id' : [matrix[x] for x in range(len(matrix)) if x-i >= 0],
+                                        'row_index' : i
+                                        }, 'backgroundColor' : 'gainsboro'
+                                }
+                                for i in range(len(matrix))]
+
+        dropdown= { 
+                   i:{
+                    'options': [
+                                 {'label':'True', 'value':True},
+                                ]
+                    } for i in matrix     
+                 }
+
+        dropdown_conditional=[{
+                            'if': {
+                                'column_id' : i,
+                                'filter_query': '{parameter} eq "' + str(i) + '"'
+                                }, 
+                                'options': []
+                            } for i in matrix]  
+        return data, columns, style_data_conditional, dropdown, dropdown_conditional
+    except: raise PreventUpdate
+
+@app.callback(
+    Output("covariance_matrix", "data", allow_duplicate=True),
+    Input("covariance_matrix", "data"),
+    prevent_initial_call=True
+    )
+
+def set_covariance(data):
+    #FIXME! 
+    #try:
+    d = data
+    for row in d[::-1]:
+        true_keys = [row["parameter"]]
+        for key, value in row.items():
+                if value == True:
+                    true_keys.append(key)
+                    
+                for second_iter in d[::-1]:
+                    if second_iter['parameter'] == key:
+                        second_iter.update({row["parameter"]:value})
+    globals()["model"] = split_joint_distribution(model=globals()["model"], rvs=true_keys)              
+    globals()["model"] = create_joint_distribution(model = globals()["model"],rvs=true_keys)
+
+
+    return data 
+        
+    #except: raise PreventUpdate
+
+    
+                 
+    
 if __name__ == '__main__':
     app.run_server(debug=True)
 

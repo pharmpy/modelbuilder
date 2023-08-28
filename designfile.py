@@ -827,7 +827,9 @@ iiv_table = dash_table.DataTable(
 
 )
 
-
+covariance_matrix = dbc.Container([
+    dash_table.DataTable(id="covariance_matrix")
+    ])
 
 all_parameters_table = dash_table.DataTable(
     id='parameter-table',
@@ -922,6 +924,12 @@ par_var_tab = dbc.Container([
             iov_table, 
             ])
 ]),
+    dbc.Row(children=[
+    dbc.Col([
+        dbc.Badge("Model Covariance Matrix", color="success", style={"font-size": "large"}),
+        covariance_matrix,
+        ])
+    ])
     
 ])
 
