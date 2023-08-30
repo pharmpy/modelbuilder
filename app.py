@@ -281,7 +281,7 @@ def toggle_disable(lag_tog, transit_tog, input):
             globals()["model"] = add_lag_time(globals()["model"])
             return [{"label": "Lag Time", "value" : True, "disabled":False}], [{"label": "Transit Compartments", "value" : True, "disabled":True}]
         except:
-            PreventUpdate
+            raise PreventUpdate
     if transit_tog:
         try:
             globals()["model"]= remove_lag_time(globals()["model"])
@@ -289,13 +289,14 @@ def toggle_disable(lag_tog, transit_tog, input):
                 globals()["model"] = set_transit_compartments(globals()["model"], int(input))
             return [{"label": "Lag Time", "value" : True, "disabled":True}], [{"label": "Transit Compartments", "value" : True, "disabled":False}]
         except:
-            PreventUpdate
+            raise PreventUpdate
     else:
         try:
             globals()["model"]= remove_lag_time(globals()["model"])
+            globals()["model"] = set_transit_compartments(globals()["model"],0)
             return [{"label": "Lag Time", "value" : True, "disabled":False}], [{"label": "Transit Compartments", "value" : True, "disabled":False}]
         except:
-            return [{"label": "Lag Time", "value" : True, "disabled":False}], [{"label": "Transit Compartments", "value" : True, "disabled":False}]
+            raise PreventUpdate
 
 #callback for peripheral compartments
 @app.callback(
@@ -329,11 +330,11 @@ def set_bioavailability(toggle):
     if toggle:
         try:
             globals()["model"] = add_bioavailability(globals()["model"])
-            return "current bio: "+str(get_bioavailability(globals()["model"]))
-        except: return "something wrong"
+            return True
+        except: True
     else:
         globals()["model"] = remove_bioavailability(globals()["model"])
-        return "not toggled"
+        return True
 
 #Getting the model parameters
 @app.callback(

@@ -233,7 +233,7 @@ lag_toggle = html.Div(
     ],
 )
 
-periheral_toggle = html.Div(
+peripheral_toggle = html.Div(
     [
         dbc.Checklist(
             options=[
@@ -455,7 +455,7 @@ error_multi_input = dbc.Container([
         dbc.ListGroupItem(
             dbc.InputGroup(children=[
                             dbc.Checkbox(id="add_check", label = 
-                                        dbc.Badge("Additative", 
+                                        dbc.Badge("Additive", 
                                                 color="success", style={"width":150, "font-size":"medium"}),
                                                 value = False ,
                                     style={"size": "md"}),
@@ -722,7 +722,8 @@ collapse_PK_IIV = dbc.Row([
 collapse_transit = dbc.Row([
     dbc.Col(
         dbc.Collapse([
-            dbc.Input(id="transit_input", placeholder="Input number of compartments", type="number", min=0),
+            dbc.Input(id="transit_input", placeholder="Input number of compartments", type="number", min=0,
+                      style={"width" : "70%"}),
             
             ],
         id="transit-collapse",
@@ -737,7 +738,8 @@ collapse_transit = dbc.Row([
 collapse_peripheral = dbc.Row([
     dbc.Col(
         dbc.Collapse([
-            dbc.Input(id="peripheral_input", placeholder="Input number of compartments", type="number", min=0),
+            dbc.Input(id="peripheral_input", placeholder="Input number of compartments", type="number", min=0, 
+                      style={"width" : "70%"}),
             
             ],
         id="peripheral-collapse",
@@ -904,9 +906,9 @@ structural_tab = dbc.Container([
     ]),
     dbc.Row([
         dbc.Col(children=[dbc.Badge("Absorption Delay", color="success", style={"font-size": "large"}),
-            lag_toggle, transit_toggle, collapse_transit]),
+            transit_toggle, collapse_transit, lag_toggle,]),
         dbc.Col(children=[dbc.Badge("Distribution", color="success", style={"font-size": "large"}),
-            periheral_toggle, collapse_peripheral])
+            peripheral_toggle, collapse_peripheral])
     ]),
     dbc.Row([dbc.Col(bioavailability_toggle)])
 ])
