@@ -293,9 +293,8 @@ def peripheral_compartments(n):
 )
 def set_bioavailability(toggle):
     if toggle:
-        try:
-            globals()["model"] = add_bioavailability(globals()["model"])
-
+        globals()["model"] = add_bioavailability(globals()["model"])
+        return True
     else:
         globals()["model"] = remove_bioavailability(globals()["model"])
         return True
