@@ -124,14 +124,20 @@ def change_format(format):
 @app.callback(
     Output("output-model", "value"),
     Input("text-refresh", "n_intervals"),
+    State("modelformat", 'value'),
     
 )
 
-def get_code(n):   
+def get_code(n, format):   
     try:
-        return get_model_code(globals()["model"])
+        if format != "generic":
+            return get_model_code(globals()["model"])
+        else: 
+            text_renderer = str(globals()["model"].statements)
+            text_renderer += str(globals()["model"].random_variables.etas)
+            return text_renderer
     except: 
-        PreventUpdate 
+        raise PreventUpdate 
 
 #Dataset-parsing
 @app.callback(
@@ -151,11 +157,13 @@ def parse_dataset(contents, filename):
         # Assume that the user uploaded a CSV file
             data = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
+
             data.to_csv('dataset/'+filename, index=False)   
         return str(filename), #dis, dis
     else: raise PreventUpdate
     #else: return f'No dataset, editable ={editable}', dis, dis 
     
+
 
 #Callback for absorption, elimination
 @app.callback(
@@ -238,20 +246,25 @@ def toggle_disable(lag_tog, transit_input):
             return [{"label": "Lag Time", "value" : True, "disabled":False}], None, True
         except:
             raise PreventUpdate
+
     if transit_input :
+
         try:
             globals()["model"]= remove_lag_time(globals()["model"])
             if transit_input:
                 globals()["model"] = set_transit_compartments(globals()["model"], int(transit_input))
             return [{"label": "Lag Time", "value" : False, "disabled":True}], int(transit_input), False
         except:
+
             raise PreventUpdate 
     else: 
         try:
             globals()["model"]= remove_lag_time(globals()["model"])
+            globals()["model"] = set_transit_compartments(globals()["model"],0)
             return [{"label": "Lag Time", "value" : True, "disabled":False}], None, False
         except:
             return [{"label": "Lag Time", "value" : True, "disabled":False}], None, False
+
 
 #callback for peripheral compartments
 @app.callback(
@@ -282,8 +295,7 @@ def set_bioavailability(toggle):
     if toggle:
         try:
             globals()["model"] = add_bioavailability(globals()["model"])
-            return "current bio: "+str(get_bioavailability(globals()["model"]))
-        except: return True
+
     else:
         globals()["model"] = remove_bioavailability(globals()["model"])
         return True

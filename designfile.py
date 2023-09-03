@@ -172,9 +172,9 @@ navbar = dbc.Navbar(dbc.Container(
     [html.A(
         dbc.Row([
             dbc.Col(html.Img(src="https://pharmpy.github.io/latest/_images/Pharmpy_logo.svg"
-            , height="30px")),
+            , height="40px")),
             ]),href="https://pharmpy.github.io"),
-            dbc.Col(dbc.NavbarBrand("PLACEHOLDER Pharmpy GUI Navbar", className="ms-4")),
+            dbc.Col(dbc.NavbarBrand("Pharmpy Model Builder", className="ms-5", style={"font-size" : "25px", "font-weight":"bold"}))
            ]
             ))
 
@@ -220,7 +220,7 @@ lag_toggle = html.Div(
     ],
 )
 
-periheral_toggle = html.Div(
+peripheral_toggle = html.Div(
     [
         dbc.Checklist(
             options=[
@@ -434,7 +434,7 @@ error_multi_input = dbc.Container([
         dbc.ListGroupItem(
             dbc.InputGroup(children=[
                             dbc.Checkbox(id="add_check", label = 
-                                        dbc.Badge("Additative", 
+                                        dbc.Badge("Additive", 
                                                 color="success", style={"width":150, "font-size":"medium"}),
                                                 value = False ,
                                     style={"size": "md"}),
@@ -719,7 +719,9 @@ collapse_PK_IIV = dbc.Row([
 collapse_transit = dbc.Row([
     dbc.Col(
         dbc.Collapse([
+
             #dbc.Input(id="transit_input", placeholder=0, type="number", min=0, step=1),
+
             
             ],
         id="transit-collapse",
@@ -734,7 +736,9 @@ collapse_transit = dbc.Row([
 collapse_peripheral = dbc.Row([
     dbc.Col(
         dbc.Collapse([
+
             #dbc.Input(id="peripheral_input", placeholder=0, type="number", min=0, step=1),
+
             
             ],
         id="peripheral-collapse",
@@ -900,10 +904,12 @@ structural_tab = dbc.Container([
     ]),
     dbc.Row([
         dbc.Col(children=[dbc.Badge("Absorption Delay", color="success", style={"font-size": "large"}),
+
             transits, lag_toggle, bioavailability_toggle]),
         dbc.Col(children=[dbc.Badge("Distribution", color="success", style={"font-size": "large"}),
             peripherals])
   ]),
+
 
 ])
 

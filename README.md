@@ -44,7 +44,7 @@ cd /path/modelbuilder/pharmpy_ui
 scripts/activate.ps1
 ```
 
-**Linux**
+**Linux/macOS**
 ```
 cd /path/modelbuilder/pharmpy_ui
 source bin/activate
