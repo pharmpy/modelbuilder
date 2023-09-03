@@ -9,6 +9,8 @@ import numpy as np
 import base64
 import json
 import io
+import time
+import os
 PHARMPY_LOGO = "https://pharmpy.github.io/latest/_images/Pharmpy_logo.svg"
 
 
@@ -73,13 +75,14 @@ app.layout = dbc.Container([
 )
 def create_model(route, dataset, format):
     if format and route:
-        try:
-            start_model = create_basic_pk_model(route, dataset_path=globals()["dataset"])
-        except:
-            start_model = create_basic_pk_model(route, dataset_path=dataset)    
+        if dataset:
+            time.sleep(1)
+            path = 'dataset/'+dataset
+        else:
+            path=None
+        start_model = create_basic_pk_model(route, dataset_path=path)    
         start_model = set_name(start_model, "model")
-
-
+        
         start_model = convert_model(start_model, format)
         globals()["model"] = start_model
         return True
@@ -139,31 +142,28 @@ def get_code(n, format):
 #Dataset-parsing
 @app.callback(
    Output("dataset-path", 'value'),
-   Output("dataset-path", "disabled"),
-   Output("dataset-separator", "disabled"),
    Input("upload-dataset", 'contents'),
-   Input("edit_data", "value"),
    State('upload-dataset', 'filename') 
 )
-def parse_dataset(contents, editable, filename):
-    if editable == "True":
-        dis = False
-    else: 
-        dis = True        
+def parse_dataset(contents, filename):
+     
     if contents is not None:
+        for file in os.listdir('dataset'):
+            if file.endswith(".csv"):
+                os.remove('dataset/'+file)
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
         if 'csv' in filename:
         # Assume that the user uploaded a CSV file
-            globals()["dataset"]=pd.read_csv(
+            data = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
-        elif 'xls' in filename:
-        # Assume that the user uploaded an excel file
-            globals()["dataset"]= pd.read_excel(io.BytesIO(decoded))
 
-        return str(filename), dis, dis
-    else: return f'No dataset, editable ={editable}', dis, dis 
-        
+            data.to_csv('dataset/'+filename, index=False)   
+        return str(filename), #dis, dis
+    else: raise PreventUpdate
+    #else: return f'No dataset, editable ={editable}', dis, dis 
+    
+
 
 #Callback for absorption, elimination
 @app.callback(
@@ -207,16 +207,13 @@ def disable_abs(value, options, rate):
 
 #Callback for download-btn
 @app.callback(
-    Output("model_comfirm", "children"),
+    Output("model_confirm", "children"),
     Input("download-btn", "n_clicks"),
     State("model-name", "value"),
     State("model_path", "value"),
     prevent_initial_call=True,
               )
 
-#Fel med att spara utan namn
-
-#SPARA MODELLER MED WRITE IST
 def make_mod(n_clicks, name, path):
     if not name:
         return "please provide model name"
@@ -231,95 +228,63 @@ def make_mod(n_clicks, name, path):
                     return f'Model written to directory folder'
     return f'Provided path {path} '
 
-
-#Callback and function for the limit collapse
 @app.callback(
-    Output("transit-collapse", "is_open"),
-    Input("transit-toggle", "value"),
-    Input("transit-collapse", "is_open")
-)
-
-@app.callback(
-    Output("PK_IIV-collapse", "is_open"),
-    Input("pk_iiv_toggle", "value"),
-    Input("PK_IIV-collapse", "is_open")
-)
-
-@app.callback(
-    Output("peripheral-collapse", "is_open"),
-    Input("peripheral-toggle", "value"),
-    State("peripheral-collapse", "is_open"),
-)
-
-def toggle_input(val, is_open):
-    if val:
-        return not is_open
-    
-@app.callback(
-    Output("statements-pop", "is_open"),
-    Input("statements-btn", "n_clicks"),
-    State("statements-pop", "is_open"),
-)
-def open_popup(n_clicks, is_open):
-    if n_clicks:
-        return not is_open
-    return is_open
-
-#Callback for creating transit compartments and lagtime
-@app.callback(
-        [Output("lag-toggle", "options"), Output("transit-toggle", "options")],
-        [Input("lag-toggle", "value"), Input("transit-toggle", "value")],
+        [Output("lag-toggle", "options"),
+         Output("transit_input", "value"), 
+         Output("transit_input", "disabled")],
+        Input("lag-toggle", "value"),
         Input("transit_input", "value"),
         prevent_inital_call = True
 )
 
-def toggle_disable(lag_tog, transit_tog, input):
+def toggle_disable(lag_tog, transit_input):
     
     if lag_tog:
         try:
             globals()["model"] = set_transit_compartments(globals()["model"],0)
             globals()["model"] = add_lag_time(globals()["model"])
-            return [{"label": "Lag Time", "value" : True, "disabled":False}], [{"label": "Transit Compartments", "value" : True, "disabled":True}]
+            return [{"label": "Lag Time", "value" : True, "disabled":False}], None, True
         except:
             raise PreventUpdate
-    if transit_tog:
+
+    if transit_input :
+
         try:
             globals()["model"]= remove_lag_time(globals()["model"])
-            if input:
-                globals()["model"] = set_transit_compartments(globals()["model"], int(input))
-            return [{"label": "Lag Time", "value" : True, "disabled":True}], [{"label": "Transit Compartments", "value" : True, "disabled":False}]
+            if transit_input:
+                globals()["model"] = set_transit_compartments(globals()["model"], int(transit_input))
+            return [{"label": "Lag Time", "value" : False, "disabled":True}], int(transit_input), False
         except:
-            raise PreventUpdate
-    else:
+
+            raise PreventUpdate 
+    else: 
         try:
             globals()["model"]= remove_lag_time(globals()["model"])
             globals()["model"] = set_transit_compartments(globals()["model"],0)
-            return [{"label": "Lag Time", "value" : True, "disabled":False}], [{"label": "Transit Compartments", "value" : True, "disabled":False}]
+            return [{"label": "Lag Time", "value" : True, "disabled":False}], None, False
         except:
-            raise PreventUpdate
+            return [{"label": "Lag Time", "value" : True, "disabled":False}], None, False
+
 
 #callback for peripheral compartments
 @app.callback(
     Output("data-dump", "clear_data", allow_duplicate=True),
     Input("peripheral_input", "value"),
-    Input("peripheral-toggle", "value"),
     prevent_initial_call = True
 )
 
-def peripheral_compartments(n, toggle):
-    if toggle:
-        try:
-            if n>0:
-                globals()["peripherals"] = int(n)
-                globals()["model"] = set_peripheral_compartments(globals()["model"], int(n))
+def peripheral_compartments(n):
+
+    try:
+        if n>0:
+            globals()["peripherals"] = int(n)
+            globals()["model"] = set_peripheral_compartments(globals()["model"], int(n))
             return True
-        except: return True
-        
-    else:
-        while globals()["peripherals"] > 0:
-            globals()["model"] = remove_peripheral_compartment(globals()["model"])
-            globals()["peripherals"] = globals()["peripherals"] - 1 
-    return True
+        else:
+            while globals()["peripherals"] > 0:
+                globals()["model"] = remove_peripheral_compartment(globals()["model"])
+                globals()["peripherals"] = globals()["peripherals"] - 1 
+    except: return True
 
 @app.callback(
         Output("data-dump", "clear_data", allow_duplicate=True),
@@ -330,8 +295,7 @@ def set_bioavailability(toggle):
     if toggle:
         try:
             globals()["model"] = add_bioavailability(globals()["model"])
-            return True
-        except: True
+
     else:
         globals()["model"] = remove_bioavailability(globals()["model"])
         return True
@@ -344,7 +308,7 @@ def set_bioavailability(toggle):
     prevent_initial_call = 'initial_duplicate' 
     
 )
-#Dela upp i fixera/inte fixera
+
 def get_parameters(fixed, tab):
     if tab == "parameters-tab":
         
@@ -423,11 +387,7 @@ def create_pop_param(n_clicks, name, init, upper,lower,fix):
 
 @app.callback(
         Output("iiv_table", "data"),
-        #Output("iiv_table", "selected_rows"),
-        
         Output("iov_table","data"),
-        #Output("iov_table", "selected_rows"),
-
         Output("iov_table","dropdown"),
         Input('all-tabs', 'value'),
         prevent_initial_call = True
@@ -436,34 +396,36 @@ def render_iiv_iov_data(tab):
      
 
     if tab == "par-var-tab":
-        parameter_names = [str(s.symbol) for s in globals()["model"].statements if not isinstance(s, CompartmentalSystem)]
-        df = pd.DataFrame({'parameter':parameter_names, 'initial_estimate':0.09, 'operation':'*', 'eta_names':None})
-        iiv_data = df.to_dict('records')
-
-        iov_data = pd.DataFrame({'parameter': parameter_names, 'distribution':'disjoint', 'eta_names':None})
-        iov_data = iov_data.to_dict('records')
         try:
-            occ_opts = globals()["model"].datainfo.typeix["idv"].names + globals()["model"].datainfo.typeix["unknown"].names
-        except:
-            occ_opts = globals()["model"].datainfo.typeix["unknown"].names  
-            
-        iov_dd_options = {
-        
-        'occasion': {
-             'options' : [make_label_value(i, i) for i in occ_opts]
-        },
-            
-        'distribution' : {
-        'options' : [
-            {'label': 'disjoint' , 'value': 'disjoint'},
-            {'label': 'joint' , 'value': 'joint'},
-            {'label': 'explicit' , 'value': 'explicit'},
-            {'label': 'Same as IIV' , 'value': 'same-as-iiv'},
-            ]
-            },
-       },
+            parameter_names = [str(s.symbol) for s in globals()["model"].statements if not isinstance(s, CompartmentalSystem)]
+            df = pd.DataFrame({'parameter':parameter_names, 'initial_estimate':0.09, 'operation':'*', 'eta_names':None})
+            iiv_data = df.to_dict('records')
 
-        return iiv_data, iov_data, iov_dd_options[0]
+            iov_data = pd.DataFrame({'parameter': parameter_names, 'distribution':'disjoint', 'eta_names':None})
+            iov_data = iov_data.to_dict('records')
+            try:
+                occ_opts = globals()["model"].datainfo.typeix["idv"].names + globals()["model"].datainfo.typeix["unknown"].names
+            except:
+                occ_opts = globals()["model"].datainfo.typeix["unknown"].names  
+                
+            iov_dd_options = {
+            
+            'occasion': {
+                'options' : [make_label_value(i, i) for i in occ_opts]
+            },
+                
+            'distribution' : {
+            'options' : [
+                {'label': 'disjoint' , 'value': 'disjoint'},
+                {'label': 'joint' , 'value': 'joint'},
+                {'label': 'explicit' , 'value': 'explicit'},
+                {'label': 'Same as IIV' , 'value': 'same-as-iiv'},
+                ]
+                },
+        },
+
+            return iiv_data, iov_data, iov_dd_options[0]
+        except: raise PreventUpdate
     else:
         raise PreventUpdate
 @app.callback(
@@ -1045,5 +1007,5 @@ def set_covariance(data):
     
 if __name__ == '__main__':
     app.run_server(debug=True)
-
+    
 

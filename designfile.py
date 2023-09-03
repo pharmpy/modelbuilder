@@ -7,20 +7,18 @@ import plotly.express as px
 import pandas as pd
 import dash_bootstrap_components as dbc
 
-
 btn_color = "primary"
 refreshtime = 0.5 #How often the model-code refreshes seconds
 
 #Model types, add more if you want more buttons available
 typeoptions = [
     {"label":"PK", "value":"PK" },
-    {"label":"Example Type" , "value":"ex_type", "disabled":True}
     ]
 
 #The supported model formats
 modelformats = [
     {"label":"generic", "value":"generic" },
-    {"label":"nlnmixr", "value":"nlmixr" },
+    {"label":"nlmixr", "value":"nlmixr" },
     {"label":"nonmem", "value":"nonmem" },
     {"label":"rxode2", "value":"rxode" },
     ]
@@ -69,7 +67,6 @@ estimation_methods = [
     {"label":"FO", "value":"FO" },
     {"label":"FOCE", "value":"FOCE"},
     {"label":"ITS", "value":"ITS" },
-    #{"label":"LAPLACE", "value":"LAPLACE" },
     {"label":"IMPMAP", "value":"IMPMAP" },
     {"label":"IMP", "value":"IMP" },
     {"label":"SAEM", "value":"SAEM" },
@@ -168,14 +165,7 @@ dd = {
 
 
 
-#Modal for statements
-model_statements = html.Div([
-    dbc.Button("Model statements", id="statements-btn", color="success", n_clicks=0, style={'fontSize': 'medium'}),
-    dbc.Modal([
-        dbc.ModalHeader("Model statements"),
-        dbc.ModalBody(dbc.Textarea(id="statements-body", readOnly = True, style={'resize': 'None', 'width': '100%', 'height': '50vh', 'fontSize': '12px', "backgroundColor": '#fffff'})),
-    ], id="statements-pop", is_open=False)
-])
+
 
 #Navbar
 navbar = dbc.Navbar(dbc.Container(
@@ -212,14 +202,12 @@ PK_IIV_toggle = html.Div(
             ],
             id ="pk_iiv_toggle",
             value=[],
-            ###switch=True
         ),
         dbc.Badge("PK IIV", color="success", style={"font-size":"medium"})]
     )
     ],
 )
 
-#LAG TOGGLE INTE MED TRANSIT COMPARTMENTS
 lag_toggle = html.Div(
     [
         dbc.Checklist(
@@ -228,7 +216,6 @@ lag_toggle = html.Div(
             ],
             id ="lag-toggle",
             value=[],
-            ###switch=True
         )
     ],
 )
@@ -268,8 +255,6 @@ bioavailability_toggle = html.Div(
             }],
             value=[],
             id = "bio_toggle",
-            #switch=True
-
         )
     ]
 )
@@ -286,12 +271,6 @@ covar_toggle = html.Div([
 
 #TEXTFIELDS
 model_covariate_list = html.Div(id="covar_div")
-
-
-#dbc.Container([
-    #dbc.ListGroup(children=[dbc.ListGroupItem(item) for item in mt.covars],
-    #)
-#])
 
 pop_parameters = dbc.Container([
     dbc.Badge("Population Parameter", 
@@ -518,7 +497,7 @@ error_multi_input = dbc.Container([
 model_output_text = html.Div([
     dbc.Textarea(id = "output-model", 
                 readOnly = True, 
-                style={'resize': 'None', 'width': '100%', 'height': '70vh', 'fontSize': '12px', "backgroundColor": '#fffff'}, 
+                style={'font-family': 'Consolas', 'resize': 'None', 'width': '100%', 'height': '70vh', 'fontSize': '12px', "backgroundColor": '#fffff'}, 
                 className = "text-success"),
     #Update interval value to change how often refresh happens            
     dcc.Interval(id="text-refresh", interval=refreshtime*1000, n_intervals=0)
@@ -538,7 +517,7 @@ model_description = html.Div(children=[
     ], style={'marginTop':'5px'}),
 ], )
 
-dataset = html.Div(children=[
+"""dataset = html.Div(children=[
     dbc.InputGroup([
     dcc.Upload(dbc.Button('Choose Dataset', color="success"), id="upload-dataset"),
     dbc.Input(id="dataset-path", placeholder="Dataset path",type="text", disabled=True),
@@ -554,7 +533,15 @@ dataset = html.Div(children=[
                    {"label" :"editable=True", "value":"True"}
                    ])           
     ] ),
-], )
+], )"""
+
+dataset = html.Div(children=[
+    dbc.InputGroup([
+        dcc.Upload(dbc.Button('Select Dataset', color="success"), id="upload-dataset"),
+        dbc.Input(id="dataset-path", placeholder="No Dataset",type="text", disabled=True),
+        
+    ], style={"width":"50%"})
+])
 
 show_vars = dbc.Container([
     #Något är fel med printout här 
@@ -568,6 +555,16 @@ show_vars = dbc.Container([
                          ),
     #html.Div(mt.ode, style={ 'fontSize': '7px'})
                     
+])
+
+peripherals = dbc.InputGroup(children=[
+                dbc.InputGroupText("Peripheral Compartments"),
+                dbc.Input(id="peripheral_input", placeholder=0, type="number", min=0, step=1)
+])
+
+transits = dbc.InputGroup(children=[
+                dbc.InputGroupText("Transit Compartments"),
+                dbc.Input(id="transit_input", placeholder=0, type="number", min=0, step=1)
 ])
 
 #RADIOBUTTONS
@@ -634,7 +631,7 @@ download_model = dbc.Container([
         dbc.Button("Write model", id="download-btn", color="success", style={"fontSize":"medium"}),
         dbc.Input(id="model_path", placeholder="model path")
         ]),
-    html.Div(id="model_comfirm")     
+    html.Div(id="model_confirm")     
     
 ]) 
     #dcc.Download(id="download-model")])
@@ -722,12 +719,13 @@ collapse_PK_IIV = dbc.Row([
 collapse_transit = dbc.Row([
     dbc.Col(
         dbc.Collapse([
-            dbc.Input(id="transit_input", placeholder="Input number of compartments", type="number", min=0,
-                      style={"width" : "70%"}),
+
+            #dbc.Input(id="transit_input", placeholder=0, type="number", min=0, step=1),
+
             
             ],
         id="transit-collapse",
-        is_open=False,
+        is_open=True,
         dimension="width"
         ),  
     )
@@ -738,12 +736,13 @@ collapse_transit = dbc.Row([
 collapse_peripheral = dbc.Row([
     dbc.Col(
         dbc.Collapse([
-            dbc.Input(id="peripheral_input", placeholder="Input number of compartments", type="number", min=0, 
-                      style={"width" : "70%"}),
+
+            #dbc.Input(id="peripheral_input", placeholder=0, type="number", min=0, step=1),
+
             
             ],
         id="peripheral-collapse",
-        is_open=False,
+        is_open=True,
         dimension="width"
         ),  
     )
@@ -898,7 +897,6 @@ allometry_tab = dbc.Container([
 )
 
 structural_tab = dbc.Container([
-    #dcc.Store(id="structural-store", storage_type="session"),
     html.Hr(),
     dbc.Row([
         dbc.Col(children=[abs_rates_radio, ]),
@@ -906,11 +904,13 @@ structural_tab = dbc.Container([
     ]),
     dbc.Row([
         dbc.Col(children=[dbc.Badge("Absorption Delay", color="success", style={"font-size": "large"}),
-            transit_toggle, collapse_transit, lag_toggle,]),
+
+            transits, lag_toggle, bioavailability_toggle]),
         dbc.Col(children=[dbc.Badge("Distribution", color="success", style={"font-size": "large"}),
-            peripheral_toggle, collapse_peripheral])
-    ]),
-    dbc.Row([dbc.Col(bioavailability_toggle)])
+            peripherals])
+  ]),
+
+
 ])
 
 par_var_tab = dbc.Container([
