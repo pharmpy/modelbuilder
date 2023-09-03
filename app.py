@@ -110,8 +110,16 @@ def change_name_desc(name, description):
         prevent_initial_call=True
 )
 def change_format(format):
-    globals()["model"] = convert_model(globals()["model"], format)
-    return get_model_code(globals()["model"])
+    if format != "generic":
+        globals()["model"] = convert_model(globals()["model"], format)
+        return get_model_code(globals()["model"])
+    elif format == "generic":
+        globals()["model"] = convert_model(globals()["model"], format)
+        text_renderer = ""
+        text_renderer += str(globals()["model"].statements)
+        text_renderer += str(globals()["model"].random_variables.etas)
+        return text_renderer
+    
 
 @app.callback(
     Output("output-model", "value"),
@@ -213,7 +221,9 @@ def make_mod(n_clicks, name, path):
     return f'Provided path {path} '
 
 @app.callback(
-        [Output("lag-toggle", "options"), Output("transit_input", "value"), Output("transit_input", "disabled")],
+        [Output("lag-toggle", "options"),
+         Output("transit_input", "value"), 
+         Output("transit_input", "disabled")],
         Input("lag-toggle", "value"),
         Input("transit_input", "value"),
         prevent_inital_call = True
@@ -986,5 +996,4 @@ def set_covariance(data):
 if __name__ == '__main__':
     app.run_server(debug=True)
     
-
 
