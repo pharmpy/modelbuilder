@@ -7,8 +7,9 @@ import plotly.express as px
 import pandas as pd
 import dash_bootstrap_components as dbc
 
-btn_color = "primary"
-refreshtime = 0.5 #How often the model-code refreshes seconds
+btn_color = "info"
+badge_color ="info"
+refreshtime = 1 #How often the model-code refreshes seconds
 
 #Model types, add more if you want more buttons available
 typeoptions = [
@@ -24,7 +25,7 @@ modelformats = [
     ]
 
 admin_route = [
-    {"label":"IV", "value" : "IV"},
+    {"label":"IV", "value" : "iv"},
     {"label":"Oral", "value" : "oral"}
 ]
 
@@ -283,7 +284,7 @@ pop_parameters = dbc.Container([
                         dbc.Select(id="pop-param-fix",
                                 options=[{"label":"fix=False", "value":"False"},
                                 {"label":"fix=True", "value":"True"}], placeholder="fix=False"),
-                        dbc.Button("Create Population Parameter", id="pop-param-btn", color="success", n_clicks=0),
+                        dbc.Button("Create Population Parameter", id="pop-param-btn", color=btn_color, n_clicks=0),
                         ])
 ])
 
@@ -303,7 +304,7 @@ covariate_options =dbc.Container([
                             {"label":"allow-nestle=False", "value":"False"},
                             {"label":"allow-nestle=True", "value":"True"},
                         ], placeholder="allow-nestle=False"),
-                        dbc.Button("Add Covariate", id="covar-btn", color="success", n_clicks=0),
+                        dbc.Button("Add Covariate", id="covar-btn", color=btn_color, n_clicks=0),
                     ])                 
 ]) 
 
@@ -336,7 +337,7 @@ allometry_multi_input=dbc.Container([
             dbc.Select(id="allo_fix", placeholder="fixed=True (opt)",
                    options=[{"label":"True", "value":True},{"label":"False", "value":False}])),
         dbc.ListGroupItem(
-            dbc.Button("Set Scaling",id="allo_btn", n_clicks=0, color="success")
+            dbc.Button("Set Scaling",id="allo_btn", n_clicks=0, color=btn_color)
         )
     ]),
     
@@ -379,7 +380,7 @@ estimation_multi_input = dbc.Container([
                 ),
 
         dbc.ListGroupItem(
-            dbc.Button("Set Estimation Step", id="estimation_btn", n_clicks=0, color="success",
+            dbc.Button("Set Estimation Step", id="estimation_btn", n_clicks=0, color=btn_color,
             )),           
         ]),
 ])
@@ -393,7 +394,7 @@ eval_multi_input = dbc.Container([
                 dbc.Input(id="evaluation_index", placeholder="index", type='number'),
             ),
             dbc.ListGroupItem(
-                dbc.Button("Set Evaluation", id="eval_btn", n_clicks=0, color="success")
+                dbc.Button("Set Evaluation", id="eval_btn", n_clicks=0, color=btn_color)
             ),
             ])
         ])
@@ -423,7 +424,7 @@ estimation_remove_multi = dbc.Container([
         dbc.ListGroupItem( 
         dbc.InputGroup(children=[
             dbc.Input(id="remove_estimation", placeholder="index", type="number"),    
-            dbc.Button("Remove", id="remove_est_btn", n_clicks=0, color="success")      
+            dbc.Button("Remove", id="remove_est_btn", n_clicks=0, color=btn_color)      
         ]))       
     ])
 ])            
@@ -495,6 +496,10 @@ error_multi_input = dbc.Container([
 
 
 model_output_text = html.Div([
+    dcc.Clipboard(target_id= "output-model", title="copy", 
+                        style={"position": "relative", "top": "5vh", "right":"-25vw",
+                               'width':'5vw', 'cursor':'pointer'}
+                        ),
     dbc.Textarea(id = "output-model", 
                 readOnly = True, 
                 style={'font-family': 'Consolas', 'resize': 'None', 'width': '100%', 'height': '70vh', 'fontSize': '12px', "backgroundColor": '#fffff'}, 
@@ -517,55 +522,24 @@ model_description = html.Div(children=[
     ], style={'marginTop':'5px'}),
 ], )
 
-"""dataset = html.Div(children=[
-    dbc.InputGroup([
-    dcc.Upload(dbc.Button('Choose Dataset', color="success"), id="upload-dataset"),
-    dbc.Input(id="dataset-path", placeholder="Dataset path",type="text", disabled=True),
-    dbc.Select(id="dataset-separator", value=",", disabled=True,
-               options=[
-                   {"label" : "\",\" (commas)", "value" : ","},
-                   {"label" : "\\s+ (any amount of space)", "value": "\\s+"},
-                   {"label" : "\\t (tabs)", "value":"\t"}
-               ]),
-    dbc.Select(id="edit_data", value=False, 
-               options=[
-                   {"label" :"editable=False", "value":"False"}, 
-                   {"label" :"editable=True", "value":"True"}
-                   ])           
-    ] ),
-], )"""
 
 dataset = html.Div(children=[
     dbc.InputGroup([
-        dcc.Upload(dbc.Button('Select Dataset', color="success"), id="upload-dataset"),
+        dcc.Upload(dbc.Button('Select Dataset', color=btn_color), id="upload-dataset"),
         dbc.Input(id="dataset-path", placeholder="No Dataset",type="text", disabled=True),
         
     ], style={"width":"50%"})
 ])
 
-show_vars = dbc.Container([
-    #Något är fel med printout här 
-    html.Meta(charSet="utf-8"),
-    dbc.Textarea(id= "vars-text",
-                        #value = mt.ode ,
-                        readOnly = True, 
-                        style={'resize': 'None', 'width': '100%', 'height': '30vh',
-                               'fontSize': '12px', "backgroundColor": '#00000', 'whiteSpace': ''}, 
-                        className = "text-success"
-                         ),
-    #html.Div(mt.ode, style={ 'fontSize': '7px'})
-                    
-])
-
 peripherals = dbc.InputGroup(children=[
                 dbc.InputGroupText("Peripheral Compartments"),
                 dbc.Input(id="peripheral_input", placeholder=0, type="number", min=0, step=1)
-])
+], style={"width":"70%"})
 
 transits = dbc.InputGroup(children=[
                 dbc.InputGroupText("Transit Compartments"),
                 dbc.Input(id="transit_input", placeholder=0, type="number", min=0, step=1)
-])
+], style={"width":"70%"})
 
 #RADIOBUTTONS
 
@@ -628,13 +602,12 @@ elim_button = dbc.Button(
 )
 download_model = dbc.Container([
     dbc.InputGroup([
-        dbc.Button("Write model", id="download-btn", color="success", style={"fontSize":"medium"}),
+        dbc.Button("Write model", id="download-btn", color=btn_color, style={"fontSize":"medium"}),
         dbc.Input(id="model_path", placeholder="model path")
         ]),
     html.Div(id="model_confirm")     
     
 ]) 
-    #dcc.Download(id="download-model")])
 
 model_format_button = dbc.Button(
     "Model Format",
@@ -833,7 +806,7 @@ covariance_matrix = dbc.Container([
 all_parameters_table = dash_table.DataTable(
     id='parameter-table',
     columns=[
-        {'name': 'Name', 'id': 'name', 'type': 'text'},
+        {'name': 'Name', 'id': 'name', 'type': 'text', 'editable':False},
         {'name': 'Init', 'id': 'init', 'type': 'numeric'},
         {'name': 'Lower', 'id': 'lower', 'type': 'numeric'},
         {'name': 'Upper', 'id': 'upper', 'type': 'numeric' },
@@ -863,28 +836,16 @@ data_info_table = dash_table.DataTable(
     style_header={
         'backgroundColor': 'rgb(230, 230, 230)',
         'fontWeight': 'bold'
-    },
-    
-    
-    
-       
-)
-
-add_row_button = dbc.Button("Add Row", id="add-row-btn", color="primary", className="mr-3")
-
-delete_row_button = dbc.Button("Delete Row", id="delete-row-btn", color="danger", className="mr-3")
+    },)
 
 
+model_format_div = html.Div(children=[
+                html.Hr(),
+                model_format_radio,
+                model_output_text,
+                download_model,
+                ])
 
-
-
-
-
-
-
-
-
-#TABS
 
 allometry_tab = dbc.Container([
     dbc.Row([
@@ -942,20 +903,6 @@ parameter_tab = dbc.Container(
     className="mt-4"
 )
 
-
-show_tab = dbc.Container([
-    
-    dbc.Row([
-        dbc.Col(children=[
-            html.Hr(), 
-            html.P("Showing ODE-System"),
-            show_vars, 
-        ])
-    ])
-
-
-])
-
 base_tab = dbc.Container([
     #dcc.Store(id="base-store", storage_type="session"),
        dbc.Col(children=[
@@ -1000,7 +947,6 @@ error_tab = dbc.Container([
 
 
 covariate_tab = dbc.Container([
-    #dcc.Store(id="covar-store", storage_type="session"),
     html.Hr(),
     html.P("Covariates"),
     dbc.Row(covariate_options),
@@ -1019,7 +965,7 @@ datainfo_tab = dbc.Container([
     dropdown = dd,),
 
     dbc.Container([
-        dbc.Button("Download DataInfo", id="makedatainf", n_clicks = 0, color="success"), 
+        dbc.Button("Download DataInfo", id="makedatainf", n_clicks = 0, color=btn_color), 
         dcc.Download("download_dtainf")]),
 
 

@@ -27,34 +27,12 @@ app.layout = dbc.Container([
     df.navbar,
     dbc.Row([
         dbc.Col(children=[
-            html.Div(children=[
-                html.Hr(),
-                df.model_format_radio,
-                df.model_output_text,
-                dbc.Row([
-                    dbc.Col(
-                        dcc.Clipboard(target_id= "output-model", title="copy", 
-                                    style={"position": "relative", "top": "-70vh", "right":"-25vw", 'cursor':'pointer'}
-                        )
-                    )
-                    ], style={'width':'5vw'} #Ensure clipboard stays within row
-                )
-                ]
-            ),
+            df.model_format_div
             ],
             width=4,  
         ), 
         
-        dbc.Col(df.all_tabs, width=8) ,
-        
-    dbc.Row([   
-        dbc.Col(children=[
-        df.download_model
-        ] 
-        ,width=4),
-        dbc.Col(width=8)
-
-    ],)
+        dbc.Col(df.all_tabs, width=8),
     ], style={'width':'100vw', }),
     
    
@@ -301,32 +279,37 @@ def set_bioavailability(toggle):
 
 #Getting the model parameters
 @app.callback(
+    Output("parameter-table", "data"), #allow_duplicate=True),
+    Input("all-tabs", "value"),          
+)
+
+def get_parameters(tab):
+    if tab == "parameters-tab":
+        parameters = globals()["model"].parameters.to_dict()
+        return parameters["parameters"]
+    else:
+        raise PreventUpdate
+
+
+@app.callback(
     Output("parameter-table", "data", allow_duplicate=True),
     Input("fix_all_toggle", "value"),
-    Input("all-tabs", "value"),
-    prevent_initial_call = 'initial_duplicate' 
+    prevent_initial_call = True 
     
 )
 
-def get_parameters(fixed, tab):
-    if tab == "parameters-tab":
-        
-        if fixed:
-            names = globals()["model"].parameters.names 
-            globals()["model"] = fix_parameters(globals()["model"],names)
-            parameters = globals()["model"].parameters.to_dict()
-            
-            
-            return parameters["parameters"]
-        else:
-            names = globals()["model"].parameters.names 
-            globals()["model"] = unfix_parameters(globals()["model"],names)
-            parameters = globals()["model"].parameters.to_dict()
-            
-            
-            return parameters["parameters"]
+def fix_all_parameters(fixed):    
+    if fixed:
+        names = globals()["model"].parameters.names 
+        globals()["model"] = fix_parameters(globals()["model"],names)
+        parameters = globals()["model"].parameters.to_dict()
+    
     else:
-        raise PreventUpdate
+        names = globals()["model"].parameters.names 
+        globals()["model"] = unfix_parameters(globals()["model"],names)
+        parameters = globals()["model"].parameters.to_dict()
+    return parameters["parameters"]
+
 
 @app.callback(
         Output("data-dump", "clear_data", allow_duplicate=True),
@@ -343,7 +326,6 @@ def visualise_data(data):
     data = replace_empty(data)
     current = globals()["model"].parameters.to_dict()
     current["parameters"] = data
-    
     try:
         globals()["model"] = globals()["model"].replace(parameters= Parameters.from_dict(current))
         globals()["model"] = globals()["model"].update_source()
@@ -382,7 +364,7 @@ def create_pop_param(n_clicks, name, init, upper,lower,fix):
             model_parameters = df.to_dict('records')
             return model_parameters, None, None, None, None, None
     except:
-        PreventUpdate
+        raise PreventUpdate
 
 @app.callback(
         Output("iiv_table", "data"),
@@ -620,7 +602,7 @@ def create_time_error(check, cutoff, idv):
             globals()["model"]= set_time_varying_error_model(globals()["model"], cutoff=cutoff,)
    
     return f''    
-    #Time Error model: {str(globals()["model"].statements.find_assignment("Y"))}
+    
 
     
 
@@ -631,16 +613,10 @@ def create_time_error(check, cutoff, idv):
 )
 
 def create_wgt_error(check):
-    
-    #current = globals()["model"]
     if check:
         globals()["model"] = set_weighted_error_model(globals()["model"])
-    #else:
-        #globals()["model"] = remove_error_model(globals()["model"])
-        #globals()["model"] = current 
     return f''
-    #Weighted Error model: {has_weighted_error_model(globals()["model"])}
-    
+  
 @app.callback(
     [Output("covar-param-name", "options")],
     [Output("covar-name", "options")],
