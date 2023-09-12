@@ -294,7 +294,7 @@ covariate_options =dbc.Container([
                     dbc.InputGroup(id="covar", children=[
                         dbc.Select(id="covar-param-name", placeholder="Parameter Name"),
                         dbc.Select(id="covar-name", placeholder="Covariate Name"),
-                        dbc.Select(id="covariate-effect", options=covariate_effect, placeholder="Covariate Effect"),
+                        dbc.Select(id="covariate-effect", options=covariate_effect, placeholder="Effect"),
                         dbc.Input(id="covar-custom-eff", placeholder="Custom Effect"),
                         dbc.Select(id="covar-operation", options=[
                             {"label":"operation= +", "value":"+"},
@@ -888,7 +888,7 @@ par_var_tab = dbc.Container([
     dbc.Row(children=[
     dbc.Col([
         dbc.Badge("Model Covariance Matrix", color="success", style={"font-size": "large"}),
-        covariance_matrix,
+        covariance_matrix, 
         ])
     ])
     
@@ -904,7 +904,6 @@ parameter_tab = dbc.Container(
 )
 
 base_tab = dbc.Container([
-    #dcc.Store(id="base-store", storage_type="session"),
        dbc.Col(children=[
             html.Hr(), 
             html.P("Base Model Options"),
@@ -922,8 +921,6 @@ base_tab = dbc.Container([
             dbc.Row([
                 dbc.Col(dataset)
                 ], style={}),
-            #]),    
-            
         ])
     
 

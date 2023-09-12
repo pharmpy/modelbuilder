@@ -178,7 +178,7 @@ def update_abs_elim(abs, elim):
 )
 
 def disable_abs(value, options, rate):
-    if value == "IV":
+    if value == "iv":
         return [{**dictionary, "disabled":True} for dictionary in options], 0
     else: 
         return [{**dictionary, "disabled":False} for dictionary in options], rate
@@ -326,10 +326,8 @@ def visualise_data(data):
     data = replace_empty(data)
     current = globals()["model"].parameters.to_dict()
     current["parameters"] = data
-    try:
-        globals()["model"] = globals()["model"].replace(parameters= Parameters.from_dict(current))
-        globals()["model"] = globals()["model"].update_source()
-    except: raise PreventUpdate
+    globals()["model"] = globals()["model"].replace(parameters=Parameters.from_dict(current))
+    globals()["model"] = globals()["model"].update_source()
 
     return True
 
@@ -352,19 +350,17 @@ def visualise_data(data):
 )
 
 def create_pop_param(n_clicks, name, init, upper,lower,fix):
-    try:
-        if n_clicks:
-            if upper:
-                upper = float(upper)
-            if lower:
-                lower = float(lower)    
-            globals()["model"] = add_population_parameter(globals()["model"], name, float(init), lower, upper, fix == "True")
-            parameters = globals()["model"].parameters.to_dict()
-            df = pd.DataFrame(parameters["parameters"])
-            model_parameters = df.to_dict('records')
-            return model_parameters, None, None, None, None, None
-    except:
-        raise PreventUpdate
+    if n_clicks:
+        if upper:
+            upper = float(upper)
+        if lower:
+            lower = float(lower)    
+        globals()["model"] = add_population_parameter(globals()["model"], name, float(init), lower, upper, fix == "True")
+        parameters = globals()["model"].parameters.to_dict()
+        df = pd.DataFrame(parameters["parameters"])
+        model_parameters = df.to_dict('records')
+        return model_parameters, None, None, None, None, None
+    else: raise PreventUpdate
 
 @app.callback(
         Output("iiv_table", "data"),
@@ -473,8 +469,6 @@ def set_iov(selected_index, data):
 @app.callback(
         Output('iiv_table', 'selected_rows'),
         Output('iov_table', 'selected_rows'),
-        #Input('iov_table', 'selected_rows'),
-        #Input('iiv_table', 'selected_rows'),
         Input('iiv_table','data'),
         Input('iov_table', 'data'),
         prevent_initial_call=True
@@ -508,8 +502,6 @@ def check_tables(iiv_data, iov_data):
 
 
 def create_add_error(addcheck, dv, data_trans, series_terms, comb, prop):
- 
-    #current = globals()["model"]
     if addcheck:
         globals()["model"]= remove_error_model(globals()["model"])
 
@@ -519,11 +511,9 @@ def create_add_error(addcheck, dv, data_trans, series_terms, comb, prop):
             series_terms = 2    
         globals()["model"]= set_additive_error_model(
         globals()["model"], dv=dv, data_trans=data_trans,series_terms=series_terms)
-        return f'Addititve Error model: {has_additive_error_model(globals()["model"])}', False, False
-    return f'', comb, prop 
- #Addititve Error model: {has_additive_error_model(globals()["model"])}      
-    #else:
-        #globals()["model"] = current
+        return f'', False, False
+    else:
+        return f'', comb, prop 
     
     
 
@@ -550,9 +540,9 @@ def create_comb_error(check, dv, data_trans, add, prop):
         globals()["model"]= set_combined_error_model(
         globals()["model"], dv=dv, data_trans=data_trans)
             
-        return f'Combined Error model: {has_combined_error_model(globals()["model"])}', False, False    
-    return f'', add, prop   
-    #Combined Error model: {has_combined_error_model(globals()["model"])}
+        return f'', False, False
+    else:    
+        return  f'', add, prop   
 
 @app.callback(
     Output("error_div", "children", allow_duplicate=True),
@@ -577,9 +567,9 @@ def create_prop_error(check, dv, data_trans, protection, add, comb):
         globals()["model"]= set_proportional_error_model(
             globals()["model"], dv=dv, data_trans=data_trans, zero_protection=protection)
             
-        return f'Proportional Error model: {has_proportional_error_model(globals()["model"])}', False, False
-    return f'', add, comb
-           #Proportional Error model: {has_proportional_error_model(globals()["model"])}
+        return f'', False, False
+    else:
+        return f'', add, comb
     
 
     
@@ -600,7 +590,6 @@ def create_time_error(check, cutoff, idv):
             globals()["model"]= set_time_varying_error_model(globals()["model"], cutoff=cutoff, idv = idv)
         else:
             globals()["model"]= set_time_varying_error_model(globals()["model"], cutoff=cutoff,)
-   
     return f''    
     
 
@@ -639,7 +628,7 @@ def get_params_covars(tab):
                 render = dbc.ListGroup(children=[dbc.ListGroupItem(param_expression(item)) for item in get_individual_parameters(globals()["model"])]) 
 
                 return param_opt, covar_opt, render
-            except: PreventUpdate
+            except: raise PreventUpdate
         else:
             return  [{"label": "No Options", "value":True}], [{"label": "No Options", "value":True}], "No covariates found"   
     
@@ -875,10 +864,8 @@ def create_allometry(clicked, variable, custom, ref_val, params, inits, lower, u
     if variable is not None:
         variables = list(variable)
     else: variables = []
-
     if pattern is False:
         variables.append(custom)
-    
     standard_values = { "ref_val" : 70, "params": None, 
                         "inits" : None, "lower":None,
                         "upper":None, "fix":True   }
@@ -897,10 +884,9 @@ def create_allometry(clicked, variable, custom, ref_val, params, inits, lower, u
                     parameters=standard_values["params"], initials=standard_values["inits"], 
                     lower_bounds=standard_values["lower"],
                     upper_bounds=standard_values["upper"], fixed=standard_values["fix"] )
-            
-            return True, pattern
-        except: True, pattern
-    else: True, pattern
+        except: pass
+        return True, pattern
+    else: raise PreventUpdate
 
 @app.callback(
     Output("covariance_matrix", "data", allow_duplicate=True),
@@ -958,24 +944,24 @@ def get_cov_matrix(tab):
 
 def set_covariance(data):
     #FIXME! 
-    #try:
     d = data
+    pairs = {}
     for row in d[::-1]:
-        true_keys = [row["parameter"]]
+        pairs[row["parameter"]] = []
         for key, value in row.items():
                 if value == True:
-                    true_keys.append(key)
+                    pairs[row["parameter"]].append(key)
                     
                 for second_iter in d[::-1]:
                     if second_iter['parameter'] == key:
                         second_iter.update({row["parameter"]:value})
-    globals()["model"] = split_joint_distribution(model=globals()["model"], rvs=true_keys)              
-    globals()["model"] = create_joint_distribution(model = globals()["model"],rvs=true_keys)
+    for keys in pairs.values():
+        globals()["model"] = split_joint_distribution(model=globals()["model"], rvs=keys)              
+        try:
+            globals()["model"] = create_joint_distribution(model = globals()["model"],rvs=keys)
+        except: pass
+    return data
 
-
-    return data 
-        
-    #except: raise PreventUpdate
 
     
                  
