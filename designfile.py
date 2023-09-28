@@ -993,3 +993,16 @@ all_tabs = html.Div(dcc.Tabs(id="all-tabs", value='base-tab',
                               
 
 ), html.Div(id='tab-content', children=[])
+
+
+layout = dbc.Container([
+    dcc.Store(id="data-dump"),
+    navbar,
+    dbc.Row([
+        dbc.Col(children=[
+            model_format_div
+            ],
+            width=4), 
+        dbc.Col(all_tabs, width=8)
+        ], style={'width':'100vw', }),        
+    ],style={'height': '100vh', 'width': '100vw', "margin-bottom": "0%", }, fluid=True)
