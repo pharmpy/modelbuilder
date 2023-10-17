@@ -557,7 +557,7 @@ model_format_radio = dbc.Col(children=[
 
 elimination_radio  = dbc.Col(children=[
     dbc.Badge("Elimination Rate", color = "success", style={"font-size": "large"}),
-    dcc.RadioItems(elimination_rates, value="FO", id="elim_radio", style={"font-size": "large"})
+    dcc.RadioItems(elimination_rates, id="elim_radio", style={"font-size": "large"})
 ])
 
 route_radio = dbc.Col(children=[
