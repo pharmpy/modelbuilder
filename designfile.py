@@ -503,7 +503,7 @@ model_output_text = html.Div([
                         ),
     dbc.Textarea(id = "output-model",
                 readOnly = True,
-                style={'font-family': 'Consolas', 'resize': 'None', 'width': '100%', 'height': '70vh', 'fontSize': '12px', "backgroundColor": '#fffff'},
+                style={'font-family': 'monospace', 'resize': 'None', 'width': '100%', 'height': '70vh', 'fontSize': '12px', "backgroundColor": '#ffffff'},
                 className = "text-success"),
     #Update interval value to change how often refresh happens
     dcc.Interval(id="text-refresh", interval=refreshtime*1000, n_intervals=0)
