@@ -25,7 +25,8 @@ def structural_callbacks(app):
         if elim:
             elim_keys ={"FO": set_first_order_elimination(config.model),
                     "MM": set_michaelis_menten_elimination(config.model),
-                    "mixed_MM_FO": set_mixed_mm_fo_elimination(config.model)
+                    "mixed_MM_FO": set_mixed_mm_fo_elimination(config.model),
+                    "ZO" : set_zero_order_elimination(config.model)
                     }
             
             config.model = elim_keys[elim]

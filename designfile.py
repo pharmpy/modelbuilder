@@ -52,6 +52,7 @@ elimination_rates = [
     {"label":"First Order", "value":"FO" },
     {"label":"Michaelis-Menten", "value":"MM" },
     {"label":"Mixed MM FO", "value":"mixed_MM_FO" },
+    {"label":"Zero Order", "value": "ZO"}
     ]
 
 
