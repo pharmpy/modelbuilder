@@ -47,7 +47,7 @@ covariate_effect = [
     {"label":"exponential", "value":"exp" },
     {"label":"power", "value":"pow" },
     ]
-                    
+
 elimination_rates = [
     {"label":"First Order", "value":"FO" },
     {"label":"Michaelis-Menten", "value":"MM" },
@@ -76,13 +76,13 @@ estimation_methods = [
 
 #OPTIONS FOR DATAINFO
 cols = [
-        {'name': 'name', 'id': 'name', }, 
-        {'name': 'type', 'id': 'type', 'presentation': 'dropdown'}, 
-        {'name': 'scale', 'id': 'scale', 'presentation': 'dropdown'}, 
+        {'name': 'name', 'id': 'name', },
+        {'name': 'type', 'id': 'type', 'presentation': 'dropdown'},
+        {'name': 'scale', 'id': 'scale', 'presentation': 'dropdown'},
         {'name': 'continuous', 'id': 'continuous', 'presentation': 'dropdown'},
-        {'name': 'categories', 'id': 'categories', 'presentation': 'dropdown'}, 
-        {'name': 'unit', 'id': 'unit', 'presentation': 'dropdown'}, 
-        {'name': 'datatype', 'id': 'datatype', 'presentation': 'dropdown'}, 
+        {'name': 'categories', 'id': 'categories', 'presentation': 'dropdown'},
+        {'name': 'unit', 'id': 'unit', 'presentation': 'dropdown'},
+        {'name': 'datatype', 'id': 'datatype', 'presentation': 'dropdown'},
         {'name': 'drop', 'id': 'drop', 'presentation': 'dropdown'},
         {'name': 'descriptor', 'id': 'descriptor', 'presentation': 'dropdown'}
         ]
@@ -118,7 +118,7 @@ dd = {
             {'label': 'discrete' , 'value': False}
         ]
     },
-    
+
     'unit' : {
         'options' : [
             {'label':  "1", 'value':1},
@@ -230,7 +230,7 @@ peripheral_toggle = html.Div(
             id ="peripheral-toggle",
             value=[],
             switch=True,
-         
+
         )
     ],
 )
@@ -244,7 +244,7 @@ transit_toggle = html.Div(
             id ="transit-toggle",
             value=[],
             switch=True,
-         
+
         )
     ],
 )
@@ -274,7 +274,7 @@ covar_toggle = html.Div([
 model_covariate_list = html.Div(id="covar_div")
 
 pop_parameters = dbc.Container([
-    dbc.Badge("Population Parameter", 
+    dbc.Badge("Population Parameter",
                             color="success", style={"font-size":"medium"}),
                     dbc.InputGroup(id="pop_param", children=[
                         dbc.Input(id="pop-param-name", placeholder="Name"),
@@ -289,7 +289,7 @@ pop_parameters = dbc.Container([
 ])
 
 covariate_options =dbc.Container([
-                    dbc.Badge("Specify Covariate", 
+                    dbc.Badge("Specify Covariate",
                             color="success", style={"width":150, "font-size":"medium"}),
                     dbc.InputGroup(id="covar", children=[
                         dbc.Select(id="covar-param-name", placeholder="Parameter Name"),
@@ -305,13 +305,13 @@ covariate_options =dbc.Container([
                             {"label":"allow-nestle=True", "value":"True"},
                         ], placeholder="allow-nestle=False"),
                         dbc.Button("Add Covariate", id="covar-btn", color=btn_color, n_clicks=0),
-                    ])                 
-]) 
+                    ])
+])
 
 distribution_compartments = dbc.Container([
-    dbc.Badge("Specify Covariate", 
+    dbc.Badge("Specify Covariate",
             color="success", style={"width":150, "font-size":"medium"}),
-    
+
 ])
 
 allometry_multi_input=dbc.Container([
@@ -340,29 +340,29 @@ allometry_multi_input=dbc.Container([
             dbc.Button("Set Scaling",id="allo_btn", n_clicks=0, color=btn_color)
         )
     ]),
-    
+
 ], style={"width":"50%"})
 
 estimation_multi_input = dbc.Container([
-    dbc.ListGroup([    
+    dbc.ListGroup([
         dbc.ListGroupItem(
-            dbc.Badge("Estimation Step", color="success", 
+            dbc.Badge("Estimation Step", color="success",
                       style={"width":150, "fontSize": "medium"})),
         dbc.ListGroupItem(
-            dbc.Select(id="estimation_method", placeholder="select method", 
+            dbc.Select(id="estimation_method", placeholder="select method",
                        options=estimation_methods)),
-        dbc.ListGroupItem(    
+        dbc.ListGroupItem(
             dbc.Input(id="estimation_index", placeholder="index=None", type="number")),
         dbc.ListGroupItem(
             dbc.Select(id="estimation_covs", placeholder="cov", options=['SANDWICH', 'CPG', 'OFIM'])
-        ),    
+        ),
         dbc.ListGroupItem(
             dbc.Checklist(id='int_eval_lapl',
                 options=[
                     "interaction","evaluation","laplace"
-                ],    
+                ],
                 inline=True
-            )) ,   
+            )) ,
         dbc.ListGroupItem(
             dbc.InputGroup(children=(
                 dbc.Select(id="solver",placeholder="solver", options=[
@@ -381,7 +381,7 @@ estimation_multi_input = dbc.Container([
 
         dbc.ListGroupItem(
             dbc.Button("Set Estimation Step", id="estimation_btn", n_clicks=0, color=btn_color,
-            )),           
+            )),
         ]),
 ])
 
@@ -404,7 +404,7 @@ covariance_estimation = dbc.Container([
     dbc.ListGroup([
         dbc.ListGroupItem([
             dbc.Checkbox(
-                id="covariance_check", 
+                id="covariance_check",
                 label=dbc.Badge(
                     "Covariance on final estimation",
                     color="success",
@@ -421,73 +421,73 @@ estimation_remove_multi = dbc.Container([
     dbc.ListGroup([
         dbc.ListGroupItem(
             dbc.Badge("Remove estimation", style={"width":150, "fontSize": "medium"}, color="success" )),
-        dbc.ListGroupItem( 
+        dbc.ListGroupItem(
         dbc.InputGroup(children=[
-            dbc.Input(id="remove_estimation", placeholder="index", type="number"),    
-            dbc.Button("Remove", id="remove_est_btn", n_clicks=0, color=btn_color)      
-        ]))       
+            dbc.Input(id="remove_estimation", placeholder="index", type="number"),
+            dbc.Button("Remove", id="remove_est_btn", n_clicks=0, color=btn_color)
+        ]))
     ])
-])            
+])
 
 
 error_multi_input = dbc.Container([
     dbc.ListGroup([
         dbc.ListGroupItem(
             dbc.InputGroup(children=[
-                            dbc.Checkbox(id="add_check", label = 
-                                        dbc.Badge("Additive", 
+                            dbc.Checkbox(id="add_check", label =
+                                        dbc.Badge("Additive",
                                                 color="success", style={"width":150, "font-size":"medium"}),
                                                 value = False ,
                                     style={"size": "md"}),
                             dbc.Input(id="add_dv", placeholder="dv=None", style={"width": "0.2"}),
                             dbc.Input(id="add_data_trans", placeholder="data_trans=None",style={"width": "0.2"}),
                             dbc.Input(id="add_series_terms", placeholder="series_terms=2",style={}),
-                            
+
                         ])
         ),
-    
+
         dbc.ListGroupItem(
             dbc.InputGroup(children=[
-                            dbc.Checkbox(id="comb_check", label = 
-                                        dbc.Badge("Combined", 
+                            dbc.Checkbox(id="comb_check", label =
+                                        dbc.Badge("Combined",
                                                 color="success", style={"width":150, "font-size":"medium"}),
-                                                value = False, 
+                                                value = False,
                                         style={"size": "md"}),
                             dbc.Input(id="comb_dv", placeholder="dv=None",style={"width": "0.2"}),
                             dbc.Input(id="comb_data_trans", placeholder="data_trans=None",style={"width": "0.2"}),
-                            
+
                         ]),
         ),
         dbc.ListGroupItem(
             dbc.InputGroup(children=[
-                            dbc.Checkbox(id="prop_check", label = 
-                                        dbc.Badge("Proportional", 
-                                                color="success", style={"width":150, "font-size":"medium"}), 
+                            dbc.Checkbox(id="prop_check", label =
+                                        dbc.Badge("Proportional",
+                                                color="success", style={"width":150, "font-size":"medium"}),
                                                 value = False,
 
                                         style={"size": "md"}),
                             dbc.Input(id="prop_dv", placeholder="dv=None",style={"width": "0.2"}),
                             dbc.Input(id="prop_data_trans", placeholder="data_trans=None", style={"width": "0.2"}),
                             dbc.Input(id="prop_zero_prot", placeholder="zero_protection=True",style={} )
-                            
+
                         ]),
         ),
         dbc.ListGroupItem(
             dbc.InputGroup(children=[
-                            dbc.Checkbox(id="time_check", label = 
-                                        dbc.Badge("Time varying", 
-                                                color="success", style={"width":150, "font-size":"medium"}), 
+                            dbc.Checkbox(id="time_check", label =
+                                        dbc.Badge("Time varying",
+                                                color="success", style={"width":150, "font-size":"medium"}),
                                         style={"size": "md"}),
                             dbc.Input(id="time_cutoff", placeholder="cutoff", style={"width": "33%"}, type="number"),
                             dbc.Input(id="data_idv", placeholder= "idv='TIME'", style={"width": "33%"}),
-                            
+
                         ]),
         ),
         dbc.ListGroupItem(
             dbc.InputGroup(children=[
-                            dbc.Checkbox(id="wgt_check", label = 
-                                        dbc.Badge("Weighted", 
-                                                color="success", style={"width":150, "font-size":"medium"}), 
+                            dbc.Checkbox(id="wgt_check", label =
+                                        dbc.Badge("Weighted",
+                                                color="success", style={"width":150, "font-size":"medium"}),
                             style={"size": "md"}),
                         ]),
         ),
@@ -496,23 +496,23 @@ error_multi_input = dbc.Container([
 
 
 model_output_text = html.Div([
-    dcc.Clipboard(target_id= "output-model", title="copy", 
+    dcc.Clipboard(target_id= "output-model", title="copy",
                         style={"position": "relative", "top": "5vh", "right":"-25vw",
                                'width':'5vw', 'cursor':'pointer'}
                         ),
-    dbc.Textarea(id = "output-model", 
-                readOnly = True, 
-                style={'font-family': 'Consolas', 'resize': 'None', 'width': '100%', 'height': '70vh', 'fontSize': '12px', "backgroundColor": '#fffff'}, 
+    dbc.Textarea(id = "output-model",
+                readOnly = True,
+                style={'font-family': 'Consolas', 'resize': 'None', 'width': '100%', 'height': '70vh', 'fontSize': '12px', "backgroundColor": '#fffff'},
                 className = "text-success"),
-    #Update interval value to change how often refresh happens            
+    #Update interval value to change how often refresh happens
     dcc.Interval(id="text-refresh", interval=refreshtime*1000, n_intervals=0)
 ])
 model_name = html.Div(children=[
     dbc.InputGroup([
-    dbc.Badge("Model Name", color="success", style={"width":150, 'fontSize': 'medium'}),    
+    dbc.Badge("Model Name", color="success", style={"width":150, 'fontSize': 'medium'}),
     dbc.Input(id="model-name", placeholder= "Input model name", type="text")
     ],)
-    
+
 ],)
 
 model_description = html.Div(children=[
@@ -527,7 +527,7 @@ dataset = html.Div(children=[
     dbc.InputGroup([
         dcc.Upload(dbc.Button('Select Dataset', color=btn_color), id="upload-dataset"),
         dbc.Input(id="dataset-path", placeholder="No Dataset",type="text", disabled=True),
-        
+
     ], style={"width":"50%"})
 ])
 
@@ -556,7 +556,7 @@ model_format_radio = dbc.Col(children=[
 
 elimination_radio  = dbc.Col(children=[
     dbc.Badge("Elimination Rate", color = "success", style={"font-size": "large"}),
-    dcc.RadioItems(elimination_rates, id="elim_radio", style={"font-size": "large"})
+    dcc.RadioItems(elimination_rates, value="FO", id="elim_radio", style={"font-size": "large"})
 ])
 
 route_radio = dbc.Col(children=[
@@ -590,7 +590,7 @@ abs_button = dbc.Button(
     "Absorption Rate",
     id = "abs-btn",
     color=btn_color,
-    n_clicks= 0,    
+    n_clicks= 0,
 )
 
 elim_button = dbc.Button(
@@ -605,16 +605,16 @@ download_model = dbc.Container([
         dbc.Button("Write model", id="download-btn", color=btn_color, style={"fontSize":"medium"}),
         dbc.Input(id="model_path", placeholder="model path")
         ]),
-    html.Div(id="model_confirm")     
-    
-]) 
+    html.Div(id="model_confirm")
+
+])
 
 model_format_button = dbc.Button(
     "Model Format",
     id="format-button",
     color=btn_color,
     n_clicks=0,
-    size="md"       
+    size="md"
 )
 
 model_type_button = dbc.Button(
@@ -622,12 +622,12 @@ model_type_button = dbc.Button(
     id="type-button",
     color=btn_color,
             n_clicks=0,
-    size="md"  
+    size="md"
 )
 
 route_button = dbc.Button(
     "Route",
-    id = "route-button", color=btn_color, n_clicks=0, size="md" 
+    id = "route-button", color=btn_color, n_clicks=0, size="md"
 )
 
 #NOTE: not that good if used in collapse
@@ -677,16 +677,16 @@ collapse_PK_IIV = dbc.Row([
             dbc.InputGroup(
                 [
                 dbc.Checkbox(id="pk_iiv_init_checkbox"),
-                dbc.Input(id="pk_iiv_inp", placeholder="Change init_est (=0.09)?", type="number", style={"width":"50%"})   
+                dbc.Input(id="pk_iiv_inp", placeholder="Change init_est (=0.09)?", type="number", style={"width":"50%"})
                 ]
             )],
         id="PK_IIV-collapse",
         is_open=False,
         dimension="width"
-        ),  
+        ),
     )
-    
-], 
+
+],
 )
 
 collapse_transit = dbc.Row([
@@ -695,15 +695,15 @@ collapse_transit = dbc.Row([
 
             #dbc.Input(id="transit_input", placeholder=0, type="number", min=0, step=1),
 
-            
+
             ],
         id="transit-collapse",
         is_open=True,
         dimension="width"
-        ),  
+        ),
     )
-    
-], 
+
+],
 )
 
 collapse_peripheral = dbc.Row([
@@ -712,15 +712,15 @@ collapse_peripheral = dbc.Row([
 
             #dbc.Input(id="peripheral_input", placeholder=0, type="number", min=0, step=1),
 
-            
+
             ],
         id="peripheral-collapse",
         is_open=True,
         dimension="width"
-        ),  
+        ),
     )
-    
-], 
+
+],
 )
 #Complete buttons
 
@@ -751,11 +751,11 @@ iov_table = dash_table.DataTable(
     {'name': 'Distribution', 'id': 'distribution', 'presentation':'dropdown' },
     ],
     dropdown= {
-        
+
         'occasion': {
              'options' : []
         },
-            
+
         'distribution' : {
         'options' : []
     },
@@ -811,7 +811,7 @@ all_parameters_table = dash_table.DataTable(
         {'name': 'Lower', 'id': 'lower', 'type': 'numeric'},
         {'name': 'Upper', 'id': 'upper', 'type': 'numeric' },
         {'name': 'Fix', 'id': 'fix', 'type': 'any' , 'presentation': 'dropdown'},
-    ],  
+    ],
     editable=True,
     row_deletable=True,
     dropdown= {
@@ -821,7 +821,7 @@ all_parameters_table = dash_table.DataTable(
             {'label': 'false' , 'value': False}
         ]
     } },
-   
+
 )
 
 data_info_table = dash_table.DataTable(
@@ -851,7 +851,7 @@ allometry_tab = dbc.Container([
     dbc.Row([
         allometry_multi_input,
 
-    
+
     ], justify="start")
 ]
 
@@ -861,7 +861,7 @@ structural_tab = dbc.Container([
     html.Hr(),
     dbc.Row([
         dbc.Col(children=[abs_rates_radio, ]),
-        dbc.Col(elimination_radio)    
+        dbc.Col(elimination_radio)
     ]),
     dbc.Row([
         dbc.Col(children=[dbc.Badge("Absorption Delay", color="success", style={"font-size": "large"}),
@@ -877,21 +877,21 @@ structural_tab = dbc.Container([
 par_var_tab = dbc.Container([
     dbc.Row(children=[
     dbc.Col([dbc.Badge("Model IIVs", color="success", style={"font-size": "large"}),
-             iiv_table, 
+             iiv_table,
              ])
     ]),
     dbc.Row(children=[
     dbc.Col([dbc.Badge("Model IOVs", color="success", style={"font-size": "large"}),
-            iov_table, 
+            iov_table,
             ])
 ]),
     dbc.Row(children=[
     dbc.Col([
         dbc.Badge("Model Covariance Matrix", color="success", style={"font-size": "large"}),
-        covariance_matrix, 
+        covariance_matrix,
         ])
     ])
-    
+
 ])
 
 parameter_tab = dbc.Container(
@@ -905,41 +905,41 @@ parameter_tab = dbc.Container(
 
 base_tab = dbc.Container([
        dbc.Col(children=[
-            html.Hr(), 
+            html.Hr(),
             html.P("Base Model Options"),
             dbc.Row([
-                dbc.Col(model_type_radio), 
-                dbc.Col(route_radio)], 
+                dbc.Col(model_type_radio),
+                dbc.Col(route_radio)],
                 style={"height":"20vh"}),
             dbc.Row([
                 dbc.Col(children=[model_name, model_description
                                   ], style={},),
                 dbc.Col(children=[
-                    
+
                     ], style={"height":"20vh"}),
                 ], style={}),
             dbc.Row([
                 dbc.Col(dataset)
                 ], style={}),
         ])
-    
 
 
-],  
+
+],
 style={
     "display": "flex",
 }
     )
 
 error_tab = dbc.Container([
-    
+
     dbc.Col(children=[
         html.Hr(),
         html.P("Error Model"),
     error_multi_input,
     html.Div(id="error_div")
     ]),
-    
+
 ])
 
 
@@ -962,7 +962,7 @@ datainfo_tab = dbc.Container([
     dropdown = dd,),
 
     dbc.Container([
-        dbc.Button("Download DataInfo", id="makedatainf", n_clicks = 0, color=btn_color), 
+        dbc.Button("Download DataInfo", id="makedatainf", n_clicks = 0, color=btn_color),
         dcc.Download("download_dtainf")]),
 
 
@@ -979,7 +979,7 @@ estimation_tab = dbc.Container([
 ])
 
 
-all_tabs = html.Div(dcc.Tabs(id="all-tabs", value='base-tab', 
+all_tabs = html.Div(dcc.Tabs(id="all-tabs", value='base-tab',
                     children=[dcc.Tab(label = "Base", value = 'base-tab', children=base_tab),
                               dcc.Tab(label= "DataInfo", value = 'data-info-tab', children = datainfo_tab),
                               dcc.Tab(label = "Structural", value = 'structural-tab', children=structural_tab),
@@ -990,7 +990,7 @@ all_tabs = html.Div(dcc.Tabs(id="all-tabs", value='base-tab',
                               dcc.Tab(label="Allometry",value="allometry-tab", children=allometry_tab),
                               dcc.Tab(label="Estimation", value="estimation-tab", children=estimation_tab)
                               ], className='nav-link active')
-                              
+
 
 ), html.Div(id='tab-content', children=[])
 
@@ -1002,7 +1002,7 @@ layout = dbc.Container([
         dbc.Col(children=[
             model_format_div
             ],
-            width=4), 
+            width=4),
         dbc.Col(all_tabs, width=8)
-        ], style={'width':'100vw', }),        
+        ], style={'width':'100vw', }),
     ],style={'height': '100vh', 'width': '100vw', "margin-bottom": "0%", }, fluid=True)
