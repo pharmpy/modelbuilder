@@ -561,7 +561,7 @@ elimination_radio  = dbc.Col(children=[
 
 route_radio = dbc.Col(children=[
     dbc.Badge("Administration Route", color = "success", style={"font-size": "large"}),
-    dcc.RadioItems(admin_route, id= "route-radio", style={"font-size": "large"})
+    dcc.RadioItems(admin_route, value='iv', id= "route-radio", style={"font-size": "large"})
 ])
 
 abs_rates_radio = dbc.Col(children=[
