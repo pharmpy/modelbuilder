@@ -20,7 +20,7 @@ def base_callbacks(app):
             Output("data-dump", "clear_data",allow_duplicate=True),
             [
             Input("route-radio", "value"),
-            
+
             Input('upload-dataset', 'filename'),
             State("modelformat", 'value'),
             ]
@@ -33,28 +33,34 @@ def base_callbacks(app):
                 path = 'dataset/'+dataset
             else:
                 path=None
-            start_model = create_basic_pk_model(route, dataset_path=path)    
+            start_model = create_basic_pk_model(route, dataset_path=path)
             start_model = set_name(start_model, "model")
-            
+
             start_model = convert_model(start_model, format)
             config.model = start_model
             return True
-        else: 
+        else:
             raise PreventUpdate
 
     @app.callback(
             Output("data-dump", "clear_data", allow_duplicate=True),
             Input("model-name", "value"),
             Input("model-description", "value"),
-            prevent_initial_call = True        
-    )            
+            prevent_initial_call = True
+    )
 
     def change_name_desc(name, description):
         if name:
             config.model = set_name(config.model, name)
         if description:
             config.model = config.model.replace(description=description)
-        return True    
+        return True
+
+    def render_generic_model(model):
+       s = ""
+       s += str(config.model.statements) + "\n\n"
+       s += str(config.model.random_variables.etas)
+       return s
 
     #Callback for changing the model print
     @app.callback(
@@ -68,38 +74,34 @@ def base_callbacks(app):
             return get_model_code(config.model)
         elif format == "generic":
             config.model = convert_model(config.model, format)
-            text_renderer = ""
-            text_renderer += str(config.model.statements)
-            text_renderer += str(config.model.random_variables.etas)
+            text_renderer = render_generic_model(config.model)
             return text_renderer
-        
+
 
     @app.callback(
         Output("output-model", "value"),
         Input("text-refresh", "n_intervals"),
         State("modelformat", 'value'),
-        
-    )
 
-    def get_code(n, format):   
+    )
+    def get_code(n, format):
         try:
             if format != "generic":
                 return get_model_code(config.model)
-            else: 
-                text_renderer = str(config.model.statements)
-                text_renderer += str(config.model.random_variables.etas)
+            else:
+                text_renderer = render_generic_model(config.model)
                 return text_renderer
-        except: 
-            raise PreventUpdate 
+        except:
+            raise PreventUpdate
 
     #Dataset-parsing
     @app.callback(
     Output("dataset-path", 'value'),
     Input("upload-dataset", 'contents'),
-    State('upload-dataset', 'filename') 
+    State('upload-dataset', 'filename')
     )
     def parse_dataset(contents, filename):
-        
+
         if contents is not None:
             for file in os.listdir('dataset'):
                 if file.endswith(".csv"):
@@ -111,10 +113,10 @@ def base_callbacks(app):
                 data = pd.read_csv(
                     io.StringIO(decoded.decode('utf-8')))
 
-                data.to_csv('dataset/'+filename, index=False)   
+                data.to_csv('dataset/'+filename, index=False)
             return str(filename), #dis, dis
         else: raise PreventUpdate
-        #else: return f'No dataset, editable ={editable}', dis, dis 
+        #else: return f'No dataset, editable ={editable}', dis, dis
 
     #Callback for download-btn
     @app.callback(
@@ -130,13 +132,13 @@ def base_callbacks(app):
             return "please provide model name"
         if name and n_clicks:
             if n_clicks:
-        
+
                     if path:
                         write_model(config.model, path=path)
                         return f"Model written to {path}"
-                    else: 
+                    else:
                         write_model(config.model)
                         return f'Model written to directory folder'
         return f'Provided path {path} '
-    
-    return 
+
+    return
