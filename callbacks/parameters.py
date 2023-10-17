@@ -17,7 +17,7 @@ def parameter_callbacks(app):
         #Getting the model parameters
     @app.callback(
         Output("parameter-table", "data"), #allow_duplicate=True),
-        Input("all-tabs", "value"),          
+        Input("all-tabs", "value"),
     )
 
     def get_parameters(tab):
@@ -31,18 +31,18 @@ def parameter_callbacks(app):
     @app.callback(
         Output("parameter-table", "data", allow_duplicate=True),
         Input("fix_all_toggle", "value"),
-        prevent_initial_call = True 
-        
+        prevent_initial_call = True
+
     )
 
-    def fix_all_parameters(fixed):    
+    def fix_all_parameters(fixed):
         if fixed:
-            names = config.model.parameters.names 
+            names = config.model.parameters.names
             config.model = fix_parameters(config.model,names)
             parameters = config.model.parameters.to_dict()
-        
+
         else:
-            names = config.model.parameters.names 
+            names = config.model.parameters.names
             config.model = unfix_parameters(config.model,names)
             parameters = config.model.parameters.to_dict()
         return parameters["parameters"]
@@ -57,8 +57,11 @@ def parameter_callbacks(app):
         def replace_empty(data):
                 for item in data:
                     for key, value in item.items():
-                        if value == "":
-                            item[key] = None
+                        if value is None:
+                            if key == "lower":
+                                item[key] = float("-inf")
+                            elif key == "upper":
+                                item[key] = float("inf")
                 return data
         data = replace_empty(data)
         current = config.model.parameters.to_dict()
@@ -68,7 +71,7 @@ def parameter_callbacks(app):
 
         return True
 
-    
+
 
     @app.callback(
         Output("parameter-table", "data", allow_duplicate=True),
@@ -91,7 +94,7 @@ def parameter_callbacks(app):
             if upper:
                 upper = float(upper)
             if lower:
-                lower = float(lower)    
+                lower = float(lower)
             config.model = add_population_parameter(config.model, name, float(init), lower, upper, fix == "True")
             parameters = config.model.parameters.to_dict()
             df = pd.DataFrame(parameters["parameters"])
