@@ -163,3 +163,21 @@ def update_on_click(n_clicks, value):
     else:
         raise PreventUpdate
 ```
+
+## Example of a callback in structural.py with prevent_initial_call and general structure:
+
+Callback changing bioavilability:
+```
+@app.callback(
+            Output("data-dump", "clear_data", allow_duplicate=True),
+            Input("bio_toggle", "value"),
+            prevent_initial_call = True
+    )
+    def set_bioavailability(toggle):
+        if toggle:
+            config.model = add_bioavailability(config.model)
+            return True
+        else:
+            config.model = remove_bioavailability(config.model)
+            return True
+```
