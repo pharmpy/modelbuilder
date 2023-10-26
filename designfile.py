@@ -479,7 +479,7 @@ error_multi_input = dbc.Container([
                                         dbc.Badge("Time varying",
                                                 color="success", style={"width":150, "font-size":"medium"}),
                                         style={"size": "md"}),
-                            dbc.Input(id="time_cutoff", placeholder="cutoff", style={"width": "33%"}, type="number"),
+                            dbc.Input(id="time_cutoff", placeholder="cutoff", style={"width": "33%"}, type="number", min=0),
                             dbc.Input(id="data_idv", placeholder= "idv='TIME'", style={"width": "33%"}),
 
                         ]),

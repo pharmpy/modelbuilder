@@ -95,6 +95,7 @@ def error_model_callbacks(app):
 
     @app.callback(
         Output("error_div", "children", allow_duplicate=True),
+        Output("time_cutoff", "value"),
         Input("time_check", "value"),
         Input("time_cutoff", "value"),
         Input("data_idv", "value"),
@@ -103,13 +104,13 @@ def error_model_callbacks(app):
 
     def create_time_error(check, cutoff, idv):
         if check:
-            if not cutoff:
-                cutoff = 1
+            if not cutoff or cutoff < 0:
+                cutoff = 0
             if idv: 
                 config.model= set_time_varying_error_model(config.model, cutoff=cutoff, idv = idv)
             else:
                 config.model= set_time_varying_error_model(config.model, cutoff=cutoff,)
-        return f''    
+        return f'', cutoff    
 
     @app.callback(
         Output("error_div", "children", allow_duplicate=True),
