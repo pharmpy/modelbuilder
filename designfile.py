@@ -35,8 +35,8 @@ absorptionoptions = [
     ]
 
 absorptionrates = [
-    {"label":"Zero Order", "value" : "ZO", "disabled":"False"},
-    {"label":"First Order", "value" : "FO", "disabled":"False"},
+    {"label":"Zero order", "value" : "ZO", "disabled":"False"},
+    {"label":"First order", "value" : "FO", "disabled":"False"},
     {"label":"Sequential ZO FO", "value" : "seq_ZO_FO", "disabled":"False"},
     ]
 
@@ -49,10 +49,10 @@ covariate_effect = [
     ]
 
 elimination_rates = [
-    {"label":"First Order", "value":"FO" },
+    {"label":"First order", "value":"FO" },
     {"label":"Michaelis-Menten", "value":"MM" },
     {"label":"Mixed MM FO", "value":"mixed_MM_FO" },
-    {"label":"Zero Order", "value": "ZO"}
+    {"label":"Zero order", "value": "ZO"}
     ]
 
 
@@ -61,7 +61,7 @@ error_model = [
     {"label":"Additive", "value":"add"},
     {"label":"Combined", "value":"comb" },
     {"label":"Proportional", "value":"prop" },
-    {"label":"Time Varying", "value":"time" },
+    {"label":"Time varying", "value":"time" },
     {"label":"Weighted", "value":"wgt" },
     ]
 
@@ -214,7 +214,7 @@ lag_toggle = html.Div(
     [
         dbc.Checklist(
             options=[
-                {"label": "Lag Time", "value" : True, "disabled":False},
+                {"label": "Lag time", "value" : True, "disabled":False},
             ],
             id ="lag-toggle",
             value=[],
@@ -226,7 +226,7 @@ peripheral_toggle = html.Div(
     [
         dbc.Checklist(
             options=[
-                {"label": "Peripheral Compartments", "value" : False, "disabled":False},
+                {"label": "Peripheral compartments", "value" : False, "disabled":False},
             ],
             id ="peripheral-toggle",
             value=[],
@@ -240,7 +240,7 @@ transit_toggle = html.Div(
     [
         dbc.Checklist(
             options=[
-                {"label": "Transit Compartments", "value" : True, "disabled":False},
+                {"label": "Transit compartments", "value" : True, "disabled":False},
             ],
             id ="transit-toggle",
             value=[],
@@ -275,7 +275,7 @@ covar_toggle = html.Div([
 model_covariate_list = html.Div(id="covar_div")
 
 pop_parameters = dbc.Container([
-    dbc.Badge("Population Parameter",
+    dbc.Badge("Population parameter",
                             color="success", style={"font-size":"medium"}),
                     dbc.InputGroup(id="pop_param", children=[
                         dbc.Input(id="pop-param-name", placeholder="Name"),
@@ -285,18 +285,18 @@ pop_parameters = dbc.Container([
                         dbc.Select(id="pop-param-fix",
                                 options=[{"label":"fix=False", "value":"False"},
                                 {"label":"fix=True", "value":"True"}], placeholder="fix=False"),
-                        dbc.Button("Create Population Parameter", id="pop-param-btn", color=btn_color, n_clicks=0),
+                        dbc.Button("Create population parameter", id="pop-param-btn", color=btn_color, n_clicks=0),
                         ])
 ])
 
 covariate_options =dbc.Container([
-                    dbc.Badge("Specify Covariate",
+                    dbc.Badge("Specify covariate",
                             color="success", style={"width":150, "font-size":"medium"}),
                     dbc.InputGroup(id="covar", children=[
-                        dbc.Select(id="covar-param-name", placeholder="Parameter Name"),
-                        dbc.Select(id="covar-name", placeholder="Covariate Name"),
+                        dbc.Select(id="covar-param-name", placeholder="Parameter name"),
+                        dbc.Select(id="covar-name", placeholder="Covariate name"),
                         dbc.Select(id="covariate-effect", options=covariate_effect, placeholder="Effect"),
-                        dbc.Input(id="covar-custom-eff", placeholder="Custom Effect"),
+                        dbc.Input(id="covar-custom-eff", placeholder="Custom effect"),
                         dbc.Select(id="covar-operation", options=[
                             {"label":"operation= +", "value":"+"},
                             {"label":"operation= *", "value":"*"},
@@ -305,12 +305,12 @@ covariate_options =dbc.Container([
                             {"label":"allow-nestle=False", "value":"False"},
                             {"label":"allow-nestle=True", "value":"True"},
                         ], placeholder="allow-nestle=False"),
-                        dbc.Button("Add Covariate", id="covar-btn", color=btn_color, n_clicks=0),
+                        dbc.Button("Add covariate", id="covar-btn", color=btn_color, n_clicks=0),
                     ])
 ])
 
 distribution_compartments = dbc.Container([
-    dbc.Badge("Specify Covariate",
+    dbc.Badge("Specify covariate",
             color="success", style={"width":150, "font-size":"medium"}),
 
 ])
@@ -318,7 +318,7 @@ distribution_compartments = dbc.Container([
 allometry_multi_input=dbc.Container([
     dbc.ListGroup([
         dbc.ListGroupItem(
-            dbc.Badge("Allometric Scaling", color="success", style={"width":150, "font-size":"medium"})),
+            dbc.Badge("Allometric scaling", color="success", style={"width":150, "font-size":"medium"})),
         dbc.ListGroupItem(
             dbc.InputGroup(children=[
                 dcc.Dropdown(id="allo_variable", placeholder="select variable",
@@ -338,7 +338,7 @@ allometry_multi_input=dbc.Container([
             dbc.Select(id="allo_fix", placeholder="fixed=True (opt)",
                    options=[{"label":"True", "value":True},{"label":"False", "value":False}])),
         dbc.ListGroupItem(
-            dbc.Button("Set Scaling",id="allo_btn", n_clicks=0, color=btn_color)
+            dbc.Button("Set scaling",id="allo_btn", n_clicks=0, color=btn_color)
         )
     ]),
 
@@ -347,7 +347,7 @@ allometry_multi_input=dbc.Container([
 estimation_multi_input = dbc.Container([
     dbc.ListGroup([
         dbc.ListGroupItem(
-            dbc.Badge("Estimation Step", color="success",
+            dbc.Badge("Estimation step", color="success",
                       style={"width":150, "fontSize": "medium"})),
         dbc.ListGroupItem(
             dbc.Select(id="estimation_method", placeholder="select method",
@@ -381,7 +381,7 @@ estimation_multi_input = dbc.Container([
                 ),
 
         dbc.ListGroupItem(
-            dbc.Button("Set Estimation Step", id="estimation_btn", n_clicks=0, color=btn_color,
+            dbc.Button("Set sstimation step", id="estimation_btn", n_clicks=0, color=btn_color,
             )),
         ]),
 ])
@@ -389,13 +389,13 @@ estimation_multi_input = dbc.Container([
 eval_multi_input = dbc.Container([
         dbc.ListGroup([
             dbc.ListGroupItem(
-                dbc.Badge("Evaluation Step", color="success", style={"width":150, "fontSize": "medium"})
+                dbc.Badge("Evaluation step", color="success", style={"width":150, "fontSize": "medium"})
             ),
             dbc.ListGroupItem(
                 dbc.Input(id="evaluation_index", placeholder="index", type='number'),
             ),
             dbc.ListGroupItem(
-                dbc.Button("Set Evaluation", id="eval_btn", n_clicks=0, color=btn_color)
+                dbc.Button("Set evaluation", id="eval_btn", n_clicks=0, color=btn_color)
             ),
             ])
         ])
@@ -526,19 +526,19 @@ model_description = html.Div(children=[
 
 dataset = html.Div(children=[
     dbc.InputGroup([
-        dcc.Upload(dbc.Button('Select Dataset', color=btn_color), id="upload-dataset"),
+        dcc.Upload(dbc.Button('Select dataset', color=btn_color), id="upload-dataset"),
         dbc.Input(id="dataset-path", placeholder="No Dataset",type="text", disabled=True),
 
     ], style={"width":"50%"})
 ])
 
 peripherals = dbc.InputGroup(children=[
-                dbc.InputGroupText("Peripheral Compartments"),
+                dbc.InputGroupText("Peripheral compartments"),
                 dbc.Input(id="peripheral_input", placeholder=0, type="number", min=0, step=1)
 ], style={"width":"70%"})
 
 transits = dbc.InputGroup(children=[
-                dbc.InputGroupText("Transit Compartments"),
+                dbc.InputGroupText("Transit compartments"),
                 dbc.Input(id="transit_input", placeholder=0, type="number", min=0, step=1)
 ], style={"width":"70%"})
 
@@ -556,17 +556,17 @@ model_format_radio = dbc.Col(children=[
 ])
 
 elimination_radio  = dbc.Col(children=[
-    dbc.Badge("Elimination Rate", color = "success", style={"font-size": "large"}),
+    dbc.Badge("Elimination rate", color = "success", style={"font-size": "large"}),
     dcc.RadioItems(elimination_rates, id="elim_radio", style={"font-size": "large"})
 ])
 
 route_radio = dbc.Col(children=[
-    dbc.Badge("Administration Route", color = "success", style={"font-size": "large"}),
+    dbc.Badge("Administration route", color = "success", style={"font-size": "large"}),
     dcc.RadioItems(admin_route, value='iv', id= "route-radio", style={"font-size": "large"})
 ])
 
 abs_rates_radio = dbc.Col(children=[
-    dbc.Badge("Absorption Rate", color = "success", style={"font-size": "large"}),
+    dbc.Badge("Absorption rate", color = "success", style={"font-size": "large"}),
     dcc.RadioItems(options=absorptionrates,id = "abs_rate-radio", style={"font-size": "large"})
 ])
 #DROPDOWNS
@@ -581,21 +581,21 @@ estimation_dropdown = dcc.Dropdown(estimation_methods)
 
 #BUTTONS
 error_button = dbc.Button(
-    "Error Model",
+    "Error model",
     id = "err-btn",
     color=btn_color,
     n_clicks= 0,
 )
 
 abs_button = dbc.Button(
-    "Absorption Rate",
+    "Absorption rate",
     id = "abs-btn",
     color=btn_color,
     n_clicks= 0,
 )
 
 elim_button = dbc.Button(
-    "Elimination Rate",
+    "Elimination rate",
     id="elim-btn",
     color = btn_color,
     n_clicks= 0,
@@ -747,8 +747,8 @@ iov_table = dash_table.DataTable(
     id='iov_table',
     columns=[
     {'name': 'Parameter', 'id': 'parameter'},
-    {'name': 'Occasion Column', 'id': 'occasion', 'presentation' : 'dropdown'},
-    {'name': 'ETA Name', 'id':'eta_names'},
+    {'name': 'Occasion column', 'id': 'occasion', 'presentation' : 'dropdown'},
+    {'name': 'ETA name', 'id':'eta_names'},
     {'name': 'Distribution', 'id': 'distribution', 'presentation':'dropdown' },
     ],
     dropdown= {
@@ -774,7 +774,7 @@ iiv_table = dash_table.DataTable(
     {'name': 'Expression', 'id': 'expression', 'presentation':'dropdown' },
     {'name': 'Custom', 'id':'custom'},
     {'name': 'Operation', 'id': 'operation', 'presentation':'dropdown' },
-    {'name': 'Initial Estimate', 'id': 'initial_estimate', },
+    {'name': 'Initial estimate', 'id': 'initial_estimate', },
     {'name': 'ETA Name', 'id': 'eta_names'},
     ],
     dropdown= {
@@ -865,7 +865,7 @@ structural_tab = dbc.Container([
         dbc.Col(elimination_radio)
     ]),
     dbc.Row([
-        dbc.Col(children=[dbc.Badge("Absorption Delay", color="success", style={"font-size": "large"}),
+        dbc.Col(children=[dbc.Badge("Absorption delay", color="success", style={"font-size": "large"}),
 
             transits, lag_toggle, bioavailability_toggle]),
         dbc.Col(children=[dbc.Badge("Distribution", color="success", style={"font-size": "large"}),
@@ -888,7 +888,7 @@ par_var_tab = dbc.Container([
 ]),
     dbc.Row(children=[
     dbc.Col([
-        dbc.Badge("Covariance Matrix", color="success", style={"font-size": "large"}),
+        dbc.Badge("Covariance matrix", color="success", style={"font-size": "large"}),
         covariance_matrix,
         ])
     ])
@@ -907,7 +907,7 @@ parameter_tab = dbc.Container(
 base_tab = dbc.Container([
        dbc.Col(children=[
             html.Hr(),
-            html.P("Base Model Options"),
+            html.P("Base model options"),
             dbc.Row([
                 dbc.Col(model_type_radio),
                 dbc.Col(route_radio)],
@@ -936,7 +936,7 @@ error_tab = dbc.Container([
 
     dbc.Col(children=[
         html.Hr(),
-        html.P("Error Model"),
+        html.P("Error model"),
     error_multi_input,
     html.Div(id="error_div")
     ]),
@@ -963,7 +963,7 @@ datainfo_tab = dbc.Container([
     dropdown = dd,),
 
     dbc.Container([
-        dbc.Button("Download DataInfo", id="makedatainf", n_clicks = 0, color=btn_color),
+        dbc.Button("Download dataInfo", id="makedatainf", n_clicks = 0, color=btn_color),
         dcc.Download("download_dtainf")]),
 
 
@@ -985,8 +985,8 @@ all_tabs = html.Div(dcc.Tabs(id="all-tabs", value='base-tab',
                               dcc.Tab(label= "DataInfo", value = 'data-info-tab', children = datainfo_tab),
                               dcc.Tab(label = "Structural", value = 'structural-tab', children=structural_tab),
                               dcc.Tab(label ='Parameters', value='parameters-tab', children=parameter_tab),
-                              dcc.Tab(label='Parameter Variability', value='par-var-tab', children=par_var_tab),
-                              dcc.Tab(label="Error Model", value="error-tab", children=error_tab),
+                              dcc.Tab(label='Parameter variability', value='par-var-tab', children=par_var_tab),
+                              dcc.Tab(label="Error model", value="error-tab", children=error_tab),
                               dcc.Tab(label="Covariates", value="covariate-tab", children=covariate_tab),
                               dcc.Tab(label="Allometry",value="allometry-tab", children=allometry_tab),
                               dcc.Tab(label="Estimation", value="estimation-tab", children=estimation_tab)
