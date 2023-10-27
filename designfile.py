@@ -550,7 +550,7 @@ model_type_radio = dbc.Col(children=[
     ])
 
 model_format_radio = dbc.Col(children=[
-    dbc.Badge("Model Format", color = "success", style={"font-size": "large"}),
+    dbc.Badge("Model view", color = "success", style={"font-size": "large"}),
     dcc.RadioItems(modelformats, 'nonmem', id='modelformat',
                    inputStyle={"font-size": "large", "margin":"10px" }, inline=True)
 ])
