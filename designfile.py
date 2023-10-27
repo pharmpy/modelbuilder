@@ -182,7 +182,13 @@ navbar = dbc.Navbar(dbc.Container(
             , height="60px")),
             ]),href="https://pharmpy.github.io"),
             dbc.Col(dbc.NavbarBrand("Model Builder", className="ms-5", style={"font-size" : "25px", "font-weight":"bold"}))
-           ], fluid=True
+           ,html.A(
+        dbc.Row([
+            dbc.Col(html.Img(src="assets\github-mark.png"
+            , height="30px")),
+            ]),href="https://github.com/pharmpy/modelbuilder"),
+           ]
+           , fluid=True
             ))
 
 
