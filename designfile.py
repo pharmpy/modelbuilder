@@ -55,6 +55,11 @@ elimination_rates = [
     {"label":"Zero order", "value": "ZO"}
     ]
 
+peripheral_compartments = [
+    {"label": "0", "value": 0},
+    {"label": "1", "value": 1},
+    {"label": "2", "value": 2},
+]
 
 
 error_model = [
@@ -517,11 +522,6 @@ dataset = html.Div(children=[
     ], style={"width":"50%"})
 ])
 
-peripherals = dbc.InputGroup(children=[
-                dbc.InputGroupText("Peripheral compartments"),
-                dbc.Input(id="peripheral_input", placeholder=0, type="number", min=0, step=1)
-], style={"width":"70%"})
-
 transits = dbc.InputGroup(children=[
                 dbc.InputGroupText("Transit compartments"),
                 dbc.Input(id="transit_input", placeholder=0, type="number", min=0, step=1)
@@ -554,6 +554,12 @@ abs_rates_radio = dbc.Col(children=[
     dbc.Badge("Absorption rate", color = "success", style={"font-size": "large"}),
     dcc.RadioItems(options=absorptionrates,id = "abs_rate-radio", style={"font-size": "large"})
 ])
+
+peripherals_radio = dbc.Col(children=[
+    dbc.Badge("Distribution", color="success", style={"font-size": "large"}),
+    dcc.RadioItems(peripheral_compartments, id="peripheral-radio", style={"font-size": "large"})
+], style={"width":"70%"})
+
 #DROPDOWNS
 
 elim_dropdown = dcc.Dropdown(elimination_rates, id="elim-dropdown")
@@ -692,22 +698,6 @@ collapse_transit = dbc.Row([
 ],
 )
 
-collapse_peripheral = dbc.Row([
-    dbc.Col(
-        dbc.Collapse([
-
-            #dbc.Input(id="peripheral_input", placeholder=0, type="number", min=0, step=1),
-
-
-            ],
-        id="peripheral-collapse",
-        is_open=True,
-        dimension="width"
-        ),
-    )
-
-],
-)
 #Complete buttons
 
 abs_rates = dbc.Col(children=[
@@ -785,9 +775,8 @@ iiv_table = dash_table.DataTable(
 
 )
 
-covariance_matrix = dbc.Container([
-    dash_table.DataTable(id="covariance_matrix")
-    ])
+covariance_matrix = dash_table.DataTable(id="covariance_matrix")
+
 
 all_parameters_table = dash_table.DataTable(
     id='parameter-table',
@@ -865,24 +854,26 @@ structural_tab = dbc.Container([
         dbc.Col(children=[dbc.Badge("Absorption delay", color="success", style={"font-size": "large"}),
 
             transits, lag_toggle, bioavailability_toggle]),
-        dbc.Col(children=[dbc.Badge("Distribution", color="success", style={"font-size": "large"}),
-            peripherals])
+        dbc.Col(children=[peripherals_radio])
   ]),
 
 
 ])
 
 par_var_tab = dbc.Container([
+    html.Br(),
     dbc.Row(children=[
     dbc.Col([dbc.Badge("IIVs", color="success", style={"font-size": "large"}),
              iiv_table,
              ])
     ]),
+    html.Br(),
     dbc.Row(children=[
     dbc.Col([dbc.Badge("IOVs", color="success", style={"font-size": "large"}),
             iov_table,
             ])
 ]),
+    html.Br(),
     dbc.Row(children=[
     dbc.Col([
         dbc.Badge("Covariance matrix", color="success", style={"font-size": "large"}),

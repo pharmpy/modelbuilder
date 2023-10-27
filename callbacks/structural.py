@@ -95,23 +95,14 @@ def structural_callbacks(app):
 
     #callback for peripheral compartments
     @app.callback(
-        Output("data-dump", "clear_data", allow_duplicate=True),
-        Input("peripheral_input", "value"),
-        prevent_initial_call = True
+            Output("data-dump", "clear_data",allow_duplicate=True),
+            Input("peripheral-radio", "value"),
+            prevent_initial_call=True
     )
-
     def peripheral_compartments(n):
-
-        try:
-            if n>0:
-                globals()["peripherals"] = int(n)
-                config.model = set_peripheral_compartments(config.model, int(n))
-                return True
-            else:
-                while globals()["peripherals"] > 0:
-                    config.model = remove_peripheral_compartment(config.model)
-                    globals()["peripherals"] = globals()["peripherals"] - 1
-        except: return True
+        if n is not None:
+            config.model = set_peripheral_compartments(config.model, n)
+        return True
 
     @app.callback(
             Output("data-dump", "clear_data", allow_duplicate=True),
