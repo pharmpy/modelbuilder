@@ -775,9 +775,8 @@ iiv_table = dash_table.DataTable(
 
 )
 
-covariance_matrix = dbc.Container([
-    dash_table.DataTable(id="covariance_matrix")
-    ])
+covariance_matrix = dash_table.DataTable(id="covariance_matrix")
+
 
 all_parameters_table = dash_table.DataTable(
     id='parameter-table',
@@ -862,16 +861,19 @@ structural_tab = dbc.Container([
 ])
 
 par_var_tab = dbc.Container([
+    html.Br(),
     dbc.Row(children=[
     dbc.Col([dbc.Badge("IIVs", color="success", style={"font-size": "large"}),
              iiv_table,
              ])
     ]),
+    html.Br(),
     dbc.Row(children=[
     dbc.Col([dbc.Badge("IOVs", color="success", style={"font-size": "large"}),
             iov_table,
             ])
 ]),
+    html.Br(),
     dbc.Row(children=[
     dbc.Col([
         dbc.Badge("Covariance matrix", color="success", style={"font-size": "large"}),
