@@ -54,6 +54,7 @@ def base_callbacks(app):
             config.model = set_name(config.model, name)
         if description:
             config.model = config.model.replace(description=description)
+        config.model = config.model.update_source()
         return True
 
     def render_generic_model(model):
