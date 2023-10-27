@@ -588,7 +588,7 @@ elim_button = dbc.Button(
 )
 download_model = dbc.Container([
     dbc.InputGroup([
-        dbc.Button("Write model", id="download-btn", color=btn_color, style={"fontSize":"medium"}),
+        dbc.Button("Save model", id="download-btn", color=btn_color, style={"fontSize":"medium"}),
         dbc.Input(id="model_path", placeholder="model path")
         ]),
     html.Div(id="model_confirm")
@@ -960,7 +960,7 @@ datainfo_tab = dbc.Container([
     dropdown = dd,),
 
     dbc.Container([
-        dbc.Button("Download dataInfo", id="makedatainf", n_clicks = 0, color=btn_color),
+        dbc.Button("Save DataInfo", id="makedatainf", n_clicks = 0, color=btn_color),
         dcc.Download("download_dtainf")]),
 
 
