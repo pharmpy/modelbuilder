@@ -274,21 +274,6 @@ covar_toggle = html.Div([
 #TEXTFIELDS
 model_covariate_list = html.Div(id="covar_div")
 
-pop_parameters = dbc.Container([
-    dbc.Badge("Population parameter",
-                            color="success", style={"font-size":"medium"}),
-                    dbc.InputGroup(id="pop_param", children=[
-                        dbc.Input(id="pop-param-name", placeholder="Name"),
-                        dbc.Input(id="pop-param-init", placeholder="init"),
-                        dbc.Input(id="pop-param-upper", placeholder="upper=None"),
-                        dbc.Input(id="pop-param-lower", placeholder="lower=None"),
-                        dbc.Select(id="pop-param-fix",
-                                options=[{"label":"fix=False", "value":"False"},
-                                {"label":"fix=True", "value":"True"}], placeholder="fix=False"),
-                        dbc.Button("Create population parameter", id="pop-param-btn", color=btn_color, n_clicks=0),
-                        ])
-])
-
 covariate_options =dbc.Container([
                     dbc.Badge("Specify covariate",
                             color="success", style={"width":150, "font-size":"medium"}),
@@ -807,22 +792,34 @@ covariance_matrix = dbc.Container([
 all_parameters_table = dash_table.DataTable(
     id='parameter-table',
     columns=[
-        {'name': 'Name', 'id': 'name', 'type': 'text', 'editable':False},
+        {'name': 'Name', 'id': 'name', 'type': 'text'},
         {'name': 'Init', 'id': 'init', 'type': 'numeric'},
         {'name': 'Lower', 'id': 'lower', 'type': 'numeric'},
         {'name': 'Upper', 'id': 'upper', 'type': 'numeric' },
         {'name': 'Fix', 'id': 'fix', 'type': 'any' , 'presentation': 'dropdown'},
     ],
     editable=True,
-    row_deletable=True,
+    row_deletable=False,
     dropdown= {
         'fix' : {
         'options' : [
             {'label': 'true' , 'value': True},
             {'label': 'false' , 'value': False}
-        ]
-    } },
-
+            ], 'clearable': False,
+    }},
+        style_data_conditional=[
+        {
+            'if': {'state': 'active'},
+           'backgroundColor': 'rgba(0, 116, 217, 0.3)',
+           'border': '1px solid rgb(0, 116, 217)'
+        },
+        {
+            'if': {'column_type': 'numeric'},
+            'textAlign': 'right'
+        },],
+    style_cell={
+        'textAlign': 'left'
+    }
 )
 
 data_info_table = dash_table.DataTable(
@@ -898,7 +895,7 @@ par_var_tab = dbc.Container([
 parameter_tab = dbc.Container(
     [
         html.P("Parameters"),
-        fix_all_toggle, html.Hr(), pop_parameters, html.Hr(),
+        fix_all_toggle,
         all_parameters_table,
     ],
     className="mt-4"
