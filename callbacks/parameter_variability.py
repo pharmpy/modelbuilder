@@ -17,31 +17,39 @@ import os
 def parameter_variability_callbacks(app):
     @app.callback(
             Output("iiv_table", "data"),
-            Output("iov_table","data"),
-            Output("iov_table","dropdown"),
             Input('all-tabs', 'value'),
             prevent_initial_call = True
     )
     def render_iiv_iov_data(tab):
-        
-
         if tab == "par-var-tab":
-            try:
-                parameter_names = [str(s.symbol) for s in config.model.statements if not isinstance(s, CompartmentalSystem)]
-                df = pd.DataFrame({'parameter':parameter_names, 'initial_estimate':0.09, 'operation':'*', 'eta_names':None})
-                iiv_data = df.to_dict('records')
+            parameter_names = get_individual_parameters(config.model)
+            df = pd.DataFrame({'parameter':parameter_names, 'initial_estimate':0.09, 'operation':'*', 'eta_names':None})
+            iiv_data = df.to_dict('records')
+            return iiv_data
+        else:
+            raise PreventUpdate
+    @app.callback(
+                Output("iov_table","data"),
+                Output("iov_table","dropdown"),
+                Input('all-tabs', 'value'),
+                prevent_initial_call = True
+        )        
 
-                iov_data = pd.DataFrame({'parameter': parameter_names, 'distribution':'disjoint', 'eta_names':None})
-                iov_data = iov_data.to_dict('records')
+    def render_iov(tab):
+        if tab == "par-var-tab":
+            parameter_names = get_individual_parameters(config.model)
+            iov_data = pd.DataFrame({'parameter': parameter_names, 'distribution':'disjoint', 'eta_names':None})
+            iov_data = iov_data.to_dict('records')
+            occ_opts = []
+            if config.model.datainfo:
                 try:
                     occ_opts = config.model.datainfo.typeix["idv"].names + config.model.datainfo.typeix["unknown"].names
                 except:
-                    occ_opts = config.model.datainfo.typeix["unknown"].names  
-                    
-                iov_dd_options = {
-                
+                    occ_opts = config.model.datainfo.typeix["unknown"].names 
+
+            iov_dd_options = {
                 'occasion': {
-                    'options' : [make_label_value(i, i) for i in occ_opts]
+                    'options' : [make_label_value(i, i) for i in occ_opts] if occ_opts else []
                 },
                     
                 'distribution' : {
@@ -53,11 +61,26 @@ def parameter_variability_callbacks(app):
                     ]
                     },
             },
-
-                return iiv_data, iov_data, iov_dd_options[0]
-            except: raise PreventUpdate
+            
+            
+            return iov_data, iov_dd_options[0]
         else:
             raise PreventUpdate
+
+    @app.callback(
+        Output("iov_table","row_selectable"),
+        Input('all-tabs', 'value'),
+        State("iov_table","row_selectable"),
+    )
+    def check_iov(tab, selectable):
+        if tab == "par-var-tab":
+            if config.model.datainfo:
+                select = "multi"
+            else:
+                select = False
+            return select
+        else: raise PreventUpdate
+
     @app.callback(
         Output("data-dump", "clear_data", allow_duplicate=True),
         Input("iiv_table", "selected_rows"),
@@ -121,13 +144,11 @@ def parameter_variability_callbacks(app):
 
     @app.callback(
             Output('iiv_table', 'selected_rows'),
-            Output('iov_table', 'selected_rows'),
             Input('iiv_table','data'),
-            Input('iov_table', 'data'),
             prevent_initial_call=True
     )
 
-    def check_tables(iiv_data, iov_data):
+    def check_iiv(iiv_data):
         def render_checks(data, level):
             to_check = []
             for i, j in enumerate(data):
@@ -136,8 +157,25 @@ def parameter_variability_callbacks(app):
                         to_check.append(i)
                 except: pass
             return to_check
-        iiv_checks, iov_checks = render_checks(iiv_data, "iiv"), render_checks(iov_data, "iov")
-        return iiv_checks, iov_checks
+        iiv_checks = render_checks(iiv_data, "iiv")
+        return iiv_checks
+    
+    @app.callback(
+            Output('iov_table', 'selected_rows'),
+            Input('iov_table', 'data'),
+            prevent_initial_call=True
+    )
+    def check_iov(iov_data):
+        def render_checks(data, level):
+            to_check = []
+            for i, j in enumerate(data):
+                try:
+                    if has_random_effect(model=config.model , parameter=j["parameter"], level=level):
+                        to_check.append(i)
+                except: pass
+            return to_check
+        iov_checks = render_checks(iov_data, "iov")
+        return iov_checks
 
     @app.callback(
         Output("covariance_matrix", "data", allow_duplicate=True),
