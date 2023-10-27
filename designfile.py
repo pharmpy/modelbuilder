@@ -510,7 +510,7 @@ model_output_text = html.Div([
 ])
 model_name = html.Div(children=[
     dbc.InputGroup([
-    dbc.Badge("Model Name", color="success", style={"width":150, 'fontSize': 'medium'}),
+    dbc.Badge("Name", color="success", style={"width":150, 'fontSize': 'medium'}),
     dbc.Input(id="model-name", placeholder= "Input model name", type="text")
     ],)
 
@@ -518,7 +518,7 @@ model_name = html.Div(children=[
 
 model_description = html.Div(children=[
     dbc.InputGroup([
-    dbc.Badge("Model Description", color="success", style={"width":150, 'fontSize': 'medium', } ),
+    dbc.Badge("Description", color="success", style={"width":150, 'fontSize': 'medium', } ),
     dbc.Input(id="model-description", placeholder="Input model description",type="text"),
     ], style={'marginTop':'5px'}),
 ], )
@@ -545,7 +545,7 @@ transits = dbc.InputGroup(children=[
 #RADIOBUTTONS
 
 model_type_radio = dbc.Col(children=[
-    dbc.Badge("Model Type", color = "success", style={"font-size": "large"}),
+    dbc.Badge("Type", color = "success", style={"font-size": "large"}),
     dcc.RadioItems(typeoptions, "PK", id="model_type", style={"font-size": "large"})
     ])
 
@@ -611,7 +611,7 @@ download_model = dbc.Container([
 ])
 
 model_format_button = dbc.Button(
-    "Model Format",
+    "Format",
     id="format-button",
     color=btn_color,
     n_clicks=0,
@@ -619,7 +619,7 @@ model_format_button = dbc.Button(
 )
 
 model_type_button = dbc.Button(
-    "Model Type",
+    "Type",
     id="type-button",
     color=btn_color,
             n_clicks=0,
@@ -877,18 +877,18 @@ structural_tab = dbc.Container([
 
 par_var_tab = dbc.Container([
     dbc.Row(children=[
-    dbc.Col([dbc.Badge("Model IIVs", color="success", style={"font-size": "large"}),
+    dbc.Col([dbc.Badge("IIVs", color="success", style={"font-size": "large"}),
              iiv_table,
              ])
     ]),
     dbc.Row(children=[
-    dbc.Col([dbc.Badge("Model IOVs", color="success", style={"font-size": "large"}),
+    dbc.Col([dbc.Badge("IOVs", color="success", style={"font-size": "large"}),
             iov_table,
             ])
 ]),
     dbc.Row(children=[
     dbc.Col([
-        dbc.Badge("Model Covariance Matrix", color="success", style={"font-size": "large"}),
+        dbc.Badge("Covariance Matrix", color="success", style={"font-size": "large"}),
         covariance_matrix,
         ])
     ])
@@ -956,7 +956,7 @@ covariate_tab = dbc.Container([
 
 datainfo_tab = dbc.Container([
     html.Hr(),
-    html.P("Model DataInfo"),
+    html.P("DataInfo"),
     dash_table.DataTable(id="datatable",
     columns=cols,
     editable=True,
