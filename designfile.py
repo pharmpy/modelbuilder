@@ -556,7 +556,7 @@ abs_rates_radio = dbc.Col(children=[
 ])
 
 peripherals_radio = dbc.Col(children=[
-    dbc.Badge("Distribution", color="success", style={"font-size": "large"}),
+    dbc.Badge("Peripheral compartments", color="success", style={"font-size": "large"}),
     dcc.RadioItems(peripheral_compartments, id="peripheral-radio", style={"font-size": "large"})
 ], style={"width":"70%"})
 
