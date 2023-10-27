@@ -42,16 +42,18 @@ def structural_callbacks(app):
     @app.callback(
             Output("abs_rate-radio", "options"),
             Output("abs_rate-radio", "value"),
+            Output("abs_rate-radio", "style"),
             Input("route-radio", "value"),
             State("abs_rate-radio", "options"),
             State("abs_rate-radio", "value"),
+            State("abs_rate-radio", "style"),
     )
 
-    def disable_abs(value, options, rate):
+    def disable_abs(value, options, rate, style):
         if value == "iv":
-            return [{**dictionary, "disabled":True} for dictionary in options], 0
+            return [{**dictionary, "disabled":True} for dictionary in options], 0, {**style, "opacity":"0.42"}
         else:
-            return [{**dictionary, "disabled":False} for dictionary in options], rate
+            return [{**dictionary, "disabled":False} for dictionary in options], rate, {**style, "opacity":"1.0"}
 
     @app.callback(
         [Output("lag-toggle", "options"),
