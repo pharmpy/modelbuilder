@@ -156,7 +156,7 @@ def parameter_variability_callbacks(app):
             data = model.random_variables.etas.covariance_matrix
             df = pd.DataFrame(np.array(data).astype(str), columns=matrix)
             df.replace(str(0), None, inplace=True)
-            df = df.applymap(lambda x: isinstance(x, str))
+            df = df.applymap(lambda x: 'X' if isinstance(x, str) else x)
             df.insert(0, "parameter" ,matrix, True)
             data = df.to_dict('records')
 
@@ -172,7 +172,7 @@ def parameter_variability_callbacks(app):
             dropdown= { 
                     i:{
                         'options': [
-                                    {'label':'True', 'value':True},
+                                    {'label':'X', 'value':'X'},
                                     ]
                         } for i in matrix     
                     }
@@ -194,13 +194,12 @@ def parameter_variability_callbacks(app):
         )
 
     def set_covariance(data):
-        #FIXME! 
         d = data
         pairs = {}
         for row in d[::-1]:
             pairs[row["parameter"]] = []
             for key, value in row.items():
-                    if value == True:
+                    if value == 'X':
                         pairs[row["parameter"]].append(key)
                         
                     for second_iter in d[::-1]:
