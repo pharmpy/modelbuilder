@@ -562,7 +562,7 @@ abs_rates_radio = dbc.Col(children=[
 ])
 
 peripherals_radio = dbc.Col(children=[
-    dbc.Badge("Distribution", color="success", style={"font-size": "large"}),
+    dbc.Badge("Peripheral compartments", color="success", style={"font-size": "large"}),
     dcc.RadioItems(peripheral_compartments, id="peripheral-radio", style={"font-size": "large"})
 ], style={"width":"70%"})
 
@@ -841,6 +841,7 @@ model_format_div = html.Div(children=[
 
 
 allometry_tab = dbc.Container([
+    html.Br(),
     dbc.Row([
         allometry_multi_input,
 
@@ -851,7 +852,7 @@ allometry_tab = dbc.Container([
 )
 
 structural_tab = dbc.Container([
-    html.Hr(),
+    html.Br(),
     dbc.Row([
         dbc.Col(children=[abs_rates_radio, ]),
         dbc.Col(elimination_radio)
@@ -900,7 +901,7 @@ parameter_tab = dbc.Container(
 
 base_tab = dbc.Container([
        dbc.Col(children=[
-            html.Hr(),
+            html.Br(),
             html.P("Base model options"),
             dbc.Row([
                 dbc.Col(model_type_radio),
@@ -929,7 +930,7 @@ style={
 error_tab = dbc.Container([
 
     dbc.Col(children=[
-        html.Hr(),
+        html.Br(),
         html.P("Error model"),
     error_multi_input,
     html.Div(id="error_div")
@@ -939,7 +940,7 @@ error_tab = dbc.Container([
 
 
 covariate_tab = dbc.Container([
-    html.Hr(),
+    html.Br(),
     html.P("Covariates"),
     dbc.Row(covariate_options),
     html.Hr(),
@@ -949,7 +950,7 @@ covariate_tab = dbc.Container([
 ])
 
 datainfo_tab = dbc.Container([
-    html.Hr(),
+    html.Br(),
     html.P("DataInfo"),
     dash_table.DataTable(id="datatable",
     columns=cols,
@@ -966,6 +967,7 @@ datainfo_tab = dbc.Container([
 ])
 
 estimation_tab = dbc.Container([
+    html.Br(),
     dbc.Row([
     dbc.Col([estimation_multi_input, covariance_estimation]),
     dbc.Col([eval_multi_input, estimation_remove_multi])
