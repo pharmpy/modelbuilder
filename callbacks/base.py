@@ -59,8 +59,13 @@ def base_callbacks(app):
 
     def render_generic_model(model):
        s = ""
+       s += "------------------STATEMENTS----------------" + "\n\n"
        s += str(config.model.statements) + "\n\n"
-       s += str(config.model.random_variables.etas)
+       s += "------------------ETAS----------------------" + "\n\n"
+       s += str(config.model.random_variables.etas) + "\n\n"
+       s += "------------------PARAMETERS----------------" + "\n\n"
+       s += str(config.model.parameters) + "\n\n"
+
        return s
 
     #Callback for changing the model print
