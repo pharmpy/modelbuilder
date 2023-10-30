@@ -436,9 +436,6 @@ error_multi_input = dbc.Container([
                                                 color="success", style={"width":150, "font-size":"medium"}),
                                                 value = False ,
                                     style={"size": "md"}),
-                            dbc.Input(id="add_dv", placeholder="dv=None", style={"width": "0.2"}),
-                            dbc.Input(id="add_data_trans", placeholder="data_trans=None",style={"width": "0.2"}),
-                            dbc.Input(id="add_series_terms", placeholder="series_terms=2",style={}),
 
                         ])
         ),
@@ -450,9 +447,7 @@ error_multi_input = dbc.Container([
                                                 color="success", style={"width":150, "font-size":"medium"}),
                                                 value = False,
                                         style={"size": "md"}),
-                            dbc.Input(id="comb_dv", placeholder="dv=None",style={"width": "0.2"}),
-                            dbc.Input(id="comb_data_trans", placeholder="data_trans=None",style={"width": "0.2"}),
-
+                           
                         ]),
         ),
         dbc.ListGroupItem(
@@ -463,11 +458,9 @@ error_multi_input = dbc.Container([
                                                 value = False,
 
                                         style={"size": "md"}),
-                            dbc.Input(id="prop_dv", placeholder="dv=None",style={"width": "0.2"}),
-                            dbc.Input(id="prop_data_trans", placeholder="data_trans=None", style={"width": "0.2"}),
-                            dbc.Input(id="prop_zero_prot", placeholder="zero_protection=True",style={} )
+                            dbc.Input(id="prop_zero_prot", placeholder="zero_protection=True",)
 
-                        ]),
+                        ], style= {"width":"60%"}),
         ),
         dbc.ListGroupItem(
             dbc.InputGroup(children=[
