@@ -507,7 +507,7 @@ model_output_text = html.Div([
 model_name = html.Div(children=[
     dbc.InputGroup([
     dbc.Badge("Name", color="success", style={"width":150, 'fontSize': 'medium'}),
-    dbc.Input(id="model-name", placeholder= "Input model name", type="text")
+    dbc.Input(id="model-name", placeholder= "Write model name here...", type="text")
     ],)
 
 ],)
@@ -515,7 +515,7 @@ model_name = html.Div(children=[
 model_description = html.Div(children=[
     dbc.InputGroup([
     dbc.Badge("Description", color="success", style={"width":150, 'fontSize': 'medium', } ),
-    dbc.Input(id="model-description", placeholder="Input model description",type="text"),
+    dbc.Input(id="model-description", placeholder="Write model description here...",type="text"),
     ], style={'marginTop':'5px'}),
 ], )
 
@@ -536,7 +536,7 @@ transits = dbc.InputGroup(children=[
 #RADIOBUTTONS
 
 model_type_radio = dbc.Col(children=[
-    dbc.Badge("Type", color = "success", style={"font-size": "large"}),
+    dbc.Badge("Model type", color = "success", style={"font-size": "large"}),
     dcc.RadioItems(typeoptions, "PK", id="model_type", style={"font-size": "large"})
     ])
 
@@ -902,21 +902,25 @@ parameter_tab = dbc.Container(
 base_tab = dbc.Container([
        dbc.Col(children=[
             html.Br(),
-            html.P("Base model options"),
-            dbc.Row([
-                dbc.Col(model_type_radio),
-                dbc.Col(route_radio)],
-                style={"height":"20vh"}),
+            html.P("""Basic model operations. Set model name and description, upload dataset and select model type
+                administration route."""),
             dbc.Row([
                 dbc.Col(children=[model_name, model_description
                                   ], style={},),
                 dbc.Col(children=[
 
-                    ], style={"height":"20vh"}),
+                    ], style={"height":"8vh"}),
                 ], style={}),
             dbc.Row([
                 dbc.Col(dataset)
                 ], style={}),
+            html.Br(),
+            dbc.Row([
+                dbc.Col(model_type_radio)],
+                style={"height":"10vh"}),
+            dbc.Row([
+                dbc.Col(route_radio)],
+                style={"height":"10vh"}),
         ])
 
 
