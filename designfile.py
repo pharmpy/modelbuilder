@@ -494,12 +494,13 @@ error_multi_input = dbc.Container([
 
 model_output_text = html.Div([
     dcc.Clipboard(target_id= "output-model", title="copy",
-                        style={"position": "relative", "top": "5vh", "right":"-25vw",
+                        style={"position": "relative", "top": "5vh", "right":"-29vw",
                                'width':'5vw', 'cursor':'pointer'}
                         ),
     dbc.Textarea(id = "output-model",
                 readOnly = True,
-                style={'font-family': 'monospace', 'resize': 'None', 'width': '100%', 'height': '70vh', 'fontSize': '12px', "backgroundColor": '#ffffff'},
+                style={'font-family': 'monospace', 'resize': 'None', 'height': '70vh', 'fontSize': '12px', 
+                       "backgroundColor": '#ffffff', 'overflow-x': 'auto', 'white-space': 'pre'},
                 ),
     #Update interval value to change how often refresh happens
     dcc.Interval(id="text-refresh", interval=refreshtime*1000, n_intervals=0)
