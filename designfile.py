@@ -854,8 +854,8 @@ structural_tab = dbc.Container([
     dbc.Row([
         dbc.Col(children=[dbc.Badge("Absorption delay", color="success", style={"font-size": "large"}),
 
-            transits, lag_toggle, bioavailability_toggle]),
-        dbc.Col(children=[peripherals_radio])
+            transits, lag_toggle, bioavailability_toggle], style={"padding-top":"2em"}),
+        dbc.Col(children=[peripherals_radio], style={"padding-top":"2em"})
   ]),
 
 
