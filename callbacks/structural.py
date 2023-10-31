@@ -38,7 +38,7 @@ def structural_callbacks(app):
             config.model = abs_funcs[abs](config.model)
             return True
 
-    #Callback for disabeling absorption
+    # Disabling absorption rate
     @app.callback(
             Output("abs_rate-radio", "options"),
             Output("abs_rate-radio", "value"),
@@ -48,7 +48,6 @@ def structural_callbacks(app):
             State("abs_rate-radio", "value"),
             State("abs_rate-radio", "style"),
     )
-
     def disable_abs(value, options, rate, style):
         if value == "iv":
             return [{**dictionary, "disabled":True} for dictionary in options], 0, {**style, "opacity":"0.42"}
