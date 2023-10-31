@@ -68,7 +68,7 @@ pandas==2.0.3
 pandocfilters==1.5.0
 parso==0.8.3
 partd==1.4.0
-pharmpy-core==0.99.0
+pharmpy-core==0.103.0
 pickleshare==0.7.5
 platformdirs==3.10.0
 plotly==5.16.1

@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc,  callback, Output, Input, State, dash_table
+from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
 import config
 from pharmpy.modeling import *
 from pharmpy.model import *
@@ -23,9 +23,16 @@ import json
 import io
 import time
 import os
+
 PHARMPY_LOGO = "https://pharmpy.github.io/latest/_images/Pharmpy_logo.svg"
 
-app = Dash(__name__, title="Model Builder", external_stylesheets=[dbc.themes.FLATLY], suppress_callback_exceptions=True, update_title=None)
+app = Dash(
+    __name__,
+    title="Model Builder",
+    external_stylesheets=[dbc.themes.FLATLY],
+    suppress_callback_exceptions=True,
+    update_title=None,
+)
 
 app.layout = df.layout
 
@@ -38,8 +45,6 @@ error_model_callbacks(app)
 covariate_callbacks(app)
 allometry_callbacks(app)
 estimation_callbacks(app)
-    
+
 if __name__ == '__main__':
     app.run_server(debug=True)
-    
-
