@@ -622,13 +622,20 @@ route_button = dbc.Button(
     id = "route-button", color=btn_color, n_clicks=0, size="md"
 )
 
+
 #NOTE: not that good if used in collapse
 button_group = dbc.ButtonGroup([
     model_format_button, model_type_button, route_button
 ]
 )
 
-
+unfix_custom_false_btns = html.Div(children=[
+    dbc.ButtonGroup([
+        dbc.Button("Unfix All", id="unfix_btn", color=btn_color),
+        dbc.Button("Custom", id="custom_fix_btn", color=btn_color),
+        dbc.Button("Fix All", id="fix_all_btn", color=btn_color)
+    ])
+], style={"padding-right": "15px", "padding-top": "15px", "padding-bottom": "15px"})
 
 #COLLAPSABLES
 collapse_err = dbc.Collapse(
@@ -886,8 +893,8 @@ par_var_tab = dbc.Container([
 
 parameter_tab = dbc.Container(
     [
-        html.P("Parameters"),
-        fix_all_toggle,
+        html.P("Parameters"), dcc.Store(id="custom_fix"),
+        unfix_custom_false_btns,
         all_parameters_table,
     ],
     className="mt-4"

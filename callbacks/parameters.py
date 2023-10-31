@@ -13,37 +13,55 @@ import io
 import time
 import os
 
+def check_all_same(p): #p = model_parameters_to_dict["parameters"])
+            if p:
+                ref = p[0]['fix']
+                for parameter in p:
+                    if parameter['fix'] is not ref:
+                        return False
+                return True
+
 def parameter_callbacks(app):
         #Getting the model parameters
     @app.callback(
         Output("parameter-table", "data"), #allow_duplicate=True),
+        Output("custom_fix", "data", allow_duplicate=True),
         Input("all-tabs", "value"),
+        prevent_initial_call = True
     )
 
     def get_parameters(tab):
         if tab == "parameters-tab":
             parameters = config.model.parameters.to_dict()
-            return parameters["parameters"]
+            return parameters["parameters"], json.dumps(parameters["parameters"])
         else:
             raise PreventUpdate
 
 
     @app.callback(
         Output("parameter-table", "data", allow_duplicate=True),
-        Input("fix_all_toggle", "value"),
+        Input("unfix_btn", "n_clicks"),
+        prevent_initial_call = True
+
+    )
+    def unfix_all(unfix_btn):
+        if unfix_btn:
+            names = config.model.parameters.names
+            config.model = unfix_parameters(config.model,names)
+            parameters = config.model.parameters.to_dict()
+        return parameters["parameters"]
+        
+    @app.callback(
+        Output("parameter-table", "data", allow_duplicate=True),
+        Input("fix_all_btn", "n_clicks"),
         prevent_initial_call = True
 
     )
 
-    def fix_all_parameters(fixed):
-        if fixed:
+    def fix_all(fix_all_btn):
+        if fix_all_btn:
             names = config.model.parameters.names
             config.model = fix_parameters(config.model,names)
-            parameters = config.model.parameters.to_dict()
-
-        else:
-            names = config.model.parameters.names
-            config.model = unfix_parameters(config.model,names)
             parameters = config.model.parameters.to_dict()
         return parameters["parameters"]
 
@@ -69,36 +87,31 @@ def parameter_callbacks(app):
         config.model = config.model.replace(parameters=Parameters.from_dict(current))
         config.model = config.model.update_source()
 
+   
         return True
 
-
-
     @app.callback(
-        Output("parameter-table", "data", allow_duplicate=True),
-        Output("pop-param-name", "value"),
-        Output("pop-param-init", "value"),
-        Output("pop-param-upper", "value"),
-        Output("pop-param-lower", "value"),
-        Output("pop-param-fix", "value"),
-        Input("pop-param-btn", "n_clicks"),
-        State("pop-param-name", "value"),
-        State("pop-param-init", "value"),
-        State("pop-param-upper", "value"),
-        State("pop-param-lower", "value"),
-        State("pop-param-fix", "value"),
-        prevent_initial_call=True
+         Output("custom_fix", "data"),
+         Input("parameter-table", "data"),
+
     )
 
-    def create_pop_param(n_clicks, name, init, upper,lower,fix):
-        if n_clicks:
-            if upper:
-                upper = float(upper)
-            if lower:
-                lower = float(lower)
-            config.model = add_population_parameter(config.model, name, float(init), lower, upper, fix == "True")
-            parameters = config.model.parameters.to_dict()
-            df = pd.DataFrame(parameters["parameters"])
-            model_parameters = df.to_dict('records')
-            return model_parameters, None, None, None, None, None
-        else: raise PreventUpdate
+    def save_state(data):
+        if check_all_same(data):
+             raise PreventUpdate
+        else:
+             data_json = json.dumps(data)
+        return data_json
+       
+    @app.callback(
+         Output("parameter-table", "data", allow_duplicate=True),
+         Input("custom_fix_btn", "n_clicks"),
+         State("custom_fix", "data"),
+         prevent_initial_call = True
+    )
+
+    def return_custom(custom_btn, stored_data):
+         data = json.loads(stored_data)
+         return data
+
     return
