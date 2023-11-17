@@ -1,3 +1,5 @@
+from .style_elements import create_badge
+
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
@@ -16,7 +18,7 @@ absorptionrates = [
 
 abs_rates_radio = dbc.Col(
     children=[
-        dbc.Badge("Absorption rate", color="success", style={"font-size": "large"}),
+        create_badge("Absorption rate"),
         dcc.RadioItems(options=absorptionrates, id="abs_rate-radio", style={"font-size": "large"}),
     ]
 )
@@ -32,7 +34,7 @@ elimination_rates = [
 
 elimination_radio = dbc.Col(
     children=[
-        dbc.Badge("Elimination rate", color="success", style={"font-size": "large"}),
+        create_badge("Elimination rate"),
         dcc.RadioItems(elimination_rates, id="elim_radio", style={"font-size": "large"}),
     ],
 )
@@ -79,7 +81,7 @@ peripheral_compartments = [
 
 peripherals_radio = dbc.Col(
     children=[
-        dbc.Badge("Peripheral compartments", color="success", style={"font-size": "large"}),
+        create_badge("Peripheral compartments"),
         dcc.RadioItems(
             peripheral_compartments, id="peripheral-radio", style={"font-size": "large"}
         ),
@@ -106,9 +108,7 @@ structural_tab = dbc.Container(
             [
                 dbc.Col(
                     children=[
-                        dbc.Badge(
-                            "Absorption delay", color="success", style={"font-size": "large"}
-                        ),
+                        create_badge("Absorption delay"),
                         transits,
                         lag_toggle,
                         bioavailability_toggle,

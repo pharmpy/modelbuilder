@@ -1,4 +1,4 @@
-from .style_elements import btn_color, refreshtime
+from .style_elements import btn_color, refreshtime, create_badge
 
 from dash import html, dcc
 import dash_bootstrap_components as dbc
@@ -12,7 +12,7 @@ modelformats = [
 
 model_format_radio = dbc.Col(
     children=[
-        dbc.Badge("Model view", color="success", style={"font-size": "large"}),
+        create_badge("Model view"),
         dcc.RadioItems(
             modelformats,
             'nonmem',

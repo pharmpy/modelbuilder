@@ -1,4 +1,4 @@
-from .style_elements import btn_color
+from .style_elements import btn_color, create_badge
 
 from dash import html
 import dash_bootstrap_components as dbc
@@ -13,9 +13,7 @@ covariate_effect = [
 
 covariate_options = dbc.Container(
     [
-        dbc.Badge(
-            "Specify covariate", color="success", style={"width": 150, "font-size": "medium"}
-        ),
+        create_badge("Specify covariate"),
         dbc.InputGroup(
             id="covar",
             children=[

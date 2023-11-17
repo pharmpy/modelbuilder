@@ -1,3 +1,5 @@
+from .style_elements import create_badge
+
 from dash import html, dash_table
 import dash_bootstrap_components as dbc
 
@@ -64,7 +66,7 @@ par_var_tab = dbc.Container(
             children=[
                 dbc.Col(
                     [
-                        dbc.Badge("IIVs", color="success", style={"font-size": "large"}),
+                        create_badge("IIVs"),
                         iiv_table,
                     ]
                 )
@@ -75,7 +77,7 @@ par_var_tab = dbc.Container(
             children=[
                 dbc.Col(
                     [
-                        dbc.Badge("IOVs", color="success", style={"font-size": "large"}),
+                        create_badge("IOVs"),
                         iov_table,
                     ]
                 )
@@ -86,9 +88,7 @@ par_var_tab = dbc.Container(
             children=[
                 dbc.Col(
                     [
-                        dbc.Badge(
-                            "Covariance matrix", color="success", style={"font-size": "large"}
-                        ),
+                        create_badge("Covariance matrix"),
                         covariance_matrix,
                     ]
                 )

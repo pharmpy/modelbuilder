@@ -1,4 +1,4 @@
-from .style_elements import btn_color
+from .style_elements import btn_color, create_badge
 
 from dash import html, dcc
 import dash_bootstrap_components as dbc
@@ -10,7 +10,7 @@ typeoptions = [
 
 model_type_radio = dbc.Col(
     children=[
-        dbc.Badge("Model type", color="success", style={"font-size": "large"}),
+        create_badge("Model type"),
         dcc.RadioItems(typeoptions, "PK", id="model_type", style={"font-size": "large"}),
     ]
 )
@@ -21,7 +21,7 @@ model_name = html.Div(
     children=[
         dbc.InputGroup(
             [
-                dbc.Badge("Name", color="success", style={"width": 150, 'fontSize': 'medium'}),
+                create_badge("Name", with_textbox=True),
                 dbc.Input(id="model-name", placeholder="Write model name here...", type="text"),
             ],
         )
@@ -32,14 +32,7 @@ model_description = html.Div(
     children=[
         dbc.InputGroup(
             [
-                dbc.Badge(
-                    "Description",
-                    color="success",
-                    style={
-                        "width": 150,
-                        'fontSize': 'medium',
-                    },
-                ),
+                create_badge("Description", with_textbox=True),
                 dbc.Input(
                     id="model-description",
                     placeholder="Write model description here...",
@@ -67,7 +60,7 @@ admin_route = [{"label": "IV", "value": "iv"}, {"label": "Oral", "value": "oral"
 
 route_radio = dbc.Col(
     children=[
-        dbc.Badge("Administration route", color="success", style={"font-size": "large"}),
+        create_badge("Administration route"),
         dcc.RadioItems(admin_route, value='iv', id="route-radio", style={"font-size": "large"}),
     ]
 )
