@@ -1,18 +1,19 @@
-from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
+from dash import Output, Input, State
 from dash.exceptions import PreventUpdate
 import config
 
 
-from pharmpy.modeling import *
-from pharmpy.model import *
+from pharmpy.modeling import (
+    create_basic_pk_model,
+    set_name,
+    convert_model,
+    get_model_code,
+    write_model
+    )
 
 import pandas as pd
-import numpy as np
 import base64
-import json
 import io
-import time
-import os
 
 
 def base_callbacks(app):
@@ -138,7 +139,7 @@ def base_callbacks(app):
                     return f"Model written to {path}"
                 else:
                     write_model(config.model)
-                    return f'Model written to directory folder'
+                    return 'Model written to directory folder'
         return f'Provided path {path} '
 
     return
