@@ -1207,8 +1207,8 @@ all_tabs = html.Div(
         id="all-tabs",
         value='base-tab',
         children=[
-            dcc.Tab(label="Base", value='base-tab', children=base_tab),
-            dcc.Tab(label="DataInfo", value='data-info-tab', children=datainfo_tab),
+            dcc.Tab(label="General", value='base-tab', children=base_tab),
+            dcc.Tab(label="Dataset", value='data-info-tab', children=datainfo_tab),
             dcc.Tab(label="Structural", value='structural-tab', children=structural_tab),
             dcc.Tab(label='Parameters', value='parameters-tab', children=parameter_tab),
             dcc.Tab(label='Parameter variability', value='par-var-tab', children=par_var_tab),
