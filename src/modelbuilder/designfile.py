@@ -1133,7 +1133,6 @@ base_tab = dbc.Container(
                     ],
                     style={},
                 ),
-                dbc.Row([dbc.Col(dataset)], style={}),
                 html.Br(),
                 dbc.Row([dbc.Col(model_type_radio)], style={"height": "10vh"}),
                 dbc.Row([dbc.Col(route_radio)], style={"height": "10vh"}),
@@ -1166,6 +1165,8 @@ covariate_tab = dbc.Container(
 
 datainfo_tab = dbc.Container(
     [
+        html.Br(),
+        dbc.Row([dbc.Col(dataset)], style={}),
         html.Br(),
         dash_table.DataTable(
             id="datatable",
