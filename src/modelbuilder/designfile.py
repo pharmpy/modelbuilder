@@ -325,211 +325,6 @@ covariate_options = dbc.Container(
     ]
 )
 
-distribution_compartments = dbc.Container(
-    [
-        dbc.Badge(
-            "Specify covariate", color="success", style={"width": 150, "font-size": "medium"}
-        ),
-    ]
-)
-
-allometry_multi_input = dbc.Container(
-    [
-        dbc.ListGroup(
-            [
-                dbc.ListGroupItem(
-                    dbc.Badge(
-                        "Allometric scaling",
-                        color="success",
-                        style={"width": 150, "font-size": "medium"},
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.InputGroup(
-                        children=[
-                            dcc.Dropdown(
-                                id="allo_variable",
-                                placeholder="select variable",
-                                multi=True,
-                                style={"flex": 2},
-                            ),
-                            dbc.Input(id="allo_custom", placeholder="custom variable", type="text"),
-                        ]
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.Input(
-                        id="allo_ref_val", placeholder="reference_value=70 (opt)", type="numeric"
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dcc.Dropdown(id="allometry_dropdown", placeholder="parameters(opt)", multi=True)
-                ),
-                dbc.ListGroupItem(dbc.Input(id="allo_inits", placeholder="intials (opt)")),
-                dbc.ListGroupItem(
-                    dbc.Input(
-                        id="allo_lower",
-                        placeholder="lower (opt)",
-                    )
-                ),
-                dbc.ListGroupItem(dbc.Input(id="allo_upper", placeholder="upper (opt)")),
-                dbc.ListGroupItem(
-                    dbc.Select(
-                        id="allo_fix",
-                        placeholder="fixed=True (opt)",
-                        options=[
-                            {"label": "True", "value": True},
-                            {"label": "False", "value": False},
-                        ],
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.Button("Set scaling", id="allo_btn", n_clicks=0, color=btn_color)
-                ),
-            ]
-        ),
-    ],
-    style={"width": "50%"},
-)
-
-estimation_multi_input = dbc.Container(
-    [
-        dbc.ListGroup(
-            [
-                dbc.ListGroupItem(
-                    dbc.Badge(
-                        "Estimation step",
-                        color="success",
-                        style={"width": 150, "fontSize": "medium"},
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.Select(
-                        id="estimation_method",
-                        placeholder="select method",
-                        options=estimation_methods,
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.Input(id="estimation_index", placeholder="index=None", type="number")
-                ),
-                dbc.ListGroupItem(
-                    dbc.Select(
-                        id="estimation_covs", placeholder="cov", options=['SANDWICH', 'CPG', 'OFIM']
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.Checklist(
-                        id='int_eval_lapl',
-                        options=["interaction", "evaluation", "laplace"],
-                        inline=True,
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.InputGroup(
-                        children=(
-                            dbc.Select(
-                                id="solver",
-                                placeholder="solver",
-                                options=['CVODES', 'DGEAR', 'DVERK', 'IDA', 'LSODA', 'LSODI'],
-                            ),
-                            dbc.Input(id="solver_abstol", placeholder="absolute solver tolerance"),
-                            dbc.Input(id="solver_reltol", placeholder="relative solver tolerance"),
-                        )
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.InputGroup(
-                        children=[
-                            dbc.Input(id="estimation_keywords", placeholder="tool option keywords"),
-                            dbc.Input(
-                                id="estimation_arguments", placeholder="tool option arguments"
-                            ),
-                        ]
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.Button(
-                        "Set sstimation step",
-                        id="estimation_btn",
-                        n_clicks=0,
-                        color=btn_color,
-                    )
-                ),
-            ]
-        ),
-    ]
-)
-
-eval_multi_input = dbc.Container(
-    [
-        dbc.ListGroup(
-            [
-                dbc.ListGroupItem(
-                    dbc.Badge(
-                        "Evaluation step",
-                        color="success",
-                        style={"width": 150, "fontSize": "medium"},
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.Input(id="evaluation_index", placeholder="index", type='number'),
-                ),
-                dbc.ListGroupItem(
-                    dbc.Button("Set evaluation", id="eval_btn", n_clicks=0, color=btn_color)
-                ),
-            ]
-        )
-    ]
-)
-
-
-covariance_estimation = dbc.Container(
-    [
-        dbc.ListGroup(
-            [
-                dbc.ListGroupItem(
-                    [
-                        dbc.Checkbox(
-                            id="covariance_check",
-                            label=dbc.Badge(
-                                "Covariance on final estimation",
-                                color="success",
-                                style={"font-size": "medium"},
-                            ),
-                        )
-                    ]
-                )
-            ]
-        )
-    ]
-)
-
-
-estimation_remove_multi = dbc.Container(
-    [
-        dbc.ListGroup(
-            [
-                dbc.ListGroupItem(
-                    dbc.Badge(
-                        "Remove estimation",
-                        style={"width": 150, "fontSize": "medium"},
-                        color="success",
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.InputGroup(
-                        children=[
-                            dbc.Input(id="remove_estimation", placeholder="index", type="number"),
-                            dbc.Button("Remove", id="remove_est_btn", n_clicks=0, color=btn_color),
-                        ]
-                    )
-                ),
-            ]
-        )
-    ]
-)
-
 
 error_multi_input = dbc.Container(
     [
@@ -780,7 +575,6 @@ abs_rate_dropdown = dcc.Dropdown(absorptionrates, id="abs-dropdown")
 
 error_dropdown = dcc.Dropdown(error_model, multi=True)
 
-estimation_dropdown = dcc.Dropdown(estimation_methods)
 
 # BUTTONS
 error_button = dbc.Button(
@@ -1024,18 +818,6 @@ model_format_div = html.Div(
 )
 
 
-allometry_tab = dbc.Container(
-    [
-        html.Br(),
-        dbc.Row(
-            [
-                allometry_multi_input,
-            ],
-            justify="start",
-        ),
-    ]
-)
-
 structural_tab = dbc.Container(
     [
         html.Br(),
@@ -1182,18 +964,6 @@ datainfo_tab = dbc.Container(
     ]
 )
 
-estimation_tab = dbc.Container(
-    [
-        html.Br(),
-        dbc.Row(
-            [
-                dbc.Col([estimation_multi_input, covariance_estimation]),
-                dbc.Col([eval_multi_input, estimation_remove_multi]),
-            ]
-        ),
-    ]
-)
-
 
 all_tabs = html.Div(
     dcc.Tabs(
@@ -1207,8 +977,6 @@ all_tabs = html.Div(
             dcc.Tab(label='Parameter variability', value='par-var-tab', children=par_var_tab),
             dcc.Tab(label="Error model", value="error-tab", children=error_tab),
             dcc.Tab(label="Covariates", value="covariate-tab", children=covariate_tab),
-            dcc.Tab(label="Allometry", value="allometry-tab", children=allometry_tab),
-            dcc.Tab(label="Estimation", value="estimation-tab", children=estimation_tab),
         ],
         className='nav-link active',
     )
