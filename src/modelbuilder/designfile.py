@@ -187,7 +187,7 @@ navbar = dbc.Navbar(
             html.A(
                 dbc.Row(
                     [
-                        dbc.Col(html.Img(src="assets\github-mark.png", height="30px")),
+                        dbc.Col(html.Img(src="assets\github-mark.png", height="50px")),
                     ]
                 ),
                 href="https://github.com/pharmpy/modelbuilder",
