@@ -927,9 +927,7 @@ base_tab = dbc.Container(
 
 error_tab = dbc.Container(
     [
-        dbc.Col(
-            children=[html.Br(), error_multi_input, html.Div(id="error_div")]
-        ),
+        dbc.Col(children=[html.Br(), error_multi_input, html.Div(id="error_div")]),
     ]
 )
 

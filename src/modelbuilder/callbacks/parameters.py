@@ -63,7 +63,7 @@ def parameter_callbacks(app):
         return parameters["parameters"]
 
     @app.callback(
-        Output("data-dump", "clear_data", allow_duplicate=True),
+        Output("parameter-table", "data", allow_duplicate=True),
         Input("parameter-table", "data"),
         prevent_initial_call=True,
     )
@@ -79,12 +79,37 @@ def parameter_callbacks(app):
             return data
 
         data = replace_empty(data)
+
+        def fix_blocks(data):
+            blocks = [
+                rv.parameter_names
+                for rv in config.model.random_variables
+                if isinstance(rv, JointNormalDistribution)
+            ]
+
+            params_in_block = []
+            for item in data:
+                for key, value in item.items():
+                    if key == 'fix' and value == True:
+                        param = item['name']
+                        for block in blocks:
+                            if param in block:
+                                params_in_block.append(block)
+
+            for block in params_in_block:
+                for param in block:
+                    for item in data:
+                        if str(item['name']) == param:
+                            item['fix'] = True
+            return data
+
+        data = fix_blocks(data)
         current = config.model.parameters.to_dict()
         current["parameters"] = data
         config.model = config.model.replace(parameters=Parameters.from_dict(current))
         config.model = config.model.update_source()
 
-        return True
+        return current['parameters']
 
     @app.callback(
         Output("custom_fix", "data"),
