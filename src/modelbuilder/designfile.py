@@ -1111,7 +1111,6 @@ par_var_tab = dbc.Container(
 
 parameter_tab = dbc.Container(
     [
-        html.P("Parameters"),
         dcc.Store(id="custom_fix"),
         unfix_custom_false_btns,
         all_parameters_table,
@@ -1124,10 +1123,6 @@ base_tab = dbc.Container(
         dbc.Col(
             children=[
                 html.Br(),
-                html.P(
-                    """Basic model operations. Set model name and description, upload dataset and select model type
-                administration route."""
-                ),
                 dbc.Row(
                     [
                         dbc.Col(
@@ -1153,7 +1148,7 @@ base_tab = dbc.Container(
 error_tab = dbc.Container(
     [
         dbc.Col(
-            children=[html.Br(), html.P("Error model"), error_multi_input, html.Div(id="error_div")]
+            children=[html.Br(), error_multi_input, html.Div(id="error_div")]
         ),
     ]
 )
@@ -1162,7 +1157,6 @@ error_tab = dbc.Container(
 covariate_tab = dbc.Container(
     [
         html.Br(),
-        html.P("Covariates"),
         dbc.Row(covariate_options),
         html.Hr(),
         html.P("Covariates"),
@@ -1173,7 +1167,6 @@ covariate_tab = dbc.Container(
 datainfo_tab = dbc.Container(
     [
         html.Br(),
-        html.P("DataInfo"),
         dash_table.DataTable(
             id="datatable",
             columns=cols,
