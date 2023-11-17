@@ -21,23 +21,22 @@ def base_callbacks(app):
         Output("data-dump", "clear_data", allow_duplicate=True),
         [
             Input("route-radio", "value"),
-            Input('upload-dataset', 'filename'),
             State("modelformat", 'value'),
         ],
         prevent_initial_call=True,
     )
-    def create_model(route, dataset, format):
+    def create_model(route, format):
         if format and route:
-            if dataset:
-                time.sleep(1)
-                path = 'dataset/' + dataset
-            else:
-                path = None
-            start_model = create_basic_pk_model(route, dataset_path=path)
+            # Dataset is connected to model in parse_dataset
+            old_dataset = config.model.dataset
+            old_datainfo = config.model.datainfo
+            
+            start_model = create_basic_pk_model(route)
             start_model = set_name(start_model, "model")
-
             start_model = convert_model(start_model, format)
-            config.model = start_model
+            start_model = start_model.replace(dataset = old_dataset,
+                                              datainfo = old_datainfo)
+            config.model = start_model.update_source()
             return True
         else:
             raise PreventUpdate
@@ -105,16 +104,17 @@ def base_callbacks(app):
     )
     def parse_dataset(contents, filename):
         if contents is not None:
-            for file in os.listdir('dataset'):
-                if file.endswith(".csv"):
-                    os.remove('dataset/' + file)
             content_type, content_string = contents.split(',')
             decoded = base64.b64decode(content_string)
-            if 'csv' in filename:
+            if str(filename).endswith('csv'):
                 # Assume that the user uploaded a CSV file
                 data = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
 
-                data.to_csv('dataset/' + filename, index=False)
+                config.model = config.model.replace(dataset = data)
+                config.model = config.model.update_source()
+            else:
+                # Raise error
+                pass
             return (str(filename),)  # dis, dis
         else:
             raise PreventUpdate
