@@ -46,7 +46,6 @@ all_parameters_table = dash_table.DataTable(
 
 parameter_tab = dbc.Container(
     [
-        html.P("Parameters"),
         dcc.Store(id="custom_fix"),
         unfix_custom_false_btns,
         all_parameters_table,

@@ -48,7 +48,6 @@ model_covariate_list = html.Div(id="covar_div")
 covariate_tab = dbc.Container(
     [
         html.Br(),
-        html.P("Covariates"),
         dbc.Row(covariate_options),
         html.Hr(),
         html.P("Covariates"),

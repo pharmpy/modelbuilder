@@ -73,10 +73,6 @@ base_tab = dbc.Container(
         dbc.Col(
             children=[
                 html.Br(),
-                html.P(
-                    """Basic model operations. Set model name and description, upload dataset and select model type
-                administration route."""
-                ),
                 dbc.Row(
                     [
                         dbc.Col(

@@ -87,7 +87,6 @@ dd = {
 datainfo_tab = dbc.Container(
     [
         html.Br(),
-        html.P("DataInfo"),
         dash_table.DataTable(
             id="datatable",
             columns=cols,

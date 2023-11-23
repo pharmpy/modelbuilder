@@ -105,8 +105,6 @@ error_multi_input = dbc.Container(
 
 error_tab = dbc.Container(
     [
-        dbc.Col(
-            children=[html.Br(), html.P("Error model"), error_multi_input, html.Div(id="error_div")]
-        ),
+        dbc.Col(children=[html.Br(), error_multi_input, html.Div(id="error_div")]),
     ]
 )
