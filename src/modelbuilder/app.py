@@ -3,7 +3,7 @@ import config
 from pharmpy.modeling import *
 from pharmpy.model import *
 import dash_bootstrap_components as dbc
-import designfile as df
+import design.main as df
 from dash.exceptions import PreventUpdate
 
 from callbacks.general import general_callbacks
