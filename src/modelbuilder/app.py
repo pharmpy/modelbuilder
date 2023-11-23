@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import designfile as df
 from dash.exceptions import PreventUpdate
 
-from callbacks.base import base_callbacks
+from callbacks.general import general_callbacks
 from callbacks.datainfo import datainfo_callbacks
 from callbacks.structural import structural_callbacks
 from callbacks.parameters import parameter_callbacks
@@ -36,7 +36,7 @@ app = Dash(
 
 app.layout = df.layout
 
-base_callbacks(app)
+general_callbacks(app)
 datainfo_callbacks(app)
 structural_callbacks(app)
 parameter_callbacks(app)

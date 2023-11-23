@@ -1,4 +1,4 @@
-from .base import base_tab
+from .general import general_tab
 from .covariates import covariate_tab
 from .datainfo import datainfo_tab
 from .error_model import error_tab
@@ -51,9 +51,9 @@ navbar = dbc.Navbar(
 all_tabs = html.Div(
     dcc.Tabs(
         id="all-tabs",
-        value='base-tab',
+        value='general-tab',
         children=[
-            dcc.Tab(label="General", value='base-tab', children=base_tab),
+            dcc.Tab(label="General", value='general-tab', children=general_tab),
             dcc.Tab(label="Dataset", value='data-info-tab', children=datainfo_tab),
             dcc.Tab(label="Structural", value='structural-tab', children=structural_tab),
             dcc.Tab(label='Parameters', value='parameters-tab', children=parameter_tab),

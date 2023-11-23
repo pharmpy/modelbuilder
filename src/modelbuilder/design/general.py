@@ -56,7 +56,7 @@ route_radio = dbc.Col(
 collapsable_route = dbc.Collapse(route_radio, id="collapse_route", is_open=True)
 
 
-base_tab = dbc.Container(
+general_tab = dbc.Container(
     [
         dbc.Col(
             children=[

@@ -8,15 +8,15 @@ from pharmpy.modeling import (
     set_name,
     convert_model,
     get_model_code,
-    write_model
-    )
+    write_model,
+)
 
 import pandas as pd
 import base64
 import io
 
 
-def base_callbacks(app):
+def general_callbacks(app):
     # Create model
     @app.callback(
         Output("data-dump", "clear_data", allow_duplicate=True),
@@ -31,12 +31,11 @@ def base_callbacks(app):
             # Dataset is connected to model in parse_dataset
             old_dataset = config.model.dataset
             old_datainfo = config.model.datainfo
-            
+
             start_model = create_basic_pk_model(route)
             start_model = set_name(start_model, "model")
             start_model = convert_model(start_model, format)
-            start_model = start_model.replace(dataset = old_dataset,
-                                              datainfo = old_datainfo)
+            start_model = start_model.replace(dataset=old_dataset, datainfo=old_datainfo)
             config.model = start_model.update_source()
             return True
         else:
@@ -111,7 +110,7 @@ def base_callbacks(app):
                 # Assume that the user uploaded a CSV file
                 data = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
 
-                config.model = config.model.replace(dataset = data)
+                config.model = config.model.replace(dataset=data)
                 config.model = config.model.update_source()
             else:
                 # Raise error
