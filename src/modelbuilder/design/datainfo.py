@@ -84,8 +84,22 @@ dd = {
     },
 }
 
+dataset = html.Div(
+    children=[
+        dbc.InputGroup(
+            [
+                dcc.Upload(dbc.Button('Select dataset', color=btn_color), id="upload-dataset"),
+                dbc.Input(id="dataset-path", placeholder="No Dataset", type="text", disabled=True),
+            ],
+            style={"width": "50%"},
+        )
+    ]
+)
+
 datainfo_tab = dbc.Container(
     [
+        html.Br(),
+        dbc.Row([dbc.Col(dataset)], style={}),
         html.Br(),
         dash_table.DataTable(
             id="datatable",

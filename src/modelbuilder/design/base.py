@@ -44,18 +44,6 @@ model_description = html.Div(
     ],
 )
 
-dataset = html.Div(
-    children=[
-        dbc.InputGroup(
-            [
-                dcc.Upload(dbc.Button('Select dataset', color=btn_color), id="upload-dataset"),
-                dbc.Input(id="dataset-path", placeholder="No Dataset", type="text", disabled=True),
-            ],
-            style={"width": "50%"},
-        )
-    ]
-)
-
 admin_route = [{"label": "IV", "value": "iv"}, {"label": "Oral", "value": "oral"}]
 
 route_radio = dbc.Col(
@@ -83,7 +71,6 @@ base_tab = dbc.Container(
                     ],
                     style={},
                 ),
-                dbc.Row([dbc.Col(dataset)], style={}),
                 html.Br(),
                 dbc.Row([dbc.Col(model_type_radio)], style={"height": "10vh"}),
                 dbc.Row([dbc.Col(route_radio)], style={"height": "10vh"}),

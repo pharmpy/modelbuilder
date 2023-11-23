@@ -8,7 +8,6 @@ unfix_custom_false_btns = html.Div(
         dbc.ButtonGroup(
             [
                 dbc.Button("Unfix All", id="unfix_btn", color=btn_color),
-                dbc.Button("Custom", id="custom_fix_btn", color=btn_color),
                 dbc.Button("Fix All", id="fix_all_btn", color=btn_color),
             ]
         )
@@ -41,7 +40,7 @@ all_parameters_table = dash_table.DataTable(
         },
         {'if': {'column_type': 'numeric'}, 'textAlign': 'right'},
     ],
-    style_cell={'textAlign': 'left'},
+    style_cell={'textAlign': 'left', 'width': '20%'},
 )
 
 parameter_tab = dbc.Container(
