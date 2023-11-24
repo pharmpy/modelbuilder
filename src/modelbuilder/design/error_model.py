@@ -1,110 +1,63 @@
-from dash import html
+from .style_elements import create_badge
+
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 
-error_multi_input = dbc.Container(
-    [
-        dbc.ListGroup(
-            [
-                dbc.ListGroupItem(
-                    dbc.InputGroup(
-                        children=[
-                            dbc.Checkbox(
-                                id="add_check",
-                                label=dbc.Badge(
-                                    "Additive",
-                                    color="success",
-                                    style={"width": 150, "font-size": "medium"},
-                                ),
-                                value=False,
-                                style={"size": "md"},
-                            ),
-                        ]
-                    )
-                ),
-                dbc.ListGroupItem(
-                    dbc.InputGroup(
-                        children=[
-                            dbc.Checkbox(
-                                id="comb_check",
-                                label=dbc.Badge(
-                                    "Combined",
-                                    color="success",
-                                    style={"width": 150, "font-size": "medium"},
-                                ),
-                                value=False,
-                                style={"size": "md"},
-                            ),
-                        ]
-                    ),
-                ),
-                dbc.ListGroupItem(
-                    dbc.InputGroup(
-                        children=[
-                            dbc.Checkbox(
-                                id="prop_check",
-                                label=dbc.Badge(
-                                    "Proportional",
-                                    color="success",
-                                    style={"width": 150, "font-size": "medium"},
-                                ),
-                                value=False,
-                                style={"size": "md"},
-                            ),
-                            dbc.Input(
-                                id="prop_zero_prot",
-                                placeholder="zero_protection=True",
-                            ),
-                        ],
-                        style={"width": "60%"},
-                    ),
-                ),
-                dbc.ListGroupItem(
-                    dbc.InputGroup(
-                        children=[
-                            dbc.Checkbox(
-                                id="time_check",
-                                label=dbc.Badge(
-                                    "Time varying",
-                                    color="success",
-                                    style={"width": 150, "font-size": "medium"},
-                                ),
-                                style={"size": "md"},
-                            ),
-                            dbc.Input(
-                                id="time_cutoff",
-                                placeholder="cutoff",
-                                style={"width": "33%"},
-                                type="number",
-                                min=0,
-                            ),
-                            dbc.Input(
-                                id="data_idv", placeholder="idv='TIME'", style={"width": "33%"}
-                            ),
-                        ]
-                    ),
-                ),
-                dbc.ListGroupItem(
-                    dbc.InputGroup(
-                        children=[
-                            dbc.Checkbox(
-                                id="wgt_check",
-                                label=dbc.Badge(
-                                    "Weighted",
-                                    color="success",
-                                    style={"width": 150, "font-size": "medium"},
-                                ),
-                                style={"size": "md"},
-                            ),
-                        ]
-                    ),
-                ),
-            ]
-        )
+base_types = [
+    {"label": "Additive", "value": "add"},
+    {"label": "Proportional", "value": "prop"},
+    {"label": "Combined", "value": "comb"},
+]
+
+pk_default = {"base-type-radio": "prop"}
+
+id_elem = 'base-type-radio'
+base_type_radio = dbc.Col(
+    children=[
+        create_badge("Base types"),
+        dcc.RadioItems(
+            options=base_types, value=pk_default[id_elem], id=id_elem, style={"font-size": "large"}
+        ),
     ]
 )
 
+
+additional_types_toggle = html.Div(
+    [
+        dbc.Checklist(
+            options=[{"label": "IIV on RUV", "value": True, "disabled": False}],
+            value=[],
+            id="iiv-on-ruv-toggle",
+        ),
+        dbc.Checklist(
+            options=[{"label": "Power", "value": True, "disabled": False}],
+            value=[],
+            id="power-toggle",
+        ),
+        dbc.Checklist(
+            options=[{"label": "Time varying", "value": True, "disabled": False}],
+            value=[],
+            id="time-varying-toggle",
+        ),
+    ]
+)
+
+additional_types_col = dbc.Col(
+    children=[
+        create_badge("Additional types"),
+        additional_types_toggle,
+    ]
+)
+
+
 error_tab = dbc.Container(
     [
-        dbc.Col(children=[html.Br(), error_multi_input, html.Div(id="error_div")]),
+        html.Br(),
+        dbc.Row(
+            [
+                base_type_radio,
+                additional_types_col,
+            ]
+        ),
     ]
 )
