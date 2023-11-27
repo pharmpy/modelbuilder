@@ -51,8 +51,8 @@ def structural_callbacks(app):
         State("abs_rate-radio", "value"),
         State("abs_rate-radio", "style"),
     )
-    def disable_abs(value, options, rate, style):
-        if value == "iv":
+    def disable_abs(route, options, rate, style):
+        if route == "iv":
             return (
                 [{**dictionary, "disabled": True} for dictionary in options],
                 0,
@@ -71,11 +71,15 @@ def structural_callbacks(app):
             Output("transit_input", "value"),
             Output("transit_input", "disabled"),
         ],
+        Input("route-radio", "value"),
         Input("lag-toggle", "value"),
         Input("transit_input", "value"),
         prevent_inital_call=True,
     )
-    def toggle_disable(lag_tog, transit_input):
+    def toggle_disable(route, lag_tog, transit_input):
+        if route == "iv":
+            return [{"label": "Lag Time", "value": True, "disabled": True}], None, True
+
         if lag_tog:
             try:
                 config.model = set_transit_compartments(config.model, 0)
