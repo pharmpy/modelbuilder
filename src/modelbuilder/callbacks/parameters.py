@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
+from dash import Output, Input, State
 from dash.exceptions import PreventUpdate
 import config
 

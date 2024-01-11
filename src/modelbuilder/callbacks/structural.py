@@ -1,17 +1,8 @@
-from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
+from dash import Output, Input, State
 from dash.exceptions import PreventUpdate
 import config
 
 from pharmpy.modeling import *
-from pharmpy.model import *
-
-import pandas as pd
-import numpy as np
-import base64
-import json
-import io
-import time
-import os
 
 
 def structural_callbacks(app):
