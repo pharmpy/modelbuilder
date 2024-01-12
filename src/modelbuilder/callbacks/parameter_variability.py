@@ -1,13 +1,12 @@
 from dash import Output, Input, State
 from dash.exceptions import PreventUpdate
-import config
 
 from pharmpy.modeling import *
 
-from config import make_label_value
-
 import pandas as pd
 import numpy as np
+
+import modelbuilder.config as config
 
 
 def parameter_variability_callbacks(app):
@@ -56,7 +55,9 @@ def parameter_variability_callbacks(app):
             iov_dd_options = (
                 {
                     'occasion': {
-                        'options': [make_label_value(i, i) for i in occ_opts] if occ_opts else []
+                        'options': [config.make_label_value(i, i) for i in occ_opts]
+                        if occ_opts
+                        else []
                     },
                     'distribution': {
                         'options': [

@@ -1,8 +1,9 @@
 from dash import Output, Input, State
 from dash.exceptions import PreventUpdate
-import config
 
 from pharmpy.modeling import *
+
+import modelbuilder.config as config
 
 
 def structural_callbacks(app):

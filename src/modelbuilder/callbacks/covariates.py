@@ -1,9 +1,9 @@
 from dash import Output, Input, State
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
-import config
-from config import make_label_value
 from pharmpy.modeling import *
+
+import modelbuilder.config as config
 
 
 def covariate_callbacks(app):
@@ -28,9 +28,9 @@ def covariate_callbacks(app):
                     if get_model_covariates(config.model, strings=True)
                     else config.model.datainfo.typeix["unknown"].names
                 )
-                covar_opt = [make_label_value(covar, covar) for covar in covar_names]
+                covar_opt = [config.make_label_value(covar, covar) for covar in covar_names]
                 param_opt = [
-                    make_label_value(param, param)
+                    config.make_label_value(param, param)
                     for param in get_individual_parameters(config.model)
                 ]
                 render = dbc.ListGroup(

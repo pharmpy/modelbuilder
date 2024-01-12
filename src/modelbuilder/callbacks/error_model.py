@@ -1,7 +1,8 @@
 from dash import Output, Input
-import config
 
 from pharmpy.modeling import *
+
+import modelbuilder.config as config
 
 base_error_model_funcs = {
     "add": set_additive_error_model,

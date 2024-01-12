@@ -1,8 +1,5 @@
 from dash import Output, Input, State
 from dash.exceptions import PreventUpdate
-import config
-
-
 from pharmpy.modeling import (
     create_basic_pk_model,
     set_name,
@@ -14,6 +11,8 @@ from pharmpy.modeling import (
 import pandas as pd
 import base64
 import io
+
+import modelbuilder.config as config
 
 
 def general_callbacks(app):

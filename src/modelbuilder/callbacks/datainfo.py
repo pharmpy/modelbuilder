@@ -1,8 +1,8 @@
 from dash import Output, Input
 from dash.exceptions import PreventUpdate
-import config
-
 import pandas as pd
+
+import modelbuilder.config as config
 
 
 def datainfo_callbacks(app):
