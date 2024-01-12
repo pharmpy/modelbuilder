@@ -1,7 +1,7 @@
-from .style_elements import create_badge
-
-from dash import html, dcc
 import dash_bootstrap_components as dbc
+from dash import dcc, html
+
+from .style_elements import create_badge
 
 # ABSORPTION
 

@@ -1,7 +1,7 @@
-from .style_elements import btn_color, create_badge
-
-from dash import html
 import dash_bootstrap_components as dbc
+from dash import html
+
+from .style_elements import btn_color, create_badge
 
 covariate_effect = [
     {"label": "linear", "value": "lin"},

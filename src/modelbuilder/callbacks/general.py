@@ -1,16 +1,16 @@
-from dash import Output, Input, State
-from dash.exceptions import PreventUpdate
-from pharmpy.modeling import (
-    create_basic_pk_model,
-    set_name,
-    convert_model,
-    get_model_code,
-    write_model,
-)
-
-import pandas as pd
 import base64
 import io
+
+import pandas as pd
+from dash import Input, Output, State
+from dash.exceptions import PreventUpdate
+from pharmpy.modeling import (
+    convert_model,
+    create_basic_pk_model,
+    get_model_code,
+    set_name,
+    write_model,
+)
 
 import modelbuilder.config as config
 

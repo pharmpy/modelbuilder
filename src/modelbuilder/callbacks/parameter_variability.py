@@ -1,10 +1,8 @@
-from dash import Output, Input, State
-from dash.exceptions import PreventUpdate
-
-from pharmpy.modeling import *
-
-import pandas as pd
 import numpy as np
+import pandas as pd
+from dash import Input, Output, State
+from dash.exceptions import PreventUpdate
+from pharmpy.modeling import *
 
 import modelbuilder.config as config
 

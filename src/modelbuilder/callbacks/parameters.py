@@ -1,10 +1,9 @@
-from dash import Output, Input, State
-from dash.exceptions import PreventUpdate
-
-from pharmpy.modeling import *
-from pharmpy.model import *
-
 import json
+
+from dash import Input, Output, State
+from dash.exceptions import PreventUpdate
+from pharmpy.model import *
+from pharmpy.modeling import *
 
 import modelbuilder.config as config
 

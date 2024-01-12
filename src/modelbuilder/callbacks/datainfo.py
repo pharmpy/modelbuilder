@@ -1,6 +1,6 @@
-from dash import Output, Input
-from dash.exceptions import PreventUpdate
 import pandas as pd
+from dash import Input, Output
+from dash.exceptions import PreventUpdate
 
 import modelbuilder.config as config
 

@@ -1,6 +1,6 @@
-from dash import Output, Input, State
-from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
+from dash import Input, Output, State
+from dash.exceptions import PreventUpdate
 from pharmpy.modeling import *
 
 import modelbuilder.config as config

@@ -1,5 +1,4 @@
-from dash import Output, Input
-
+from dash import Input, Output
 from pharmpy.modeling import *
 
 import modelbuilder.config as config

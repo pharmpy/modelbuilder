@@ -1,8 +1,7 @@
-from .style_elements import create_badge
-
-from dash import html, dash_table
 import dash_bootstrap_components as dbc
+from dash import dash_table, html
 
+from .style_elements import create_badge
 
 iov_table = dash_table.DataTable(
     id='iov_table',

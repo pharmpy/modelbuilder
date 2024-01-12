@@ -1,6 +1,5 @@
-from dash import Output, Input, State
+from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
-
 from pharmpy.modeling import *
 
 import modelbuilder.config as config

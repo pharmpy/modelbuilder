@@ -1,8 +1,7 @@
-from .style_elements import btn_color, create_badge
-
-from dash import html, dcc
 import dash_bootstrap_components as dbc
+from dash import dcc, html
 
+from .style_elements import btn_color, create_badge
 
 typeoptions = [
     {"label": "PK", "value": "PK"},

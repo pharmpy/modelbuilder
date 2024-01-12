@@ -1,7 +1,7 @@
-from .style_elements import btn_color
-
-from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
+from dash import dash_table, dcc, html
+
+from .style_elements import btn_color
 
 unfix_custom_false_btns = html.Div(
     children=[
