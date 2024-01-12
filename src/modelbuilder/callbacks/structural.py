@@ -1,6 +1,20 @@
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
-from pharmpy.modeling import *
+from pharmpy.modeling import (
+    add_bioavailability,
+    add_lag_time,
+    remove_bioavailability,
+    remove_lag_time,
+    set_first_order_absorption,
+    set_first_order_elimination,
+    set_michaelis_menten_elimination,
+    set_mixed_mm_fo_elimination,
+    set_peripheral_compartments,
+    set_seq_zo_fo_absorption,
+    set_transit_compartments,
+    set_zero_order_absorption,
+    set_zero_order_elimination,
+)
 
 import modelbuilder.config as config
 

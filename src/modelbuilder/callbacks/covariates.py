@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
-from pharmpy.modeling import *
+from pharmpy.modeling import add_covariate_effect, get_individual_parameters, get_model_covariates
 
 import modelbuilder.config as config
 

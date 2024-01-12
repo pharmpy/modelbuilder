@@ -2,7 +2,16 @@ import numpy as np
 import pandas as pd
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
-from pharmpy.modeling import *
+from pharmpy.modeling import (
+    add_iiv,
+    add_iov,
+    create_joint_distribution,
+    get_individual_parameters,
+    has_random_effect,
+    remove_iiv,
+    remove_iov,
+    split_joint_distribution,
+)
 
 import modelbuilder.config as config
 

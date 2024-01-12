@@ -1,5 +1,13 @@
 from dash import Input, Output
-from pharmpy.modeling import *
+from pharmpy.modeling import (
+    remove_error_model,
+    set_additive_error_model,
+    set_combined_error_model,
+    set_iiv_on_ruv,
+    set_power_on_ruv,
+    set_proportional_error_model,
+    set_time_varying_error_model,
+)
 
 import modelbuilder.config as config
 

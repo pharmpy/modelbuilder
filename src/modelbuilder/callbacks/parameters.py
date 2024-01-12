@@ -2,8 +2,8 @@ import json
 
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
-from pharmpy.model import *
-from pharmpy.modeling import *
+from pharmpy.model import JointNormalDistribution, Parameters
+from pharmpy.modeling import fix_parameters, unfix_parameters
 
 import modelbuilder.config as config
 
