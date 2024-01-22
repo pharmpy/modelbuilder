@@ -1,7 +1,6 @@
-from pharmpy.modeling import convert_model, create_basic_pk_model
+from modelbuilder.internals.model_state import create_model
 
-model = create_basic_pk_model('iv')
-model = convert_model(model, "nonmem")
+model, model_state = create_model('iv')
 
 
 def make_label_value(key, value):
