@@ -1,8 +1,15 @@
 import dash_bootstrap_components as dbc
+from dash import dcc, html
 
 btn_color = "info"
 badge_color = "info"
 refreshtime = 1  # How often the model-code refreshes seconds
+
+
+def create_options_list(dict_original, disabled=False):
+    return [
+        {'label': key, 'value': value, 'disabled': disabled} for key, value in dict_original.items()
+    ]
 
 
 def create_badge(text, with_textbox=False):
@@ -11,3 +18,35 @@ def create_badge(text, with_textbox=False):
     else:
         style = {"font-size": "large"}
     return dbc.Badge(text, color="success", style=style)
+
+
+def create_radio(elem_id, options):
+    style = {"font-size": "large"}
+    return dcc.RadioItems(options=options, id=elem_id, style=style)
+
+
+def create_checklist(elem_id, options):
+    return dbc.Checklist(
+        options=options,
+        id=elem_id,
+        value=[],
+    )
+
+
+def create_input_group(elem_id, input_group_text, default_value, **kwargs):
+    style = {"width": "70%"}
+    return dbc.InputGroup(
+        children=[
+            dbc.InputGroupText(input_group_text),
+            dbc.Input(id=elem_id, placeholder=default_value, **kwargs),
+        ],
+        style=style,
+    )
+
+
+def create_col(children, **kwargs):
+    return dbc.Col(children=children, **kwargs)
+
+
+def create_container(rows):
+    return dbc.Container([html.Br(), *[dbc.Row(row) for row in rows]])
