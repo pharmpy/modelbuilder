@@ -17,9 +17,27 @@ from pharmpy.modeling import (
 )
 
 import modelbuilder.config as config
+from modelbuilder.design.style_elements import disable_component, enable_component
 
 
 def structural_callbacks(app):
+    @app.callback(
+        Output("abs_rate-radio", "value"),
+        Output("elim_radio", "value"),
+        Output("peripheral-radio", "value"),
+        Output("bio_toggle", "value"),
+        Input("route-radio", "value"),
+    )
+    def reset_defaults(route):
+        if route == "iv":
+            default_abs_rate = 0
+        else:
+            default_abs_rate = 'FO'
+        default_elim = 'FO'
+        default_bio = False
+        default_peripherals = 0
+        return default_abs_rate, default_elim, default_peripherals, default_bio
+
     @app.callback(
         Output("data-dump", "clear_data", allow_duplicate=True),
         Input("abs_rate-radio", "value"),
@@ -46,29 +64,20 @@ def structural_callbacks(app):
             config.model = abs_funcs[abs](config.model)
             return True
 
-    # Disabling absorption rate
     @app.callback(
         Output("abs_rate-radio", "options"),
-        Output("abs_rate-radio", "value"),
         Output("abs_rate-radio", "style"),
         Input("route-radio", "value"),
         State("abs_rate-radio", "options"),
-        State("abs_rate-radio", "value"),
         State("abs_rate-radio", "style"),
     )
-    def disable_abs(route, options, rate, style):
+    def update_abs_rate_from_route(route, options, style):
         if route == "iv":
-            return (
-                [{**dictionary, "disabled": True} for dictionary in options],
-                0,
-                {**style, "opacity": "0.42"},
-            )
+            options_new, style_new = disable_component(options, style)
         else:
-            return (
-                [{**dictionary, "disabled": False} for dictionary in options],
-                rate,
-                {**style, "opacity": "1.0"},
-            )
+            options_new, style_new = enable_component(options, style)
+
+        return options_new, style_new
 
     @app.callback(
         [

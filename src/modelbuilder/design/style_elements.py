@@ -50,3 +50,15 @@ def create_col(children, **kwargs):
 
 def create_container(rows):
     return dbc.Container([html.Br(), *[dbc.Row(row) for row in rows]])
+
+
+def disable_component(options, style):
+    options_new = [{**dictionary, 'disabled': True} for dictionary in options]
+    style_new = {**style, 'opacity': 0.42}
+    return options_new, style_new
+
+
+def enable_component(options, style):
+    options_new = [{**dictionary, 'disabled': False} for dictionary in options]
+    style_new = {**style, 'opacity': 1.0}
+    return options_new, style_new
