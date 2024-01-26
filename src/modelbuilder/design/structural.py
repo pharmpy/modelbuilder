@@ -1,122 +1,84 @@
-import dash_bootstrap_components as dbc
-from dash import dcc, html
-
-from .style_elements import create_badge
-
-# ABSORPTION
-
-absorptionoptions = [
-    {"label": "Rate", "value": "Rate"},
-    {"label": "Delay", "value": "Delay"},
-]
-
-absorptionrates = [
-    {"label": "Zero order", "value": "ZO", "disabled": "False"},
-    {"label": "First order", "value": "FO", "disabled": "False"},
-    {"label": "Sequential ZO FO", "value": "seq_ZO_FO", "disabled": "False"},
-]
-
-abs_rates_radio = dbc.Col(
-    children=[
-        create_badge("Absorption rate"),
-        dcc.RadioItems(options=absorptionrates, id="abs_rate-radio", style={"font-size": "large"}),
-    ]
+from .style_elements import (
+    create_badge,
+    create_checklist,
+    create_col,
+    create_container,
+    create_input_group,
+    create_options_list,
+    create_radio,
 )
 
-# Elimination rate
 
-elimination_rates = [
-    {"label": "First order", "value": "FO"},
-    {"label": "Michaelis-Menten", "value": "MM"},
-    {"label": "Mixed MM FO", "value": "mixed_MM_FO"},
-    {"label": "Zero order", "value": "ZO"},
-]
+def create_absorption_rate_component():
+    abs_rate_label_dict = {
+        'Zero order': 'ZO',
+        'First order': 'FO',
+        'Sequential ZO FO': 'seq_ZO_FO',
+    }
 
-elimination_radio = dbc.Col(
-    children=[
-        create_badge("Elimination rate"),
-        dcc.RadioItems(elimination_rates, id="elim_radio", style={"font-size": "large"}),
-    ],
-)
+    abs_rate_badge = create_badge("Absorption rate")
+    abs_rate_options = create_options_list(abs_rate_label_dict)
+    abs_rate_radio = create_radio('abs_rate-radio', options=abs_rate_options)
 
-# Absorption delay
+    return create_col([abs_rate_badge, abs_rate_radio])
 
-lag_toggle = html.Div(
-    [
-        dbc.Checklist(
-            options=[
-                {"label": "Lag time", "value": True, "disabled": False},
-            ],
-            id="lag-toggle",
-            value=[],
-        )
-    ],
-)
 
-transits = dbc.InputGroup(
-    children=[
-        dbc.InputGroupText("Transit compartments"),
-        dbc.Input(id="transit_input", placeholder=0, type="number", min=0, step=1),
-    ],
-    style={"width": "70%"},
-)
+def create_elimination_rate_component():
+    elim_label_dict = {
+        'First order': 'FO',
+        'Michaelis-Menten': 'MM',
+        'Mixed MM FO': 'mixed_MM_FO',
+        'Zero order': 'ZO',
+    }
 
-bioavailability_toggle = html.Div(
-    [
-        dbc.Checklist(
-            options=[{"label": "Bioavailability", "value": 1}],
-            value=[],
-            id="bio_toggle",
-        )
-    ]
-)
+    elim_badge = create_badge("Elimination rate")
+    elim_options = create_options_list(elim_label_dict)
+    elim_radio = create_radio('elim_radio', options=elim_options)
 
-# Distribution
+    return create_col([elim_badge, elim_radio])
 
-peripheral_compartments = [
-    {"label": "0", "value": 0},
-    {"label": "1", "value": 1},
-    {"label": "2", "value": 2},
-]
 
-peripherals_radio = dbc.Col(
-    children=[
-        create_badge("Peripheral compartments"),
-        dcc.RadioItems(
-            peripheral_compartments, id="peripheral-radio", style={"font-size": "large"}
-        ),
-    ],
-    style={"width": "70%"},
-)
+def create_absorption_delay_component():
+    abs_delay_badge = create_badge("Absorption delay")
 
-# Full tab
+    lag_options = create_options_list({'Lag time': True})
+    lag_checklist = create_checklist("lag-toggle", lag_options)
 
-structural_tab = dbc.Container(
-    [
-        html.Br(),
-        dbc.Row(
-            [
-                dbc.Col(
-                    children=[
-                        abs_rates_radio,
-                    ]
-                ),
-                dbc.Col(elimination_radio),
-            ]
-        ),
-        dbc.Row(
-            [
-                dbc.Col(
-                    children=[
-                        create_badge("Absorption delay"),
-                        transits,
-                        lag_toggle,
-                        bioavailability_toggle,
-                    ],
-                    style={"padding-top": "2em"},
-                ),
-                dbc.Col(children=[peripherals_radio], style={"padding-top": "2em"}),
-            ]
-        ),
-    ]
+    transits_input_group = create_input_group(
+        "transit_input", "Transit compartments", default_value=0, type='number', min=0, step=1
+    )
+
+    bioavailability_options = create_options_list({'Bioavailability': True})
+    bioavailability_checklist = create_checklist("bio_toggle", bioavailability_options)
+
+    abs_delay_style = {"padding-top": "2em"}
+    return create_col(
+        [
+            abs_delay_badge,
+            transits_input_group,
+            lag_checklist,
+            bioavailability_checklist,
+        ],
+        style=abs_delay_style,
+    )
+
+
+def create_peripherals_component():
+    peripherals_dict = {'0': 0, '1': 1, '2': 2}
+
+    peripherals_badge = create_badge("Peripheral compartments")
+    peripherals_options = create_options_list(peripherals_dict)
+    peripherals_radio = create_radio('peripheral-radio', options=peripherals_options)
+
+    peripherals_style = {"width": "70%", "padding-top": "2em"}
+    return create_col([peripherals_badge, peripherals_radio], style=peripherals_style)
+
+
+abs_rate_component = create_absorption_rate_component()
+elim_component = create_elimination_rate_component()
+abs_delay_component = create_absorption_delay_component()
+peripherals_component = create_peripherals_component()
+
+structural_tab = create_container(
+    ([abs_rate_component, elim_component], [abs_delay_component, peripherals_component])
 )
