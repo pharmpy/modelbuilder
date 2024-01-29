@@ -48,16 +48,12 @@ def create_absorption_delay_component():
         "transit_input", "Transit compartments", default_value=0, type='number', min=0, step=1
     )
 
-    bioavailability_options = create_options_list({'Bioavailability': True})
-    bioavailability_checklist = create_checklist("bio_toggle", bioavailability_options)
-
     abs_delay_style = {"padding-top": "2em"}
     return create_col(
         [
             abs_delay_badge,
             transits_input_group,
             lag_checklist,
-            bioavailability_checklist,
         ],
         style=abs_delay_style,
     )

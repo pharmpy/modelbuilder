@@ -1,9 +1,7 @@
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 from pharmpy.modeling import (
-    add_bioavailability,
     add_lag_time,
-    remove_bioavailability,
     remove_lag_time,
     set_first_order_absorption,
     set_first_order_elimination,
@@ -25,7 +23,6 @@ def structural_callbacks(app):
         Output("abs_rate-radio", "value"),
         Output("elim_radio", "value"),
         Output("peripheral-radio", "value"),
-        Output("bio_toggle", "value"),
         Input("route-radio", "value"),
     )
     def reset_defaults(route):
@@ -34,9 +31,8 @@ def structural_callbacks(app):
         else:
             default_abs_rate = 'FO'
         default_elim = 'FO'
-        default_bio = False
         default_peripherals = 0
-        return default_abs_rate, default_elim, default_peripherals, default_bio
+        return default_abs_rate, default_elim, default_peripherals
 
     @app.callback(
         Output("data-dump", "clear_data", allow_duplicate=True),
@@ -137,18 +133,3 @@ def structural_callbacks(app):
         if n is not None:
             config.model = set_peripheral_compartments(config.model, n)
         return True
-
-    @app.callback(
-        Output("data-dump", "clear_data", allow_duplicate=True),
-        Input("bio_toggle", "value"),
-        prevent_initial_call=True,
-    )
-    def set_bioavailability(toggle):
-        if toggle:
-            config.model = add_bioavailability(config.model)
-            return True
-        else:
-            config.model = remove_bioavailability(config.model)
-            return True
-
-    return
