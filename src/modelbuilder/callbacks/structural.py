@@ -41,27 +41,16 @@ def structural_callbacks(app):
     @app.callback(
         Output("data-dump", "clear_data", allow_duplicate=True),
         Input("abs_rate-radio", "value"),
-        Input("elim_radio", "value"),
         prevent_initial_call=True,
     )
-    def update_abs_elim(abs, elim):
-        if elim:
-            elim_funcs = {
-                "FO": set_first_order_elimination,
-                "MM": set_michaelis_menten_elimination,
-                "mixed_MM_FO": set_mixed_mm_fo_elimination,
-                "ZO": set_zero_order_elimination,
-            }
-
-            config.model = elim_funcs[elim](config.model)
-            return True
-        if abs:
+    def update_abs_rate_on_click(abs_rate):
+        if abs_rate:
             abs_funcs = {
                 "ZO": set_zero_order_absorption,
                 "FO": set_first_order_absorption,
                 "seq_ZO_FO": set_seq_zo_fo_absorption,
             }
-            config.model = abs_funcs[abs](config.model)
+            config.model = abs_funcs[abs_rate](config.model)
             return True
 
     @app.callback(
@@ -78,6 +67,22 @@ def structural_callbacks(app):
             options_new, style_new = enable_component(options, style)
 
         return options_new, style_new
+
+    @app.callback(
+        Output("data-dump", "clear_data", allow_duplicate=True),
+        Input("elim_radio", "value"),
+        prevent_initial_call=True,
+    )
+    def update_elim_on_click(elim):
+        elim_funcs = {
+            "FO": set_first_order_elimination,
+            "MM": set_michaelis_menten_elimination,
+            "mixed_MM_FO": set_mixed_mm_fo_elimination,
+            "ZO": set_zero_order_elimination,
+        }
+
+        config.model = elim_funcs[elim](config.model)
+        return True
 
     @app.callback(
         [
