@@ -29,7 +29,6 @@ def create_checklist(elem_id, options):
     return dbc.Checklist(
         options=options,
         id=elem_id,
-        value=[],
     )
 
 
@@ -52,13 +51,13 @@ def create_container(rows):
     return dbc.Container([html.Br(), *[dbc.Row(row) for row in rows]])
 
 
-def disable_component(options, style):
+def disable_component(options, style=None):
     options_new = [{**dictionary, 'disabled': True} for dictionary in options]
-    style_new = {**style, 'opacity': 0.42}
+    style_new = {**style, 'opacity': 0.42} if style else None
     return options_new, style_new
 
 
-def enable_component(options, style):
+def enable_component(options, style=None):
     options_new = [{**dictionary, 'disabled': False} for dictionary in options]
-    style_new = {**style, 'opacity': 1.0}
+    style_new = {**style, 'opacity': 1.0} if style else None
     return options_new, style_new

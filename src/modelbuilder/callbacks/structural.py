@@ -1,5 +1,4 @@
-from dash import Input, Output, State
-from dash.exceptions import PreventUpdate
+from dash import Input, Output, State, ctx
 from pharmpy.modeling import (
     add_lag_time,
     remove_lag_time,
@@ -81,47 +80,62 @@ def structural_callbacks(app):
         return True
 
     @app.callback(
-        [
-            Output("lag-toggle", "options"),
-            Output("transit_input", "value"),
-            Output("transit_input", "disabled"),
-        ],
+        Output("lag-toggle", "options"),
+        Output("transit_input", "value"),
+        Output("transit_input", "disabled"),
         Input("route-radio", "value"),
+        Input("lag-toggle", "options"),
         Input("lag-toggle", "value"),
         Input("transit_input", "value"),
-        prevent_inital_call=True,
     )
-    def toggle_disable(route, lag_tog, transit_input):
-        if route == "iv":
-            return [{"label": "Lag Time", "value": True, "disabled": True}], None, True
+    def update_abs_delay(route, lag_options, set_lag_time, no_of_transits):
+        click_id = ctx.triggered_id
 
-        if lag_tog:
-            try:
+        if not click_id or click_id == 'route-radio':
+            lag_options_new, transit_value, transit_disabled = _update_abs_delay_from_route(
+                route, lag_options
+            )
+        else:
+            lag_options_new, transit_value, transit_disabled = _update_abs_delay_on_click(
+                lag_options, set_lag_time, no_of_transits
+            )
+
+        return lag_options_new, transit_value, transit_disabled
+
+    def _update_abs_delay_from_route(route, lag_options):
+        if route == 'iv':
+            lag_options_new, _ = disable_component(lag_options)
+            transit_disabled = True
+        else:
+            lag_options_new, _ = enable_component(lag_options)
+            transit_disabled = False
+        transit_value = 0
+        return lag_options_new, transit_value, transit_disabled
+
+    def _update_abs_delay_on_click(lag_options, set_lag_time, no_of_transits):
+        if set_lag_time:
+            # FIXME: This should be a value and not a list?
+            set_lag_time = set_lag_time[0]
+            if set_lag_time is True:
                 config.model = set_transit_compartments(config.model, 0)
                 config.model = add_lag_time(config.model)
-                return [{"label": "Lag Time", "value": True, "disabled": False}], None, True
-            except:
-                raise PreventUpdate
-
-        if transit_input:
-            try:
+            elif set_lag_time is False:
                 config.model = remove_lag_time(config.model)
-                if transit_input:
-                    config.model = set_transit_compartments(config.model, int(transit_input))
-                return (
-                    [{"label": "Lag Time", "value": False, "disabled": True}],
-                    int(transit_input),
-                    False,
-                )
-            except:
-                raise PreventUpdate
+            lag_options_new = lag_options
+            transit_value, transit_disabled = 0, True
+        elif no_of_transits is not None:
+            config.model = remove_lag_time(config.model)
+            config.model = set_transit_compartments(config.model, no_of_transits)
+            if no_of_transits > 0:
+                lag_options_new, _ = disable_component(lag_options)
+            else:
+                lag_options_new, _ = enable_component(lag_options)
+            transit_value, transit_disabled = no_of_transits, False
         else:
-            try:
-                config.model = remove_lag_time(config.model)
-                config.model = set_transit_compartments(config.model, 0)
-                return [{"label": "Lag Time", "value": True, "disabled": False}], None, False
-            except:
-                return [{"label": "Lag Time", "value": True, "disabled": False}], None, False
+            lag_options_new = lag_options
+            transit_value, transit_disabled = 0, False
+
+        return lag_options_new, transit_value, transit_disabled
 
     # callback for peripheral compartments
     @app.callback(
