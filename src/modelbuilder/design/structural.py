@@ -13,7 +13,7 @@ def create_absorption_rate_component():
     abs_rate_label_dict = {
         'Zero order': 'ZO',
         'First order': 'FO',
-        'Sequential ZO FO': 'seq_ZO_FO',
+        'Sequential ZO FO': 'SEQ-ZO-FO',
     }
 
     abs_rate_badge = create_badge("Absorption rate")
@@ -27,7 +27,7 @@ def create_elimination_rate_component():
     elim_label_dict = {
         'First order': 'FO',
         'Michaelis-Menten': 'MM',
-        'Mixed MM FO': 'mixed_MM_FO',
+        'Mixed MM FO': 'MIX-FO-MM',
         'Zero order': 'ZO',
     }
 
