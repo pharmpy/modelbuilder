@@ -22,9 +22,8 @@ def create_model(model_type):
     return model, model_state
 
 
-def update_model(model_old, ms_old, mfl_str_func):
-    feat_mfl_list = parse(mfl_str_func)
-    mfl_new = ms_old.mfl.replace_features(feat_mfl_list)
+def update_model(model_old, ms_old, mfl_str):
+    mfl_new = ms_old.mfl.replace_features(mfl_str)
     lnt = ms_old.mfl.least_number_of_transformations(mfl_new, tool="modelsearch")
 
     model_new = create_basic_pk_model(ms_old.model_type)
