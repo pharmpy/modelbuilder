@@ -1,13 +1,9 @@
 from dash import Input, Output, State, ctx
-from pharmpy.modeling import (
-    add_lag_time,
-    remove_lag_time,
-    set_transit_compartments,
-)
 
 import modelbuilder.config as config
 from modelbuilder.design.style_elements import disable_component, enable_component
 from modelbuilder.internals.model_state import update_model
+
 
 def structural_callbacks(app):
     @app.callback(
@@ -33,7 +29,8 @@ def structural_callbacks(app):
     def update_abs_rate_on_click(abs_rate):
         if abs_rate:
             mfl = f'ABSORPTION({abs_rate})'
-            config.model, config.model_state = update_model(config.model, config.model_state, mfl)
+            model_new, ms_new = update_model(config.model, config.model_state, mfl)
+            config.model, config.model_state = model_new, ms_new
             return True
 
     @app.callback(
@@ -58,7 +55,8 @@ def structural_callbacks(app):
     )
     def update_elim_on_click(elim):
         mfl = f'ELIMINATION({elim})'
-        config.model, config.model_state = update_model(config.model, config.model_state, mfl)
+        model_new, ms_new = update_model(config.model, config.model_state, mfl)
+        config.model, config.model_state = model_new, ms_new
         return True
 
     @app.callback(
@@ -79,7 +77,7 @@ def structural_callbacks(app):
             )
         else:
             lag_options_new, transit_value, transit_disabled = _update_abs_delay_on_click(
-                lag_options, set_lag_time, no_of_transits
+                click_id, lag_options, set_lag_time, no_of_transits
             )
 
         return lag_options_new, transit_value, transit_disabled
@@ -94,28 +92,28 @@ def structural_callbacks(app):
         transit_value = 0
         return lag_options_new, transit_value, transit_disabled
 
-    def _update_abs_delay_on_click(lag_options, set_lag_time, no_of_transits):
-        if set_lag_time:
+    def _update_abs_delay_on_click(click_id, lag_options, set_lag_time, no_of_transits):
+        if click_id == 'lag-toggle':
             # FIXME: This should be a value and not a list?
-            set_lag_time = set_lag_time[0]
-            if set_lag_time is True:
-                config.model = set_transit_compartments(config.model, 0)
-                config.model = add_lag_time(config.model)
-            elif set_lag_time is False:
-                config.model = remove_lag_time(config.model)
+            if set_lag_time:
+                mfl = 'LAGTIME(ON);TRANSITS(0)'
+                transit_value, transit_disabled = 0, True
+            else:
+                mfl = 'LAGTIME(OFF);TRANSITS(0)'
+                transit_value, transit_disabled = 0, False
             lag_options_new = lag_options
-            transit_value, transit_disabled = 0, True
-        elif no_of_transits is not None:
-            config.model = remove_lag_time(config.model)
-            config.model = set_transit_compartments(config.model, no_of_transits)
+        elif click_id == 'transit_input':
+            mfl = f'LAGTIME(OFF);TRANSITS({no_of_transits})'
             if no_of_transits > 0:
                 lag_options_new, _ = disable_component(lag_options)
             else:
                 lag_options_new, _ = enable_component(lag_options)
             transit_value, transit_disabled = no_of_transits, False
         else:
-            lag_options_new = lag_options
-            transit_value, transit_disabled = 0, False
+            raise ValueError('Unknown click ID')
+
+        model_new, ms_new = update_model(config.model, config.model_state, mfl)
+        config.model, config.model_state = model_new, ms_new
 
         return lag_options_new, transit_value, transit_disabled
 
@@ -128,5 +126,6 @@ def structural_callbacks(app):
     def peripheral_compartments(n):
         if n is not None:
             mfl = f'PERIPHERALS({n})'
-            config.model, config.model_state = update_model(config.model, config.model_state, mfl)
+            model_new, ms_new = update_model(config.model, config.model_state, mfl)
+            config.model, config.model_state = model_new, ms_new
         return True
