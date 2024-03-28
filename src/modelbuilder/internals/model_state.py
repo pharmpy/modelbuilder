@@ -18,7 +18,7 @@ class ModelState:
 def create_model(model_type):
     model = create_basic_pk_model(model_type)
     model = convert_model(model, "nonmem")
-    model_state = ModelState('iv', model)
+    model_state = ModelState(model_type, model)
     return model, model_state
 
 
