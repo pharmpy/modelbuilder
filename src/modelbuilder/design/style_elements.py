@@ -20,9 +20,10 @@ def create_badge(text, with_textbox=False):
     return dbc.Badge(text, color="success", style=style)
 
 
-def create_radio(elem_id, options):
-    style = {"font-size": "large"}
-    return dcc.RadioItems(options=options, id=elem_id, style=style)
+def create_radio(elem_id, options, style=None, **kwargs):
+    if not style:
+        style = {"font-size": "large"}
+    return dcc.RadioItems(options=options, id=elem_id, style=style, **kwargs)
 
 
 def create_checklist(elem_id, options):
@@ -41,6 +42,40 @@ def create_input_group(elem_id, input_group_text, default_value, **kwargs):
         ],
         style=style,
     )
+
+
+def create_input_group_button(button_id, input_id, button_text, default_value):
+    style = {"fontSize": "medium"}
+    return dbc.InputGroup(
+        [
+            dbc.Button(button_text, id=button_id, color=btn_color, style=style),
+            dbc.Input(id=input_id, placeholder=default_value),
+        ]
+    )
+
+
+def create_text(elem_id):
+    style = {
+        'font-family': 'monospace',
+        'resize': 'None',
+        'height': '70vh',
+        'fontSize': '12px',
+        "backgroundColor": '#ffffff',
+        'overflow-x': 'auto',
+        'white-space': 'pre',
+    }
+    return dbc.Textarea(id=elem_id, readOnly=True, style=style)
+
+
+def create_clipboard(target_id):
+    style = {
+        "position": "relative",
+        "top": "5vh",
+        "right": "-29vw",
+        'width': '5vw',
+        'cursor': 'pointer',
+    }
+    return dcc.Clipboard(target_id=target_id, title="copy", style=style)
 
 
 def create_col(children, **kwargs):
