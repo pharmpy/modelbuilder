@@ -7,17 +7,15 @@ from dash.exceptions import PreventUpdate
 from pharmpy.modeling import convert_model, get_model_code, set_name, write_model
 
 import modelbuilder.config as config
+from modelbuilder.internals.help_functions import render_model_code
 from modelbuilder.internals.model_state import create_model
 
 
 def general_callbacks(app):
     # Create model
     @app.callback(
-        Output("data-dump", "clear_data", allow_duplicate=True),
-        [
-            Input("route-radio", "value"),
-        ],
-        prevent_initial_call=True,
+        Output("output-model", "value"),
+        Input("route-radio", "value"),
     )
     def change_route(route):
         if route:
@@ -27,7 +25,7 @@ def general_callbacks(app):
 
             model, model_state = create_model(route, dataset=old_dataset, datainfo=old_datainfo)
             config.model, config.model_state = model, model_state
-            return True
+            return render_model_code(config.model)
         else:
             raise PreventUpdate
 
@@ -45,17 +43,6 @@ def general_callbacks(app):
         config.model = config.model.update_source()
         return True
 
-    def render_generic_model(model):
-        s = ""
-        s += "------------------STATEMENTS----------------" + "\n\n"
-        s += str(config.model.statements) + "\n\n"
-        s += "------------------ETAS----------------------" + "\n\n"
-        s += str(config.model.random_variables.etas) + "\n\n"
-        s += "------------------PARAMETERS----------------" + "\n\n"
-        s += str(config.model.parameters) + "\n\n"
-
-        return s
-
     # Callback for changing the model print
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
@@ -65,26 +52,11 @@ def general_callbacks(app):
     def change_format(format):
         if format != "generic":
             config.model = convert_model(config.model, format)
-            return get_model_code(config.model)
+            return render_model_code(config.model)
         elif format == "generic":
             config.model = convert_model(config.model, format)
-            text_renderer = render_generic_model(config.model)
+            text_renderer = render_model_code(config.model)
             return text_renderer
-
-    @app.callback(
-        Output("output-model", "value"),
-        Input("text-refresh", "n_intervals"),
-        State("modelformat", 'value'),
-    )
-    def get_code(n, format):
-        try:
-            if format != "generic":
-                return get_model_code(config.model)
-            else:
-                text_renderer = render_generic_model(config.model)
-                return text_renderer
-        except:
-            raise PreventUpdate
 
     # Dataset-parsing
     @app.callback(

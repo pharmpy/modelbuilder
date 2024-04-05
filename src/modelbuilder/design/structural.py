@@ -39,24 +39,17 @@ def create_elimination_rate_component():
 
 
 def create_absorption_delay_component():
+    abs_delay_label_dict = {
+        'No absorption delay': 'LAGTIME(OFF);TRANSITS(0)',
+        'Lag time': 'LAGTIME(ON);TRANSITS(0)',
+        'Transits': 'LAGTIME(OFF);TRANSITS(1)',
+    }
+
     abs_delay_badge = create_badge("Absorption delay")
+    abs_delay_options = create_options_list(abs_delay_label_dict)
+    abs_delay_radio = create_radio('abs_delay_radio', options=abs_delay_options)
 
-    lag_options = create_options_list({'Lag time': True})
-    lag_checklist = create_checklist("lag-toggle", lag_options)
-
-    transits_input_group = create_input_group(
-        "transit_input", "Transit compartments", default_value=0, type='number', min=0, step=1
-    )
-
-    abs_delay_style = {"padding-top": "2em"}
-    return create_col(
-        [
-            abs_delay_badge,
-            transits_input_group,
-            lag_checklist,
-        ],
-        style=abs_delay_style,
-    )
+    return create_col([abs_delay_badge, abs_delay_radio])
 
 
 def create_peripherals_component():
