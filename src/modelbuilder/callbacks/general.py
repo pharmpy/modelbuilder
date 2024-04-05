@@ -25,8 +25,7 @@ def general_callbacks(app):
             old_dataset = config.model.dataset
             old_datainfo = config.model.datainfo
 
-            model, model_state = create_model(route)
-            model = model.replace(dataset=old_dataset, datainfo=old_datainfo)
+            model, model_state = create_model(route, dataset=old_dataset, datainfo=old_datainfo)
             config.model, config.model_state = model, model_state
             return True
         else:
