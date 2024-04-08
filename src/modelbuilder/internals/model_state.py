@@ -38,13 +38,26 @@ class ModelState(Immutable):
             error_funcs = self.error_funcs
         return ModelState(model_type=self.model_type, mfl=mfl, error_funcs=error_funcs)
 
-    def generate_model(self, dataset=None, datainfo=None):
-        model_base = create_basic_pk_model(self.model_type)
-        if dataset and datainfo:
-            model_base = model_base.replace(dataset=dataset, datainfo=datainfo)
-        struct_funcs = self._get_mfl_funcs(model_base)
+    @classmethod
+    def create(cls, model_type):
+        model = cls._create_base_model(model_type)
+        mfl_str = get_model_features(model)
+        mfl = ModelFeatures.create_from_mfl_string(mfl_str)
+        error_funcs = [set_proportional_error_model]
+        return cls(model_type, mfl, error_funcs)
 
-        model_new = model_base
+    @staticmethod
+    def _create_base_model(model_type, dataset=None, datainfo=None):
+        model = create_basic_pk_model(model_type)
+        if dataset and datainfo:
+            model = model.replace(dataset=dataset, datainfo=datainfo)
+        return model
+
+    def generate_model(self, dataset=None, datainfo=None):
+        model = self._create_base_model(self.model_type, dataset, datainfo)
+        struct_funcs = self._get_mfl_funcs(model)
+
+        model_new = model
         for func in struct_funcs + self.error_funcs:
             model_new = func(model_new)
 
@@ -57,19 +70,7 @@ class ModelState(Immutable):
         return list(lnt.values())
 
 
-def create_model(model_type, dataset=None, datainfo=None):
-    model = create_basic_pk_model(model_type)
-    if dataset and datainfo:
-        model = model.replace(dataset=dataset, datainfo=datainfo)
-    model = convert_model(model, "nonmem")
-    mfl_str = get_model_features(model)
-    mfl = ModelFeatures.create_from_mfl_string(mfl_str)
-    error_funcs = [set_proportional_error_model]
-    model_state = ModelState(model_type, mfl, error_funcs)
-    return model, model_state
-
-
-def update_model(model_old, ms_old, mfl_str_or_func):
+def update_model_state(ms_old, mfl_str_or_func):
     kwargs = dict()
 
     if isinstance(mfl_str_or_func, str):
@@ -87,9 +88,8 @@ def update_model(model_old, ms_old, mfl_str_or_func):
         raise TypeError(f'Type not supported for `{mfl_str_or_func}`: {type(mfl_str_or_func)}')
 
     ms_new = ms_old.replace(**kwargs)
-    model_new = ms_new.generate_model(dataset=model_old.dataset, datainfo=model_old.datainfo)
 
-    return model_new, ms_new
+    return ms_new
 
 
 def _get_func_if_partial(func):

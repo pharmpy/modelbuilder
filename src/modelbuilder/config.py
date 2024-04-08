@@ -1,6 +1,6 @@
-from modelbuilder.internals.model_state import create_model
+from modelbuilder.internals.model_state import ModelState
 
-model, model_state = create_model('iv')
+model_state = ModelState.create('iv')
 
 
 def make_label_value(key, value):

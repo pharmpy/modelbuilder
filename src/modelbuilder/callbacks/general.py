@@ -4,11 +4,11 @@ import io
 import pandas as pd
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
-from pharmpy.modeling import convert_model, get_model_code, set_name, write_model
+from pharmpy.modeling import convert_model, set_name, write_model
 
 import modelbuilder.config as config
 from modelbuilder.internals.help_functions import render_model_code
-from modelbuilder.internals.model_state import create_model
+from modelbuilder.internals.model_state import ModelState
 
 
 def general_callbacks(app):
@@ -20,12 +20,12 @@ def general_callbacks(app):
     def change_route(route):
         if route:
             # Dataset is connected to model in parse_dataset
-            old_dataset = config.model.dataset
-            old_datainfo = config.model.datainfo
+            # old_dataset = config.model.dataset
+            # old_datainfo = config.model.datainfo
 
-            model, model_state = create_model(route, dataset=old_dataset, datainfo=old_datainfo)
-            config.model, config.model_state = model, model_state
-            return render_model_code(config.model)
+            ms = ModelState.create(route)
+            config.model_state = ms
+            return render_model_code(ms.generate_model())
         else:
             raise PreventUpdate
 

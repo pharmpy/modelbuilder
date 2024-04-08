@@ -3,7 +3,7 @@ from dash import Input, Output, State, ctx
 import modelbuilder.config as config
 from modelbuilder.design.style_elements import disable_component, enable_component
 from modelbuilder.internals.help_functions import render_model_code
-from modelbuilder.internals.model_state import update_model
+from modelbuilder.internals.model_state import update_model_state
 
 
 def structural_callbacks(app):
@@ -33,9 +33,9 @@ def structural_callbacks(app):
     def update_abs_rate_on_click(abs_rate):
         if abs_rate:
             mfl = f'ABSORPTION({abs_rate})'
-            model_new, ms_new = update_model(config.model, config.model_state, mfl)
-            config.model, config.model_state = model_new, ms_new
-            return render_model_code(config.model)
+            ms = update_model_state(config.model_state, mfl)
+            config.model_state = ms
+            return render_model_code(ms.generate_model())
 
     @app.callback(
         Output("abs_rate-radio", "options"),
@@ -59,9 +59,9 @@ def structural_callbacks(app):
     )
     def update_elim_on_click(elim):
         mfl = f'ELIMINATION({elim})'
-        model_new, ms_new = update_model(config.model, config.model_state, mfl)
-        config.model, config.model_state = model_new, ms_new
-        return render_model_code(model_new)
+        ms = update_model_state(config.model_state, mfl)
+        config.model_state = ms
+        return render_model_code(ms.generate_model())
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
@@ -71,9 +71,9 @@ def structural_callbacks(app):
     def update_abs_delay_on_click(abs_delay):
         if abs_delay:
             mfl = abs_delay
-            model_new, ms_new = update_model(config.model, config.model_state, mfl)
-            config.model, config.model_state = model_new, ms_new
-            return render_model_code(config.model)
+            ms = update_model_state(config.model_state, mfl)
+            config.model_state = ms
+            return render_model_code(ms.generate_model())
 
     @app.callback(
         Output("abs_delay_radio", "options"),
@@ -99,6 +99,6 @@ def structural_callbacks(app):
     def peripheral_compartments(n):
         if n is not None:
             mfl = f'PERIPHERALS({n})'
-            model_new, ms_new = update_model(config.model, config.model_state, mfl)
-            config.model, config.model_state = model_new, ms_new
-            return render_model_code(model_new)
+            ms = update_model_state(config.model_state, mfl)
+            config.model_state = ms
+            return render_model_code(ms.generate_model())
