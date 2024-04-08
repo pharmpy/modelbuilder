@@ -4,11 +4,11 @@ import io
 import pandas as pd
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
-from pharmpy.modeling import convert_model, set_name, write_model
+from pharmpy.modeling import write_model
 
 import modelbuilder.config as config
 from modelbuilder.internals.help_functions import render_model_code
-from modelbuilder.internals.model_state import ModelState
+from modelbuilder.internals.model_state import ModelState, update_model_state
 
 
 def general_callbacks(app):
@@ -30,18 +30,21 @@ def general_callbacks(app):
             raise PreventUpdate
 
     @app.callback(
-        Output("data-dump", "clear_data", allow_duplicate=True),
+        Output("output-model", "value", allow_duplicate=True),
         Input("model-name", "value"),
         Input("model-description", "value"),
         prevent_initial_call=True,
     )
     def change_name_desc(name, description):
         if name:
-            config.model = set_name(config.model, name)
+            ms = update_model_state(config.model_state, {'name': name})
+            config.model_state = ms
+            return render_model_code(ms.generate_model())
         if description:
-            config.model = config.model.replace(description=description)
-        config.model = config.model.update_source()
-        return True
+            ms = update_model_state(config.model_state, {'description': description})
+            config.model_state = ms
+            return render_model_code(ms.generate_model())
+        return render_model_code(config.model_state.generate_model())
 
     # Callback for changing the model print
     @app.callback(
@@ -50,13 +53,10 @@ def general_callbacks(app):
         prevent_initial_call=True,
     )
     def change_format(format):
-        if format != "generic":
-            config.model = convert_model(config.model, format)
-            return render_model_code(config.model)
-        elif format == "generic":
-            config.model = convert_model(config.model, format)
-            text_renderer = render_model_code(config.model)
-            return text_renderer
+        if format:
+            ms = config.model_state.replace(model_format=format)
+            config.model_state = ms
+            return render_model_code(ms.generate_model())
 
     # Dataset-parsing
     @app.callback(

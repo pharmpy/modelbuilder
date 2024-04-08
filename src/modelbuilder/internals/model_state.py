@@ -19,24 +19,42 @@ from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
 @dataclass
 class ModelState(Immutable):
     model_type: str
+    model_format: str
+    model_attrs: dict
     mfl: ModelFeatures
     error_funcs: List[callable]
 
-    def __init__(self, model_type, mfl, error_funcs):
+    def __init__(self, model_type, model_format, model_attrs, mfl, error_funcs):
         self.model_type = model_type
+        self.model_format = model_format
+        self.model_attrs = model_attrs
         self.mfl = mfl
         self.error_funcs = error_funcs
 
     def replace(self, **kwargs):
+        if 'model_format' in kwargs:
+            model_format = kwargs['model_format']
+        else:
+            model_format = self.model_format
         if 'mfl' in kwargs:
             mfl = kwargs['mfl']
         else:
             mfl = self.mfl
+        if 'model_attrs' in kwargs:
+            model_attrs = kwargs['model_attrs']
+        else:
+            model_attrs = self.model_attrs
         if 'error_funcs' in kwargs:
             error_funcs = kwargs['error_funcs']
         else:
             error_funcs = self.error_funcs
-        return ModelState(model_type=self.model_type, mfl=mfl, error_funcs=error_funcs)
+        return ModelState(
+            model_type=self.model_type,
+            model_format=model_format,
+            model_attrs=model_attrs,
+            mfl=mfl,
+            error_funcs=error_funcs,
+        )
 
     @classmethod
     def create(cls, model_type):
@@ -44,7 +62,7 @@ class ModelState(Immutable):
         mfl_str = get_model_features(model)
         mfl = ModelFeatures.create_from_mfl_string(mfl_str)
         error_funcs = [set_proportional_error_model]
-        return cls(model_type, mfl, error_funcs)
+        return cls(model_type, 'nonmem', {'name': 'start'}, mfl, error_funcs)
 
     @staticmethod
     def _create_base_model(model_type, dataset=None, datainfo=None):
@@ -55,13 +73,16 @@ class ModelState(Immutable):
 
     def generate_model(self, dataset=None, datainfo=None):
         model = self._create_base_model(self.model_type, dataset, datainfo)
+        if self.model_attrs:
+            model = model.replace(**self.model_attrs)
+
         struct_funcs = self._get_mfl_funcs(model)
 
         model_new = model
         for func in struct_funcs + self.error_funcs:
             model_new = func(model_new)
 
-        return convert_model(model_new, "nonmem")
+        return convert_model(model_new, self.model_format)
 
     def _get_mfl_funcs(self, model_base):
         mfl_str_start = get_model_features(model_base)
@@ -84,6 +105,8 @@ def update_model_state(ms_old, mfl_str_or_func):
             kwargs['error_funcs'] = error_funcs
         else:
             raise ValueError(f'Function not supported: `{mfl_str_or_func}`')
+    elif isinstance(mfl_str_or_func, dict):
+        kwargs['model_attrs'] = mfl_str_or_func
     else:
         raise TypeError(f'Type not supported for `{mfl_str_or_func}`: {type(mfl_str_or_func)}')
 

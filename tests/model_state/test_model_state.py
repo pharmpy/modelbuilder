@@ -23,7 +23,7 @@ def test_model_state_init():
     model = create_basic_pk_model('iv')
     mfl_str = get_model_features(model)
     mfl = parse(mfl_str, mfl_class=True)
-    model_state = ModelState('iv', mfl, (set_proportional_error_model,))
+    model_state = ModelState('iv', 'nonmem', {}, mfl, (set_proportional_error_model,))
     assert (
         repr(model_state.mfl)
         == 'ABSORPTION(INST);ELIMINATION(FO);TRANSITS(0);PERIPHERALS(0);LAGTIME(OFF)'
@@ -115,3 +115,15 @@ def test_update_model_nested():
     model_state_new = update_model_state(model_state_new, 'ELIMINATION(MM)')
     model_new = model_state_new.generate_model()
     assert has_michaelis_menten_elimination(model_new)
+
+
+def test_update_model_attrs():
+    model_state = ModelState.create('iv')
+    model = model_state.generate_model()
+    assert model.name == 'start'
+    model_state_new = update_model_state(model_state, {'name': 'new_name'})
+    model_new = model_state_new.generate_model()
+    assert model_new.name == 'new_name'
+    model_state_new = update_model_state(model_state, {'description': 'something'})
+    model_new = model_state_new.generate_model()
+    assert model_new.description != model.description
