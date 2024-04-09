@@ -1,82 +1,42 @@
-import dash_bootstrap_components as dbc
-from dash import dcc, html
-
-from .style_elements import btn_color, create_badge
-
-typeoptions = [
-    {"label": "PK", "value": "PK"},
-]
-
-model_type_radio = dbc.Col(
-    children=[
-        create_badge("Model type"),
-        dcc.RadioItems(typeoptions, "PK", id="model_type", style={"font-size": "large"}),
-    ]
+from .style_elements import (
+    create_badge,
+    create_col,
+    create_container,
+    create_options_list,
+    create_radio,
+    create_text_input,
 )
 
-collapsable_pk = dbc.Collapse(model_type_radio, id="collapse_pk", is_open=True)
 
-model_name = html.Div(
-    children=[
-        dbc.InputGroup(
-            [
-                create_badge("Name", with_textbox=True),
-                dbc.Input(id="model-name", placeholder="Write model name here...", type="text"),
-            ],
-        )
-    ],
+def create_type_component():
+    type_label_dict = {'PK': 'PK'}
+
+    type_badge = create_badge('Model type')
+    type_options = create_options_list(type_label_dict)
+    type_radio = create_radio('model_type', options=type_options)
+
+    return create_col([type_badge, type_radio])
+
+
+def create_route_component():
+    route_label_dict = {'IV': 'iv', 'Oral': 'oral'}
+
+    route_badge = create_badge('Administration route')
+    route_options = create_options_list(route_label_dict)
+    route_radio = create_radio('route-radio', options=route_options)
+
+    return create_col([route_badge, route_radio])
+
+
+name_component = create_text_input('model-name', 'Name', 'Write model name here...')
+description_component = create_text_input(
+    'model-description', 'Description', 'Write model description here...'
 )
 
-model_description = html.Div(
-    children=[
-        dbc.InputGroup(
-            [
-                create_badge("Description", with_textbox=True),
-                dbc.Input(
-                    id="model-description",
-                    placeholder="Write model description here...",
-                    type="text",
-                ),
-            ],
-            style={'marginTop': '5px'},
-        ),
-    ],
-)
-
-admin_route = [{"label": "IV", "value": "iv"}, {"label": "Oral", "value": "oral"}]
-
-route_radio = dbc.Col(
-    children=[
-        create_badge("Administration route"),
-        dcc.RadioItems(admin_route, value='iv', id="route-radio", style={"font-size": "large"}),
-    ]
-)
-
-collapsable_route = dbc.Collapse(route_radio, id="collapse_route", is_open=True)
+type_component = create_type_component()
+route_component = create_route_component()
 
 
-general_tab = dbc.Container(
-    [
-        dbc.Col(
-            children=[
-                html.Br(),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            children=[model_name, model_description],
-                            style={},
-                        ),
-                        dbc.Col(children=[], style={"height": "8vh"}),
-                    ],
-                    style={},
-                ),
-                html.Br(),
-                dbc.Row([dbc.Col(model_type_radio)], style={"height": "10vh"}),
-                dbc.Row([dbc.Col(route_radio)], style={"height": "10vh"}),
-            ]
-        )
-    ],
-    style={
-        "display": "flex",
-    },
+general_tab = create_container(
+    [[name_component], [description_component], [type_component], [route_component]]
 )

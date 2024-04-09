@@ -78,6 +78,12 @@ def create_clipboard(target_id):
     return dcc.Clipboard(target_id=target_id, title="copy", style=style)
 
 
+def create_text_input(elem_id, label, placeholder):
+    label_badge = create_badge(label, with_textbox=True)
+    input_text = dbc.Input(id=elem_id, placeholder=placeholder, type="text")
+    return dbc.InputGroup([label_badge, input_text])
+
+
 def create_col(children, **kwargs):
     return dbc.Col(children=children, **kwargs)
 
