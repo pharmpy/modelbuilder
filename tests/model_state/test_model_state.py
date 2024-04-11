@@ -40,7 +40,7 @@ def test_create_model():
         repr(model_state.mfl)
         == 'ABSORPTION(INST);ELIMINATION(FO);TRANSITS(0);PERIPHERALS(0);LAGTIME(OFF)'
     )
-    assert model_state.error_funcs == [set_proportional_error_model]
+    assert model_state.error_funcs == ['prop']
 
     model_state = ModelState.create('oral')
     model = model_state.generate_model()
@@ -51,7 +51,7 @@ def test_create_model():
         repr(model_state.mfl)
         == 'ABSORPTION(FO);ELIMINATION(FO);TRANSITS(0);PERIPHERALS(0);LAGTIME(OFF)'
     )
-    assert model_state.error_funcs == [set_proportional_error_model]
+    assert model_state.error_funcs == ['prop']
 
 
 def test_update_model():
@@ -76,7 +76,7 @@ def test_update_model_stepwise():
     assert has_first_order_elimination(model)
     assert has_proportional_error_model(model)
     model_state_new = update_model_state(model_state, 'ELIMINATION(MM)')
-    model_state_new = update_model_state(model_state_new, set_additive_error_model)
+    model_state_new = update_model_state(model_state_new, error='add')
     model_new = model_state_new.generate_model()
     assert has_michaelis_menten_elimination(model_new)
     assert has_additive_error_model(model_new)
@@ -87,19 +87,23 @@ def test_update_model_error():
     model = model_state.generate_model()
     assert has_first_order_elimination(model)
     assert has_proportional_error_model(model)
-    model_state = update_model_state(model_state, set_additive_error_model)
+    model_state = update_model_state(model_state, error='add')
     model = model_state.generate_model()
     assert has_additive_error_model(model)
-    model_state = update_model_state(model_state, set_iiv_on_ruv)
+    model_state = update_model_state(model_state, error='iiv-on-ruv')
     model = model_state.generate_model()
     assert 'ETA_RV1' in model.random_variables.names
     y_assignment = model.statements.find_assignment('Y')
     assert '+' in repr(y_assignment)
-    model_state = update_model_state(model_state, partial(set_time_varying_error_model, cutoff=1.0))
+    model_state = update_model_state(model_state, error='iiv-on-ruv;time-varying')
     model = model_state.generate_model()
     assert 'ETA_RV1' in model.random_variables.names
     y_assignment = model.statements.find_assignment('Y')
     assert 'TIME' in [str(symb) for symb in y_assignment.free_symbols]
+    model_state = update_model_state(model_state, error='')
+    model = model_state.generate_model()
+    assert has_additive_error_model(model)
+    assert 'ETA_RV1' not in model.random_variables.names
 
 
 def test_update_model_nested():
@@ -121,9 +125,9 @@ def test_update_model_attrs():
     model_state = ModelState.create('iv')
     model = model_state.generate_model()
     assert model.name == 'start'
-    model_state_new = update_model_state(model_state, {'name': 'new_name'})
+    model_state_new = update_model_state(model_state, model_attrs={'name': 'new_name'})
     model_new = model_state_new.generate_model()
     assert model_new.name == 'new_name'
-    model_state_new = update_model_state(model_state, {'description': 'something'})
+    model_state_new = update_model_state(model_state, model_attrs={'description': 'something'})
     model_new = model_state_new.generate_model()
     assert model_new.description != model.description

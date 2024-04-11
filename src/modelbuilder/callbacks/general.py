@@ -37,11 +37,11 @@ def general_callbacks(app):
     )
     def change_name_desc(name, description):
         if name:
-            ms = update_model_state(config.model_state, {'name': name})
+            ms = update_model_state(config.model_state, model_attrs={'name': name})
             config.model_state = ms
             return render_model_code(ms.generate_model())
         if description:
-            ms = update_model_state(config.model_state, {'description': description})
+            ms = update_model_state(config.model_state, model_attrs={'description': description})
             config.model_state = ms
             return render_model_code(ms.generate_model())
         return render_model_code(config.model_state.generate_model())

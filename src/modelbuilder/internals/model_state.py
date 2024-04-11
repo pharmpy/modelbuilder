@@ -10,10 +10,20 @@ from pharmpy.modeling import (
     set_additive_error_model,
     set_combined_error_model,
     set_iiv_on_ruv,
+    set_power_on_ruv,
     set_proportional_error_model,
     set_time_varying_error_model,
 )
-from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
+from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features, parse
+
+ERROR_FUNCS = {
+    'add': set_additive_error_model,
+    'prop': set_proportional_error_model,
+    'comb': set_combined_error_model,
+    'iiv-on-ruv': set_iiv_on_ruv,
+    'power': set_power_on_ruv,
+    'time-varying': partial(set_time_varying_error_model, cutoff=1.0),
+}
 
 
 @dataclass
@@ -22,7 +32,7 @@ class ModelState(Immutable):
     model_format: str
     model_attrs: dict
     mfl: ModelFeatures
-    error_funcs: List[callable]
+    error_funcs: List[str]
 
     def __init__(self, model_type, model_format, model_attrs, mfl, error_funcs):
         self.model_type = model_type
@@ -61,7 +71,7 @@ class ModelState(Immutable):
         model = cls._create_base_model(model_type)
         mfl_str = get_model_features(model)
         mfl = ModelFeatures.create_from_mfl_string(mfl_str)
-        error_funcs = [set_proportional_error_model]
+        error_funcs = ['prop']
         return cls(model_type, 'nonmem', {'name': 'start'}, mfl, error_funcs)
 
     @staticmethod
@@ -79,8 +89,10 @@ class ModelState(Immutable):
         struct_funcs = self._get_mfl_funcs(model)
 
         model_new = model
-        for func in struct_funcs + self.error_funcs:
+        for func in struct_funcs:
             model_new = func(model_new)
+        for func_name in self.error_funcs:
+            model_new = ERROR_FUNCS[func_name](model_new)
 
         return convert_model(model_new, self.model_format)
 
@@ -91,49 +103,37 @@ class ModelState(Immutable):
         return list(lnt.values())
 
 
-def update_model_state(ms_old, mfl_str_or_func):
-    kwargs = dict()
+def update_model_state(ms_old, mfl=None, **kwargs):
+    model_attrs = kwargs.get('model_attrs')
+    error = kwargs.get('error')
 
-    if isinstance(mfl_str_or_func, str):
-        mfl_new = ms_old.mfl.replace_features(mfl_str_or_func)
-        kwargs['mfl'] = mfl_new
-    elif callable(mfl_str_or_func):
-        func = mfl_str_or_func
-        module_name = inspect.getmodule(_get_func_if_partial(func)).__name__
-        if module_name == 'pharmpy.modeling.error':
-            error_funcs = _interpret_error_model(func, ms_old.error_funcs)
-            kwargs['error_funcs'] = error_funcs
-        else:
-            raise ValueError(f'Function not supported: `{mfl_str_or_func}`')
-    elif isinstance(mfl_str_or_func, dict):
-        kwargs['model_attrs'] = mfl_str_or_func
-    else:
-        raise TypeError(f'Type not supported for `{mfl_str_or_func}`: {type(mfl_str_or_func)}')
-
-    ms_new = ms_old.replace(**kwargs)
-
-    return ms_new
-
-
-def _get_func_if_partial(func):
-    return func.func if isinstance(func, partial) else func
+    if mfl:
+        mfl_new = ms_old.mfl.replace_features(mfl)
+        return ms_old.replace(mfl=mfl_new)
+    if model_attrs:
+        return ms_old.replace(model_attrs=model_attrs)
+    if error is not None:
+        error_funcs = _interpret_error_model(error, ms_old.error_funcs)
+        return ms_old.replace(error_funcs=error_funcs)
+    raise ValueError
 
 
 # FIXME: remove relevant functions when MFL supports that feature
 def _interpret_error_model(error_func, error_old):
-    mutex = [set_additive_error_model, set_proportional_error_model, set_combined_error_model]
-    addons = [set_iiv_on_ruv, set_time_varying_error_model]
+    mutex = ['add', 'prop', 'comb']
+    addons = ['iiv-on-ruv', 'power', 'time-varying']
 
-    if _get_func_if_partial(error_func) in mutex:
-        error_addons = [
-            error_func_addon for error_func_addon in error_old if error_func_addon not in mutex
-        ]
-        error_new = [error_func] + error_addons
-    elif _get_func_if_partial(error_func) in addons:
-        if error_func in error_old:
-            raise ValueError
-        error_new = error_old + [error_func]
+    base_error = set(error_old).intersection(mutex).pop()
+
+    if error_func in mutex:
+        error_addons = error_old.copy().remove(base_error)
+        if error_addons:
+            return [error_func] + error_addons
+        else:
+            return [error_func]
+    elif error_func == '':
+        return [base_error]
     else:
-        raise ValueError
-
-    return error_new
+        error_funcs = error_func.split(';')
+        assert all(func in addons for func in error_funcs)
+        return [base_error] + error_funcs
