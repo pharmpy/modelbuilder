@@ -1,3 +1,5 @@
+from functools import partial
+
 from dash import Input, Output
 from pharmpy.modeling import (
     remove_error_model,
@@ -10,46 +12,30 @@ from pharmpy.modeling import (
 )
 
 import modelbuilder.config as config
-
-base_error_model_funcs = {
-    "add": set_additive_error_model,
-    "prop": set_proportional_error_model,
-    "comb": set_combined_error_model,
-}
+from modelbuilder.internals.help_functions import render_model_code
+from modelbuilder.internals.model_state import update_model_state
 
 
 def error_model_callbacks(app):
     @app.callback(
-        Output("data-dump", "clear_data", allow_duplicate=True),
+        Output("output-model", "value", allow_duplicate=True),
         Input("base-type-radio", "value"),
         prevent_initial_call=True,
     )
-    def update_base_error_model(base_error_model):
-        if base_error_model:
-            config.model = base_error_model_funcs[base_error_model](config.model)
-            return True
+    def update_base_error_model(base_error):
+        if base_error:
+            ms = update_model_state(config.model_state, error=base_error)
+            config.model_state = ms
+            return render_model_code(ms.generate_model())
 
     @app.callback(
-        Output("data-dump", "clear_data", allow_duplicate=True),
-        Input("base-type-radio", "value"),
-        Input("iiv-on-ruv-toggle", "value"),
-        Input("power-toggle", "value"),
-        Input("time-varying-toggle", "value"),
+        Output("output-model", "value", allow_duplicate=True),
+        Input("additional-types-checklist", "value"),
         prevent_initial_call=True,
     )
-    def set_additional_type(base_type, iiv_toggle, power_toggle, time_varying_toggle):
-        if iiv_toggle:
-            config.model = set_iiv_on_ruv(config.model)
-            return True
-        elif power_toggle:
-            config.model = set_power_on_ruv(config.model)
-            return True
-        elif time_varying_toggle:
-            config.model = set_time_varying_error_model(config.model, cutoff=1.0)
-            return True
-        else:
-            config.model = remove_error_model(config.model)
-            config.model = base_error_model_funcs[base_type](config.model)
-            return True
-
-    return
+    def set_additional_type(additional_type):
+        if additional_type is not None:
+            additional_types = ';'.join(additional_type)
+            ms = update_model_state(config.model_state, error=additional_types)
+            config.model_state = ms
+            return render_model_code(ms.generate_model())
