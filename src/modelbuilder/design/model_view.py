@@ -8,7 +8,6 @@ from .style_elements import (
     create_options_list,
     create_radio,
     create_text,
-    refreshtime,
 )
 
 
@@ -37,8 +36,6 @@ def create_model_code_component():
         [
             model_code_clipboard,
             model_code_text,
-            # Update interval value to change how often refresh happens
-            dcc.Interval(id="text-refresh", interval=refreshtime * 1000, n_intervals=0),
         ]
     )
 
