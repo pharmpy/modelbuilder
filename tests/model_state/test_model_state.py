@@ -1,18 +1,15 @@
-from functools import partial
-
 from pharmpy.modeling import (
     create_basic_pk_model,
     has_additive_error_model,
+    has_covariate_effect,
     has_first_order_absorption,
     has_first_order_elimination,
     has_instantaneous_absorption,
     has_michaelis_menten_elimination,
     has_proportional_error_model,
     has_zero_order_absorption,
-    set_additive_error_model,
-    set_iiv_on_ruv,
+    load_example_model,
     set_proportional_error_model,
-    set_time_varying_error_model,
 )
 from pharmpy.tools.mfl.parse import get_model_features, parse
 
@@ -68,6 +65,15 @@ def test_update_model():
     model_state_new = update_model_state(model_state, 'ABSORPTION(ZO)')
     model_new = model_state_new.generate_model()
     assert has_zero_order_absorption(model_new)
+
+    example_model = load_example_model('pheno')
+    dataset, datainfo = example_model.dataset, example_model.datainfo
+    model_state = ModelState.create('oral')
+    model = model_state.generate_model(dataset, datainfo)
+    assert has_first_order_absorption(model)
+    model_state_new = update_model_state(model_state, 'COVARIATE(CL,WGT,exp)')
+    model_new = model_state_new.generate_model(dataset, datainfo)
+    assert has_covariate_effect(model_new, 'CL', 'WGT')
 
 
 def test_update_model_stepwise():

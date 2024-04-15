@@ -1,4 +1,3 @@
-import inspect
 from dataclasses import dataclass
 from functools import partial
 from typing import List
@@ -14,7 +13,7 @@ from pharmpy.modeling import (
     set_proportional_error_model,
     set_time_varying_error_model,
 )
-from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features, parse
+from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
 
 ERROR_FUNCS = {
     'add': set_additive_error_model,
@@ -77,7 +76,7 @@ class ModelState(Immutable):
     @staticmethod
     def _create_base_model(model_type, dataset=None, datainfo=None):
         model = create_basic_pk_model(model_type)
-        if dataset and datainfo:
+        if dataset is not None and datainfo:
             model = model.replace(dataset=dataset, datainfo=datainfo)
         return model
 
@@ -86,10 +85,10 @@ class ModelState(Immutable):
         if self.model_attrs:
             model = model.replace(**self.model_attrs)
 
-        struct_funcs = self._get_mfl_funcs(model)
+        mfl_funcs = self._get_mfl_funcs(model)
 
         model_new = model
-        for func in struct_funcs:
+        for func in mfl_funcs:
             model_new = func(model_new)
         for func_name in self.error_funcs:
             model_new = ERROR_FUNCS[func_name](model_new)
@@ -99,8 +98,9 @@ class ModelState(Immutable):
     def _get_mfl_funcs(self, model_base):
         mfl_str_start = get_model_features(model_base)
         mfl_start = ModelFeatures.create_from_mfl_string(mfl_str_start)
-        lnt = mfl_start.least_number_of_transformations(self.mfl, tool="modelsearch")
-        return list(lnt.values())
+        lnt = mfl_start.least_number_of_transformations(self.mfl, model_base)
+        funcs = list(lnt.values())
+        return funcs
 
 
 def update_model_state(ms_old, mfl=None, **kwargs):
