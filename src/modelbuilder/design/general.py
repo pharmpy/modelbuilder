@@ -23,7 +23,7 @@ def create_route_component():
 
     route_badge = create_badge('Administration route')
     route_options = create_options_list(route_label_dict)
-    route_radio = create_radio('route-radio', options=route_options)
+    route_radio = create_radio('route-radio', options=route_options, value='iv')
 
     return create_col([route_badge, route_radio])
 

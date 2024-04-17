@@ -31,7 +31,7 @@ def structural_callbacks(app):
         prevent_initial_call=True,
     )
     def update_abs_rate_on_click(abs_rate):
-        if abs_rate:
+        if ctx.triggered_id and abs_rate:
             mfl = f'ABSORPTION({abs_rate})'
             ms = update_model_state(config.model_state, mfl)
             config.model_state = ms
@@ -58,10 +58,11 @@ def structural_callbacks(app):
         prevent_initial_call=True,
     )
     def update_elim_on_click(elim):
-        mfl = f'ELIMINATION({elim})'
-        ms = update_model_state(config.model_state, mfl)
-        config.model_state = ms
-        return render_model_code(ms.generate_model())
+        if ctx.triggered_id and elim:
+            mfl = f'ELIMINATION({elim})'
+            ms = update_model_state(config.model_state, mfl)
+            config.model_state = ms
+            return render_model_code(ms.generate_model())
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
@@ -69,7 +70,7 @@ def structural_callbacks(app):
         prevent_initial_call=True,
     )
     def update_abs_delay_on_click(abs_delay):
-        if abs_delay:
+        if ctx.triggered_id and abs_delay:
             mfl = abs_delay
             ms = update_model_state(config.model_state, mfl)
             config.model_state = ms
@@ -97,7 +98,7 @@ def structural_callbacks(app):
         prevent_initial_call=True,
     )
     def peripheral_compartments(n):
-        if n is not None:
+        if ctx.triggered_id and n is not None:
             mfl = f'PERIPHERALS({n})'
             ms = update_model_state(config.model_state, mfl)
             config.model_state = ms
