@@ -18,16 +18,12 @@ def general_callbacks(app):
         Input("route-radio", "value"),
     )
     def change_route(route):
-        if route:
-            # Dataset is connected to model in parse_dataset
-            # old_dataset = config.model.dataset
-            # old_datainfo = config.model.datainfo
-
-            ms = ModelState.create(route)
-            config.model_state = ms
-            return render_model_code(ms.generate_model())
-        else:
-            raise PreventUpdate
+        # Dataset is connected to model in parse_dataset
+        # old_dataset = config.model.dataset
+        # old_datainfo = config.model.datainfo
+        ms = ModelState.create(route)
+        config.model_state = ms
+        return render_model_code(ms.generate_model())
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
@@ -38,13 +34,15 @@ def general_callbacks(app):
     def change_name_desc(name, description):
         if name:
             ms = update_model_state(config.model_state, model_attrs={'name': name})
-            config.model_state = ms
-            return render_model_code(ms.generate_model())
+            if ms != config.model_state:
+                config.model_state = ms
+                return render_model_code(ms.generate_model())
         if description:
             ms = update_model_state(config.model_state, model_attrs={'description': description})
-            config.model_state = ms
-            return render_model_code(ms.generate_model())
-        return render_model_code(config.model_state.generate_model())
+            if ms != config.model_state:
+                config.model_state = ms
+                return render_model_code(ms.generate_model())
+        raise PreventUpdate
 
     # Callback for changing the model print
     @app.callback(
@@ -55,8 +53,10 @@ def general_callbacks(app):
     def change_format(format):
         if format:
             ms = config.model_state.replace(model_format=format)
-            config.model_state = ms
-            return render_model_code(ms.generate_model())
+            if ms != config.model_state:
+                config.model_state = ms
+                return render_model_code(ms.generate_model())
+        raise PreventUpdate
 
     # Dataset-parsing
     @app.callback(
