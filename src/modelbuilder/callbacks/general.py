@@ -15,15 +15,34 @@ def general_callbacks(app):
     # Create model
     @app.callback(
         Output("output-model", "value"),
+        Output("abs_rate-radio", "value"),
+        Output("elim_radio", "value"),
+        Output("peripheral-radio", "value"),
+        Output("abs_delay_radio", "value"),
         Input("route-radio", "value"),
     )
     def change_route(route):
         # Dataset is connected to model in parse_dataset
         # old_dataset = config.model.dataset
         # old_datainfo = config.model.datainfo
+        if route == "iv":
+            default_abs_rate = 0
+            default_abs_delay = 0
+        else:
+            default_abs_rate = 'FO'
+            default_abs_delay = 'LAGTIME(OFF);TRANSITS(0)'
+        default_elim = 'FO'
+        default_peripherals = 0
+
         ms = ModelState.create(route)
         config.model_state = ms
-        return render_model_code(ms.generate_model())
+        return (
+            render_model_code(ms.generate_model()),
+            default_abs_rate,
+            default_elim,
+            default_peripherals,
+            default_abs_delay,
+        )
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),

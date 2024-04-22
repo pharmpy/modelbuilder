@@ -8,26 +8,6 @@ from modelbuilder.internals.model_state import update_model_state
 
 
 def structural_callbacks(app):
-    # FIXME: The return of this are callbacks, some sort of race condition seems to happen since
-    #  they trigger callbacks which affect the model state and model view.
-    # @app.callback(
-    #     Output("abs_rate-radio", "value"),
-    #     Output("elim_radio", "value"),
-    #     Output("peripheral-radio", "value"),
-    #     Output("abs_delay_radio", "value"),
-    #     Input("route-radio", "value"),
-    # )
-    # def reset_defaults(route):
-    #     if route == "iv":
-    #         default_abs_rate = 0
-    #         default_abs_delay = 0
-    #     else:
-    #         default_abs_rate = 'FO'
-    #         default_abs_delay = 'LAGTIME(OFF);TRANSITS(0)'
-    #     default_elim = 'FO'
-    #     default_peripherals = 0
-    #     return default_abs_rate, default_elim, default_peripherals, default_abs_delay
-
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
         Input("abs_rate-radio", "value"),
