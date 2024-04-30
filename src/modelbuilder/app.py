@@ -1,14 +1,15 @@
-import dash_bootstrap_components as dbc
-from dash import Dash
+import os
+import sys
 
-import modelbuilder.design.main as df
-from modelbuilder.callbacks.covariates import covariate_callbacks
-from modelbuilder.callbacks.datainfo import datainfo_callbacks
-from modelbuilder.callbacks.error_model import error_model_callbacks
-from modelbuilder.callbacks.general import general_callbacks
-from modelbuilder.callbacks.parameter_variability import parameter_variability_callbacks
-from modelbuilder.callbacks.parameters import parameter_callbacks
-from modelbuilder.callbacks.structural import structural_callbacks
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+
+import dash_bootstrap_components as dbc
+import design.main as df
+from callbacks.error_model import error_model_callbacks
+from callbacks.general import general_callbacks
+from callbacks.parameters import parameter_callbacks
+from callbacks.structural import structural_callbacks
+from dash import Dash
 
 PHARMPY_LOGO = "https://pharmpy.github.io/latest/_images/Pharmpy_logo.svg"
 
@@ -23,12 +24,9 @@ app = Dash(
 app.layout = df.layout
 
 general_callbacks(app)
-datainfo_callbacks(app)
 structural_callbacks(app)
 parameter_callbacks(app)
-parameter_variability_callbacks(app)
 error_model_callbacks(app)
-covariate_callbacks(app)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
