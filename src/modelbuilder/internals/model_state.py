@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from functools import partial
-from typing import List
+from typing import Union
 
 from pharmpy.internals.immutable import Immutable
+from pharmpy.model import Parameter, Parameters
 from pharmpy.modeling import (
     convert_model,
     create_basic_pk_model,
@@ -31,38 +32,31 @@ class ModelState(Immutable):
     model_format: str
     model_attrs: dict
     mfl: ModelFeatures
-    error_funcs: List[str]
+    error_funcs: list[str]
+    parameters: Parameters
 
-    def __init__(self, model_type, model_format, model_attrs, mfl, error_funcs):
+    def __init__(self, model_type, model_format, model_attrs, mfl, error_funcs, parameters):
         self.model_type = model_type
         self.model_format = model_format
         self.model_attrs = model_attrs
         self.mfl = mfl
         self.error_funcs = error_funcs
+        self.parameters = parameters
 
     def replace(self, **kwargs):
-        if 'model_format' in kwargs:
-            model_format = kwargs['model_format']
-        else:
-            model_format = self.model_format
-        if 'mfl' in kwargs:
-            mfl = kwargs['mfl']
-        else:
-            mfl = self.mfl
-        if 'model_attrs' in kwargs:
-            model_attrs = kwargs['model_attrs']
-        else:
-            model_attrs = self.model_attrs
-        if 'error_funcs' in kwargs:
-            error_funcs = kwargs['error_funcs']
-        else:
-            error_funcs = self.error_funcs
+        model_format = kwargs.get('model_format', self.model_format)
+        mfl = kwargs.get('mfl', self.mfl)
+        model_attrs = kwargs.get('model_attrs', self.model_attrs)
+        error_funcs = kwargs.get('error_funcs', self.error_funcs)
+        parameters = kwargs.get('parameters', self.parameters)
+
         return ModelState(
             model_type=self.model_type,
             model_format=model_format,
             model_attrs=model_attrs,
             mfl=mfl,
             error_funcs=error_funcs,
+            parameters=parameters,
         )
 
     @classmethod
@@ -71,7 +65,8 @@ class ModelState(Immutable):
         mfl_str = get_model_features(model)
         mfl = ModelFeatures.create_from_mfl_string(mfl_str)
         error_funcs = ['prop']
-        return cls(model_type, 'nonmem', {'name': 'start'}, mfl, error_funcs)
+        parameters = model.parameters
+        return cls(model_type, 'nonmem', {'name': 'start'}, mfl, error_funcs, parameters)
 
     @staticmethod
     def _create_base_model(model_type, dataset=None, datainfo=None):
@@ -93,6 +88,15 @@ class ModelState(Immutable):
         for func_name in self.error_funcs:
             model_new = ERROR_FUNCS[func_name](model_new)
 
+        # FIXME: This is needed since new parameters may have been added when e.g.
+        #  changing the structural model. Ideally this should be done in
+        #  ModelState.replace()
+        parameters = self.parameters
+        for p in model_new.parameters:
+            if p.name not in parameters.names:
+                parameters += p
+
+        model_new = model_new.replace(parameters=parameters)
         return convert_model(model_new, self.model_format)
 
     def _get_mfl_funcs(self, model_base):
@@ -102,10 +106,21 @@ class ModelState(Immutable):
         funcs = list(lnt.values())
         return funcs
 
+    def __eq__(self, other):
+        return (
+            self.model_type == other.model_type
+            and self.model_format == other.model_format
+            and self.model_attrs == other.model_attrs
+            and self.mfl == other.mfl
+            and self.error_funcs == other.error_funcs
+            and self.parameters == other.parameters
+        )
+
 
 def update_model_state(ms_old, mfl=None, **kwargs):
     model_attrs = kwargs.get('model_attrs')
     error = kwargs.get('error')
+    parameters = kwargs.get('parameters')
 
     if mfl:
         mfl_new = ms_old.mfl.replace_features(mfl)
@@ -115,6 +130,9 @@ def update_model_state(ms_old, mfl=None, **kwargs):
     if error is not None:
         error_funcs = _interpret_error_model(error, ms_old.error_funcs)
         return ms_old.replace(error_funcs=error_funcs)
+    if parameters:
+        params_new = [Parameter.from_dict(d) for d in parameters]
+        return ms_old.replace(parameters=Parameters.create(params_new))
     raise ValueError
 
 

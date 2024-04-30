@@ -1,19 +1,5 @@
 import dash_bootstrap_components as dbc
-from dash import dash_table, dcc, html
-
-from .style_elements import btn_color
-
-unfix_custom_false_btns = html.Div(
-    children=[
-        dbc.ButtonGroup(
-            [
-                dbc.Button("Unfix All", id="unfix_btn", color=btn_color),
-                dbc.Button("Fix All", id="fix_all_btn", color=btn_color),
-            ]
-        )
-    ],
-    style={"padding-right": "15px", "padding-top": "15px", "padding-bottom": "15px"},
-)
+from dash import dash_table
 
 all_parameters_table = dash_table.DataTable(
     id='parameter-table',
@@ -45,8 +31,6 @@ all_parameters_table = dash_table.DataTable(
 
 parameter_tab = dbc.Container(
     [
-        dcc.Store(id="custom_fix"),
-        unfix_custom_false_btns,
         all_parameters_table,
     ],
     className="mt-4",
