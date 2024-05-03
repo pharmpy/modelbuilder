@@ -8,7 +8,7 @@ refreshtime = 1  # How often the model-code refreshes seconds
 
 def create_options_list(dict_original, disabled=False):
     return [
-        {'label': key, 'value': value, 'disabled': disabled} for key, value in dict_original.items()
+        {'label': " " + key, 'value': value, 'disabled': disabled} for key, value in dict_original.items()
     ]
 
 
@@ -81,7 +81,7 @@ def create_clipboard(target_id):
 def create_text_input(elem_id, label, placeholder):
     label_badge = create_badge(label, with_textbox=True)
     input_text = dbc.Input(id=elem_id, placeholder=placeholder, type="text")
-    return dbc.InputGroup([label_badge, input_text])
+    return dbc.InputGroup([label_badge, input_text], style={"margin-bottom":"5px"})
 
 
 def create_col(children, **kwargs):
