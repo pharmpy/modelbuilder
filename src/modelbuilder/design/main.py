@@ -47,19 +47,22 @@ navbar = dbc.Navbar(
     )
 )
 
-all_tabs = html.Div(
-    dcc.Tabs(
-        id="all-tabs",
-        value='general-tab',
-        children=[
-            dcc.Tab(label="General", value='general-tab', children=general_tab),
-            dcc.Tab(label="Structural", value='structural-tab', children=structural_tab),
-            dcc.Tab(label='Parameters', value='parameters-tab', children=parameter_tab),
-            dcc.Tab(label="Error model", value="error-tab", children=error_tab),
-        ],
-        className='nav-link active',
-    )
-), html.Div(id='tab-content', children=[])
+all_tabs = (
+    html.Div(
+        dcc.Tabs(
+            id="all-tabs",
+            value='general-tab',
+            children=[
+                dcc.Tab(label="General", value='general-tab', children=general_tab),
+                dcc.Tab(label="Structural", value='structural-tab', children=structural_tab),
+                dcc.Tab(label='Parameters', value='parameters-tab', children=parameter_tab),
+                dcc.Tab(label="Error model", value="error-tab", children=error_tab),
+            ],
+            className='nav-link active',
+        )
+    ),
+    html.Div(id='tab-content', children=[]),
+)
 
 
 layout = dbc.Container(

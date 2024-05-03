@@ -1,5 +1,5 @@
 import dash_bootstrap_components as dbc
-from dash import dcc, html
+from dash import dcc, html, dash_table
 
 btn_color = "info"
 badge_color = "info"
@@ -8,7 +8,8 @@ refreshtime = 1  # How often the model-code refreshes seconds
 
 def create_options_list(dict_original, disabled=False):
     return [
-        {'label': " " + key, 'value': value, 'disabled': disabled} for key, value in dict_original.items()
+        {'label': " " + key, 'value': value, 'disabled': disabled}
+        for key, value in dict_original.items()
     ]
 
 
@@ -81,15 +82,15 @@ def create_clipboard(target_id):
 def create_text_input(elem_id, label, placeholder):
     label_badge = create_badge(label, with_textbox=True)
     input_text = dbc.Input(id=elem_id, placeholder=placeholder, type="text")
-    return dbc.InputGroup([label_badge, input_text], style={"margin-bottom":"5px"})
+    return dbc.InputGroup([label_badge, input_text], style={"margin-bottom": "5px"})
 
 
 def create_col(children, **kwargs):
     return dbc.Col(children=children, **kwargs)
 
 
-def create_container(rows):
-    return dbc.Container([html.Br(), *[dbc.Row(row) for row in rows]])
+def create_container(rows, **kwargs):
+    return dbc.Container([html.Br(), *[dbc.Row(row) for row in rows]], **kwargs)
 
 
 def disable_component(options, style=None):
@@ -102,3 +103,27 @@ def enable_component(options, style=None):
     options_new = [{**dictionary, 'disabled': False} for dictionary in options]
     style_new = {**style, 'opacity': 1.0} if style else None
     return options_new, style_new
+
+
+def create_dropdown(names, options):
+    return {name: option for (name, option) in zip(names, options)}
+
+
+def create_table(ID, COL, **kwargs):
+    table = dash_table.DataTable(
+        id=ID,
+        columns=COL,
+        editable=True,
+        row_deletable=False,
+        style_data_conditional=[
+            {
+                'if': {'state': 'active'},
+                'backgroundColor': 'rgba(0, 116, 217, 0.3)',
+                'border': '1px solid rgb(0, 116, 217)',
+            },
+            {'if': {'column_type': 'numeric'}, 'textAlign': 'right'},
+        ],
+        style_cell={'textAlign': 'left', 'width': '20%'},
+        **kwargs,
+    )
+    return table
