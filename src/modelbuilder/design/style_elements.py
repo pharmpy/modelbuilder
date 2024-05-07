@@ -13,6 +13,10 @@ def create_options_list(dict_original, disabled=False):
     ]
 
 
+def create_col_dict(name, id, type, **kwargs):
+    return {'name': name, 'id': id, 'type': type, **kwargs}
+
+
 def create_badge(text, with_textbox=False):
     if with_textbox:
         style = {"width": 150, 'fontSize': 'medium'}

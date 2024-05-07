@@ -1,11 +1,17 @@
-from .style_elements import create_table, create_dropdown, create_container
+from .style_elements import (
+    create_table,
+    create_dropdown,
+    create_container,
+    create_col_dict,
+    create_options_list,
+)
 
 columns = [
-    {'name': 'Name', 'id': 'name', 'type': 'text'},
-    {'name': 'Init', 'id': 'init', 'type': 'numeric'},
-    {'name': 'Lower', 'id': 'lower', 'type': 'numeric'},
-    {'name': 'Upper', 'id': 'upper', 'type': 'numeric'},
-    {'name': 'Fix', 'id': 'fix', 'type': 'any', 'presentation': 'dropdown'},
+    create_col_dict('Name', 'name', 'text'),
+    create_col_dict('Init', 'init', 'numeric'),
+    create_col_dict('Lower', 'lower', 'numeric'),
+    create_col_dict('Upper', 'upper', 'numeric'),
+    create_col_dict('Fix', 'fix', 'any', presentation='dropdown'),
 ]
 
 dropdown = create_dropdown(
