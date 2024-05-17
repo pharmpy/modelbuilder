@@ -7,7 +7,7 @@ dependencies = [
     "pharmpy-core>=0.110.0",
 ]
 
-[project.scripts]
+[project.gui-scripts]
 pharmpy-modelbuilder = "modelbuilder.app:run"
 
 [tool.black]
