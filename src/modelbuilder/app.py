@@ -1,5 +1,7 @@
 import os
 import sys
+import webbrowser
+from threading import Timer
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
@@ -30,8 +32,13 @@ parameter_callbacks(app)
 error_model_callbacks(app)
 
 
+def open_browser():
+    webbrowser.open_new("http://localhost:8050")
+
+
 def run():
-    app.run_server(debug=True)
+    Timer(1, open_browser).start()
+    app.run_server(debug=True, use_reloader=False)
 
 
 if __name__ == '__main__':
