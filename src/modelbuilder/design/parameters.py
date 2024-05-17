@@ -1,9 +1,9 @@
 from .style_elements import (
-    create_table,
-    create_dropdown,
-    create_container,
     create_col_dict,
+    create_container,
+    create_dropdown,
     create_options_list,
+    create_table,
 )
 
 columns = [

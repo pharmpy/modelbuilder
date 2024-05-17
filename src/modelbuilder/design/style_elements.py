@@ -1,5 +1,5 @@
 import dash_bootstrap_components as dbc
-from dash import dcc, html, dash_table
+from dash import dash_table, dcc, html
 
 btn_color = "info"
 badge_color = "info"
