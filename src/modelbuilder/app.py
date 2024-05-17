@@ -4,12 +4,13 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
 import dash_bootstrap_components as dbc
-import design.main as df
-from callbacks.error_model import error_model_callbacks
-from callbacks.general import general_callbacks
-from callbacks.parameters import parameter_callbacks
-from callbacks.structural import structural_callbacks
 from dash import Dash
+
+import modelbuilder.design.main as df
+from modelbuilder.callbacks.error_model import error_model_callbacks
+from modelbuilder.callbacks.general import general_callbacks
+from modelbuilder.callbacks.parameters import parameter_callbacks
+from modelbuilder.callbacks.structural import structural_callbacks
 
 PHARMPY_LOGO = "https://pharmpy.github.io/latest/_images/Pharmpy_logo.svg"
 
@@ -28,5 +29,10 @@ structural_callbacks(app)
 parameter_callbacks(app)
 error_model_callbacks(app)
 
-if __name__ == '__main__':
+
+def run():
     app.run_server(debug=True)
+
+
+if __name__ == '__main__':
+    run()

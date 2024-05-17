@@ -1,3 +1,15 @@
+[project]
+name = "pharmpy-modelbuilder"
+version = "0.1"
+dependencies = [
+    "dash",
+    "dash-bootstrap-components",
+    "pharmpy-core>=0.110.0",
+]
+
+[project.scripts]
+pharmpy-modelbuilder = "modelbuilder.app:run"
+
 [tool.black]
 line-length = 100
 skip-string-normalization = 1
