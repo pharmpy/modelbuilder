@@ -5,6 +5,7 @@ from .style_elements import (
     create_col,
     create_container,
     create_input_group_button,
+    create_upload_group_button,
     create_options_list,
     create_radio,
     create_text,
@@ -49,10 +50,22 @@ def create_download_model_component():
     )
 
 
+def create_load_dataset_component():
+    return create_col(
+        [
+            create_upload_group_button(
+                'upload-dataset', 'dataset-path', 'Load dataset', 'No dataset'
+            ),
+            html.Div(id="load-dataset"),
+        ]
+    )
+
+
 model_format_div = create_container(
     [
         create_model_format_component(),
         create_model_code_component(),
         create_download_model_component(),
+        create_load_dataset_component(),
     ]
 )

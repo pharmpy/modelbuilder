@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from functools import partial
 from typing import Union
+import pandas as pd
 
 from pharmpy.internals.immutable import Immutable
 from pharmpy.model import Parameter, Parameters, RandomVariables
@@ -43,6 +44,7 @@ class ModelState(Immutable):
     rvs: dict
     occ: list
     individual_parameters: list
+    dataset: pd.DataFrame
 
     def __init__(
         self,
@@ -55,6 +57,7 @@ class ModelState(Immutable):
         rvs,
         occ,
         individual_parameters,
+        dataset,
     ):
         self.model_type = model_type
         self.model_format = model_format
@@ -65,6 +68,7 @@ class ModelState(Immutable):
         self.rvs = rvs
         self.occ = occ
         self.individual_parameters = individual_parameters
+        self.dataset = dataset
 
     def replace(self, **kwargs):
         model_format = kwargs.get('model_format', self.model_format)
@@ -75,6 +79,7 @@ class ModelState(Immutable):
         rvs = kwargs.get('rvs', self.rvs)
         occ = kwargs.get('occ', self.occ)
         individual_parameters = kwargs.get('individual_parameters', self.individual_parameters)
+        dataset = kwargs.get('dataset', self.dataset)
 
         return ModelState(
             model_type=self.model_type,
@@ -86,6 +91,7 @@ class ModelState(Immutable):
             rvs=rvs,
             occ=occ,
             individual_parameters=individual_parameters,
+            dataset=dataset,
         )
 
     @classmethod
@@ -98,6 +104,7 @@ class ModelState(Immutable):
         rvs = {'iiv': {}, 'iov': {}}
         occ = model.datainfo.names
         individual_parameters = get_individual_parameters(model)
+        dataset = None
         return cls(
             model_type,
             'nonmem',
@@ -108,6 +115,7 @@ class ModelState(Immutable):
             rvs,
             occ,
             individual_parameters,
+            dataset,
         )
 
     @staticmethod
@@ -136,6 +144,7 @@ class ModelState(Immutable):
             for iiv_func in self.rvs['iiv']:
                 model_new = add_iiv(model_new, **iiv_func)
 
+        model_new = model_new.replace(dataset=self.dataset)
         for iov_func in self.rvs['iov']:
             model_new = add_iov(model_new, **iov_func)
 

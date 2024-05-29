@@ -64,6 +64,16 @@ def create_input_group_button(button_id, input_id, button_text, default_value):
     )
 
 
+def create_upload_group_button(button_id, input_id, button_text, default_value):
+    style = {"fontSize": "medium"}
+    return dbc.InputGroup(
+        [
+            dcc.Upload(dbc.Button(button_text, color=btn_color), id=button_id, style=style),
+            dbc.Input(id=input_id, placeholder=default_value),
+        ]
+    )
+
+
 def create_text(elem_id):
     style = {
         'font-family': 'monospace',

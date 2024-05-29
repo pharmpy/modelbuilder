@@ -91,8 +91,7 @@ def general_callbacks(app):
                 # Assume that the user uploaded a CSV file
                 data = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
 
-                config.model = config.model.replace(dataset=data)
-                config.model = config.model.update_source()
+                config.model_state.dataset = data
             else:
                 # Raise error
                 pass
