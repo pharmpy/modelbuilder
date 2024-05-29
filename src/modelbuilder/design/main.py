@@ -56,6 +56,7 @@ all_tabs = (
                 dcc.Tab(label="General", value='general-tab', children=general_tab),
                 dcc.Tab(label="Structural", value='structural-tab', children=structural_tab),
                 dcc.Tab(label='Parameters', value='parameters-tab', children=parameter_tab),
+                dcc.Tab(label='Parameter Variability', value='par-var-tab', children=par_var_tab),
                 dcc.Tab(label="Error model", value="error-tab", children=error_tab),
             ],
             className='nav-link active',

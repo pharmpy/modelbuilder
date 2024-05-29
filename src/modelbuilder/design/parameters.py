@@ -4,24 +4,20 @@ from .style_elements import (
     create_dropdown,
     create_options_list,
     create_table,
+    create_options_dict,
 )
 
 columns = [
-    create_col_dict('Name', 'name', 'text'),
-    create_col_dict('Init', 'init', 'numeric'),
-    create_col_dict('Lower', 'lower', 'numeric'),
-    create_col_dict('Upper', 'upper', 'numeric'),
-    create_col_dict('Fix', 'fix', 'any', presentation='dropdown'),
+    create_col_dict('Name', 'name', type='text'),
+    create_col_dict('Init', 'init', type='numeric'),
+    create_col_dict('Lower', 'lower', type='numeric'),
+    create_col_dict('Upper', 'upper', type='numeric'),
+    create_col_dict('Fix', 'fix', type='any', presentation='dropdown'),
 ]
 
 dropdown = create_dropdown(
     ['fix'],
-    [
-        {
-            'options': [{'label': 'true', 'value': True}, {'label': 'false', 'value': False}],
-            'clearable': False,
-        },
-    ],
+    [create_options_dict({'true': True, 'false': False}, clearable=False)],
 )
 
 all_parameters_table = create_table('parameter-table', columns, dropdown=dropdown)

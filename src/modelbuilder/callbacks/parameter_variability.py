@@ -3,8 +3,6 @@ import pandas as pd
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 from pharmpy.modeling import (
-    add_iiv,
-    add_iov,
     create_joint_distribution,
     get_individual_parameters,
     has_random_effect,
@@ -14,19 +12,29 @@ from pharmpy.modeling import (
 )
 
 import modelbuilder.config as config
+from modelbuilder.internals.model_state import update_model_state
+from modelbuilder.internals.help_functions import render_model_code
 
 
 def parameter_variability_callbacks(app):
     @app.callback(
         Output("iiv_table", "data"), Input('all-tabs', 'value'), prevent_initial_call=True
     )
-    def render_iiv_iov_data(tab):
+    def render_iiv(tab):
         if tab == "par-var-tab":
-            parameter_names = get_individual_parameters(config.model)
+            parameter_names = config.model_state.individual_parameters
+            rvs = config.model_state.rvs['iiv']
+            if rvs:
+                inits = [rv['initial_estimate'] for rv in rvs]
+                expr = [rv['expression'] for rv in rvs]
+            else:
+                inits = 0.09
+                expr = 'exp'
             df = pd.DataFrame(
                 {
-                    'parameter': parameter_names,
-                    'initial_estimate': 0.09,
+                    'list_of_parameters': parameter_names,
+                    'initial_estimate': inits,
+                    'expression': expr,
                     'operation': '*',
                     'eta_names': None,
                 }
@@ -44,24 +52,21 @@ def parameter_variability_callbacks(app):
     )
     def render_iov(tab):
         if tab == "par-var-tab":
-            parameter_names = get_individual_parameters(config.model)
+            # parameter_names = [rv['list_of_parameters'] for rv in config.model_state.rvs['iiv']]
+            parameter_names = config.model_state.individual_parameters
             iov_data = pd.DataFrame(
-                {'parameter': parameter_names, 'distribution': 'disjoint', 'eta_names': None}
+                {
+                    'list_of_parameters': parameter_names,
+                    'distribution': 'disjoint',
+                    'eta_names': None,
+                }
             )
             iov_data = iov_data.to_dict('records')
-            occ_opts = []
-            if config.model.datainfo:
-                try:
-                    occ_opts = (
-                        config.model.datainfo.typeix["idv"].names
-                        + config.model.datainfo.typeix["unknown"].names
-                    )
-                except:
-                    occ_opts = config.model.datainfo.typeix["unknown"].names
+            occ_opts = config.model_state.occ
 
             iov_dd_options = (
                 {
-                    'occasion': {
+                    'occ': {
                         'options': [config.make_label_value(i, i) for i in occ_opts]
                         if occ_opts
                         else []
@@ -88,7 +93,7 @@ def parameter_variability_callbacks(app):
     )
     def check_iov(tab, selectable):
         if tab == "par-var-tab":
-            if config.model.datainfo:
+            if config.model_state.occ:
                 select = "multi"
             else:
                 select = False
@@ -97,113 +102,38 @@ def parameter_variability_callbacks(app):
             raise PreventUpdate
 
     @app.callback(
-        Output("data-dump", "clear_data", allow_duplicate=True),
+        Output("output-model", "value", allow_duplicate=True),
+        Input("iiv_table", "data"),
         Input("iiv_table", "selected_rows"),
-        State("iiv_table", "data"),
         prevent_initial_call=True,
     )
-    def set_iivs(selected_index, data):
-        new = []
-        idx_to_remove = [i for i in range(len(data)) if i not in selected_index]
-        for i in selected_index:
-            new.append(data[i])
-        for i in idx_to_remove:
-            p = data[i]
-            config.model = remove_iiv(model=config.model, to_remove=p["parameter"])
-
-        created = {}
-        for i in new:
-            if "custom" in i:
-                i["expression"] = i["custom"]
-                del i["custom"]
-
-            if has_random_effect(model=config.model, parameter=i["parameter"], level="iiv"):
-                pass
-            else:
-                config.model = add_iiv(
-                    model=config.model,
-                    list_of_parameters=i["parameter"],
-                    expression=i["expression"],
-                    operation=i["operation"],
-                    initial_estimate=i["initial_estimate"],
-                    eta_names=i["eta_names"],
-                )
-
-            created[i["parameter"]] = [
-                frozenset(i.values()),
-                has_random_effect(model=config.model, parameter=i["parameter"]),
-            ]
-
-        return True
+    def set_iivs(data, selected_rows):
+        rvs = config.model_state.rvs
+        if selected_rows:
+            new_data = [data[row] for row in selected_rows]
+            rvs['iiv'] = new_data
+            ms = update_model_state(config.model_state, rvs=rvs)
+        else:
+            ms = config.model_state
+        config.model_state = ms
+        return render_model_code(ms.generate_model())
 
     @app.callback(
-        Output("data-dump", "clear_data", allow_duplicate=True),
-        Input('iov_table', 'selected_rows'),
-        State('iov_table', 'data'),
+        Output("output-model", "value", allow_duplicate=True),
+        Input("iov_table", "data"),
+        Input("iov_table", "selected_rows"),
         prevent_initial_call=True,
     )
-    def set_iov(selected_index, data):
-        new = []
-        idx_to_remove = [i for i in range(len(data)) if i not in selected_index]
-        for i in selected_index:
-            new.append(data[i])
-        for i in idx_to_remove:
-            par = data[i]
-            try:
-                config.model = remove_iov(model=config.model, to_remove=par["parameter"])
-            except:
-                pass
-        creator = {}
-
-        for i in new:
-            if has_random_effect(model=config.model, parameter=i["parameter"], level="iov"):
-                pass
-            else:
-                config.model = add_iov(
-                    model=config.model,
-                    occ=i["occasion"],
-                    list_of_parameters=i["parameter"],
-                    eta_names=i["eta_names"],
-                )
-            creator[i["parameter"]] = [
-                frozenset(i.values()),
-                has_random_effect(model=config.model, parameter=i["parameter"]),
-            ]
-        return True
-
-    @app.callback(
-        Output('iiv_table', 'selected_rows'), Input('iiv_table', 'data'), prevent_initial_call=True
-    )
-    def check_iiv(iiv_data):
-        def render_checks(data, level):
-            to_check = []
-            for i, j in enumerate(data):
-                try:
-                    if has_random_effect(model=config.model, parameter=j["parameter"], level=level):
-                        to_check.append(i)
-                except:
-                    pass
-            return to_check
-
-        iiv_checks = render_checks(iiv_data, "iiv")
-        return iiv_checks
-
-    @app.callback(
-        Output('iov_table', 'selected_rows'), Input('iov_table', 'data'), prevent_initial_call=True
-    )
-    def check_iov(iov_data):
-        def render_checks(data, level):
-            to_check = []
-            for i, j in enumerate(data):
-                try:
-                    if has_random_effect(model=config.model, parameter=j["parameter"], level=level):
-                        to_check.append(i)
-                except:
-                    pass
-            return to_check
-
-        iov_checks = render_checks(iov_data, "iov")
-        return iov_checks
+    def set_iov(data, selected_rows):
+        rvs = config.model_state.rvs
+        if selected_rows:
+            new_data = [data[row] for row in selected_rows]
+            rvs['iov'] = new_data
+            ms = update_model_state(config.model_state, rvs=rvs)
+        else:
+            ms = config.model_state
+        config.model_state = ms
+        return render_model_code(ms.generate_model())
 
     @app.callback(
         Output("covariance_matrix", "data", allow_duplicate=True),

@@ -30,6 +30,7 @@ general_callbacks(app)
 structural_callbacks(app)
 parameter_callbacks(app)
 error_model_callbacks(app)
+parameter_variability_callbacks(app)
 
 
 def open_browser():

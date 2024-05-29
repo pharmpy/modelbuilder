@@ -3,8 +3,10 @@ from functools import partial
 from typing import Union
 
 from pharmpy.internals.immutable import Immutable
-from pharmpy.model import Parameter, Parameters
+from pharmpy.model import Parameter, Parameters, RandomVariables
 from pharmpy.modeling import (
+    add_iiv,
+    add_iov,
     convert_model,
     create_basic_pk_model,
     set_additive_error_model,
@@ -13,6 +15,10 @@ from pharmpy.modeling import (
     set_power_on_ruv,
     set_proportional_error_model,
     set_time_varying_error_model,
+    get_individual_parameters,
+    remove_iiv,
+    remove_iov,
+    split_joint_distribution,
 )
 from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
 
@@ -34,14 +40,31 @@ class ModelState(Immutable):
     mfl: ModelFeatures
     error_funcs: list[str]
     parameters: Parameters
+    rvs: dict
+    occ: list
+    individual_parameters: list
 
-    def __init__(self, model_type, model_format, model_attrs, mfl, error_funcs, parameters):
+    def __init__(
+        self,
+        model_type,
+        model_format,
+        model_attrs,
+        mfl,
+        error_funcs,
+        parameters,
+        rvs,
+        occ,
+        individual_parameters,
+    ):
         self.model_type = model_type
         self.model_format = model_format
         self.model_attrs = model_attrs
         self.mfl = mfl
         self.error_funcs = error_funcs
         self.parameters = parameters
+        self.rvs = rvs
+        self.occ = occ
+        self.individual_parameters = individual_parameters
 
     def replace(self, **kwargs):
         model_format = kwargs.get('model_format', self.model_format)
@@ -49,6 +72,9 @@ class ModelState(Immutable):
         model_attrs = kwargs.get('model_attrs', self.model_attrs)
         error_funcs = kwargs.get('error_funcs', self.error_funcs)
         parameters = kwargs.get('parameters', self.parameters)
+        rvs = kwargs.get('rvs', self.rvs)
+        occ = kwargs.get('occ', self.occ)
+        individual_parameters = kwargs.get('individual_parameters', self.individual_parameters)
 
         return ModelState(
             model_type=self.model_type,
@@ -57,6 +83,9 @@ class ModelState(Immutable):
             mfl=mfl,
             error_funcs=error_funcs,
             parameters=parameters,
+            rvs=rvs,
+            occ=occ,
+            individual_parameters=individual_parameters,
         )
 
     @classmethod
@@ -66,7 +95,20 @@ class ModelState(Immutable):
         mfl = ModelFeatures.create_from_mfl_string(mfl_str)
         error_funcs = ['prop']
         parameters = model.parameters
-        return cls(model_type, 'nonmem', {'name': 'start'}, mfl, error_funcs, parameters)
+        rvs = {'iiv': {}, 'iov': {}}
+        occ = model.datainfo.names
+        individual_parameters = get_individual_parameters(model)
+        return cls(
+            model_type,
+            'nonmem',
+            {'name': 'start'},
+            mfl,
+            error_funcs,
+            parameters,
+            rvs,
+            occ,
+            individual_parameters,
+        )
 
     @staticmethod
     def _create_base_model(model_type, dataset=None, datainfo=None):
@@ -87,6 +129,15 @@ class ModelState(Immutable):
             model_new = func(model_new)
         for func_name in self.error_funcs:
             model_new = ERROR_FUNCS[func_name](model_new)
+
+        if self.rvs['iiv']:
+            model_new = split_joint_distribution(model_new, model.random_variables.etas.names)
+            model_new = remove_iiv(model_new)
+            for iiv_func in self.rvs['iiv']:
+                model_new = add_iiv(model_new, **iiv_func)
+
+        for iov_func in self.rvs['iov']:
+            model_new = add_iov(model_new, **iov_func)
 
         # FIXME: This is needed since new parameters may have been added when e.g.
         #  changing the structural model. Ideally this should be done in
@@ -114,6 +165,7 @@ class ModelState(Immutable):
             and self.mfl == other.mfl
             and self.error_funcs == other.error_funcs
             and self.parameters == other.parameters
+            and self.rvs == other.rvs
         )
 
 
@@ -121,6 +173,7 @@ def update_model_state(ms_old, mfl=None, **kwargs):
     model_attrs = kwargs.get('model_attrs')
     error = kwargs.get('error')
     parameters = kwargs.get('parameters')
+    rvs = kwargs.get('rvs')
 
     if mfl:
         mfl_new = ms_old.mfl.replace_features(mfl)
@@ -133,6 +186,10 @@ def update_model_state(ms_old, mfl=None, **kwargs):
     if parameters:
         params_new = [Parameter.from_dict(d) for d in parameters]
         return ms_old.replace(parameters=Parameters.create(params_new))
+    if rvs:
+        return ms_old.replace(rvs=rvs)
+    if individual_parameters:
+        return ms_old.replace(individual_parameters=individual_parameters)
     raise ValueError
 
 
