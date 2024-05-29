@@ -13,8 +13,13 @@ def create_options_list(dict_original, disabled=False):
     ]
 
 
-def create_col_dict(name, id, type, **kwargs):
-    return {'name': name, 'id': id, 'type': type, **kwargs}
+def create_options_dict(dict_original, **kwargs):
+    d = [{'label': key, 'value': value} for key, value in dict_original.items()]
+    return {'options': d, **kwargs}
+
+
+def create_col_dict(name, id, **kwargs):
+    return {'name': name, 'id': id, **kwargs}
 
 
 def create_badge(text, with_textbox=False):
