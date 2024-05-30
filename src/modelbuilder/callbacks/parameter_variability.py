@@ -14,29 +14,45 @@ from pharmpy.modeling import (
 import modelbuilder.config as config
 from modelbuilder.internals.model_state import update_model_state
 from modelbuilder.internals.help_functions import render_model_code
+from modelbuilder.design.style_elements import create_dropdown, create_options_dict
 
 
 def parameter_variability_callbacks(app):
     @app.callback(
-        Output("iiv_table", "data"), Input('all-tabs', 'value'), prevent_initial_call=True
+        Output("iiv_table", "data"),
+        Input('all-tabs', 'value'),
+        Input("elim_radio", "value"),
+        prevent_initial_call=True,
     )
-    def render_iiv(tab):
+    def render_iiv(tab, value):
         if tab == "par-var-tab":
-            parameter_names = config.model_state.individual_parameters
             rvs = config.model_state.rvs['iiv']
+            parameter_names = config.model_state.individual_parameters
             if rvs:
-                inits = [rv['initial_estimate'] for rv in rvs]
-                expr = [rv['expression'] for rv in rvs]
+                parameter_etas = [rv['list_of_parameters'] for rv in config.model_state.rvs['iiv']]
+                inits, expr, eta_names = [], [], []
+                for param in parameter_names:
+                    if param in parameter_etas:
+                        for rv in rvs:
+                            if param == rv['list_of_parameters']:
+                                inits.append(rv['initial_estimate'])
+                                expr.append(rv['expression'])
+                                eta_names.append(rv['eta_names'])
+                    else:
+                        inits.append(0.09)
+                        expr.append('exp')
+                        eta_names.append(None)
             else:
                 inits = 0.09
                 expr = 'exp'
+                eta_names = None
             df = pd.DataFrame(
                 {
                     'list_of_parameters': parameter_names,
                     'initial_estimate': inits,
                     'expression': expr,
                     'operation': '*',
-                    'eta_names': None,
+                    'eta_names': eta_names,
                 }
             )
             iiv_data = df.to_dict('records')
@@ -45,59 +61,55 @@ def parameter_variability_callbacks(app):
             raise PreventUpdate
 
     @app.callback(
-        Output("iov_table", "data"),
-        Output("iov_table", "dropdown"),
+        Output("iov_table", "data", allow_duplicate=True),
+        Output("iov_table", "dropdown", allow_duplicate=True),
         Input('all-tabs', 'value'),
+        Input('iiv_table', 'selected_rows'),
+        Input("dataset-path", 'value'),
+        State("iov_table", "data"),
         prevent_initial_call=True,
     )
-    def render_iov(tab):
+    def render_iov(tab, selected_rows, data, filename):
         if tab == "par-var-tab":
-            # parameter_names = [rv['list_of_parameters'] for rv in config.model_state.rvs['iiv']]
-            parameter_names = config.model_state.individual_parameters
-            iov_data = pd.DataFrame(
-                {
-                    'list_of_parameters': parameter_names,
-                    'distribution': 'disjoint',
-                    'eta_names': None,
-                }
-            )
-            iov_data = iov_data.to_dict('records')
-            occ_opts = config.model_state.occ
-
-            iov_dd_options = (
-                {
-                    'occ': {
-                        'options': [config.make_label_value(i, i) for i in occ_opts]
-                        if occ_opts
-                        else []
-                    },
-                    'distribution': {
-                        'options': [
-                            {'label': 'disjoint', 'value': 'disjoint'},
-                            {'label': 'joint', 'value': 'joint'},
-                            {'label': 'explicit', 'value': 'explicit'},
-                            {'label': 'Same as IIV', 'value': 'same-as-iiv'},
-                        ]
-                    },
-                },
-            )
-
-            return iov_data, iov_dd_options[0]
-        else:
-            raise PreventUpdate
-
-    @app.callback(
-        Output("iov_table", "row_selectable"),
-        Input('all-tabs', 'value'),
-        State("iov_table", "row_selectable"),
-    )
-    def check_iov(tab, selectable):
-        if tab == "par-var-tab":
-            if config.model_state.occ:
-                select = "multi"
+            if config.model_state.dataset is None:
+                iov_data = pd.DataFrame(
+                    {
+                        'list_of_parameters': [],
+                        'occ': [],
+                        'distribution': '',
+                        'eta_names': None,
+                    }
+                )
+                iov_dd_options = {}
             else:
-                select = False
-            return select
+                parameter_names = [rv['list_of_parameters'] for rv in config.model_state.rvs['iiv']]
+                occ_opts = config.model_state.occ
+
+                iov_dd_options = create_dropdown(
+                    ['occ', 'distribution'],
+                    [
+                        create_options_dict({i: i for i in occ_opts if occ_opts}, clearable=False),
+                        create_options_dict(
+                            {
+                                'disjoint': 'disjoint',
+                                'joint': 'joint',
+                                'explicit': 'explicit',
+                                'Same as IIV': 'same-as-iiv',
+                            },
+                            clearable=False,
+                        ),
+                    ],
+                )
+                iov_data = pd.DataFrame(
+                    {
+                        'list_of_parameters': parameter_names,
+                        'occ': iov_dd_options['occ']['options'][0]['value'],
+                        'distribution': 'disjoint',
+                        'eta_names': None,
+                    }
+                )
+            iov_data = iov_data.to_dict('records')
+            return iov_data, iov_dd_options
         else:
             raise PreventUpdate
 

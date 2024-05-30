@@ -18,10 +18,9 @@ columns = [
     create_col_dict('Distribution', 'distribution', presentation='dropdown'),
 ]
 
-dropdown = {
-    'occasion': {'options': []},
-    'distribution': {'options': []},
-}
+dropdown = create_dropdown(
+    ['occasion', 'distribution'], [create_options_dict({}), create_options_dict({})]
+)
 
 iov_table = create_table(
     'iov_table', columns, dropdown=dropdown, row_selectable='multi', selected_rows=[]
@@ -31,7 +30,7 @@ columns = [
     create_col_dict('Parameter', 'list_of_parameters'),
     create_col_dict('Expression', 'expression', presentation='dropdown'),
     create_col_dict('Operation', 'operation', presentation='dropdown'),
-    create_col_dict('Initial estimate', 'initial_estimate'),
+    create_col_dict('Initial estimate', 'initial_estimate', type='numeric'),
     create_col_dict('ETA name', 'eta_names'),
 ]
 

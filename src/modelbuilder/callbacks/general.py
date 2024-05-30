@@ -93,6 +93,7 @@ def general_callbacks(app):
                 )
             except:
                 error = "Dataset error!"
+                config.model_state.dataset = None
                 return error
             else:
                 config.model_state.dataset = data
