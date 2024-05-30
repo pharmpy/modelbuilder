@@ -37,6 +37,7 @@ def create_model_code_component():
         [
             model_code_clipboard,
             model_code_text,
+            html.Br(),
         ]
     )
 
@@ -46,6 +47,7 @@ def create_download_model_component():
         [
             create_input_group_button('download-btn', 'model_path', 'Save model', 'model path'),
             html.Div(id="model_confirm"),
+            html.Br(),
         ]
     )
 
