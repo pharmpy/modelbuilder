@@ -54,10 +54,10 @@ class ModelState(Immutable):
         mfl,
         error_funcs,
         parameters,
-        rvs = None,
-        occ = None,
-        individual_parameters = None,
-        dataset = None,
+        rvs=None,
+        occ=None,
+        individual_parameters=None,
+        dataset=None,
     ):
         self.model_type = model_type
         self.model_format = model_format

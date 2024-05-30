@@ -87,18 +87,18 @@ def general_callbacks(app):
         if contents is not None:
             content_type, content_string = contents.split(',')
             decoded = base64.b64decode(content_string)
-            if str(filename).endswith('csv'):
-                # Assume that the user uploaded a CSV file
-                data = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-
-                config.model_state.dataset = data
+            try:
+                data = pd.read_table(
+                    io.StringIO(decoded.decode('utf-8')), sep=r'\s+|,', engine='python'
+                )
+            except:
+                error = "Dataset error!"
+                return error
             else:
-                # Raise error
-                pass
-            return (str(filename),)  # dis, dis
+                config.model_state.dataset = data
+                return (str(filename),)
         else:
             raise PreventUpdate
-        # else: return f'No dataset, editable ={editable}', dis, dis
 
     # Callback for download-btn
     @app.callback(
