@@ -183,6 +183,7 @@ def update_model_state(ms_old, mfl=None, **kwargs):
     error = kwargs.get('error')
     parameters = kwargs.get('parameters')
     rvs = kwargs.get('rvs')
+    individual_parameters = kwargs.get('individual_parameters')
 
     if mfl:
         mfl_new = ms_old.mfl.replace_features(mfl)
@@ -221,3 +222,10 @@ def _interpret_error_model(error_func, error_old):
         error_funcs = error_func.split(';')
         assert all(func in addons for func in error_funcs)
         return [base_error] + error_funcs
+
+
+def update_ms_from_model(model, ms):
+    parameters = model.parameters
+    individual_parameters = get_individual_parameters(model)
+    new_ms = ms.replace(parameters=parameters, individual_parameters=individual_parameters)
+    return new_ms

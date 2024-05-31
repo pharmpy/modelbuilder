@@ -4,7 +4,7 @@ from dash.exceptions import PreventUpdate
 import modelbuilder.config as config
 from modelbuilder.design.style_elements import disable_component, enable_component
 from modelbuilder.internals.help_functions import render_model_code
-from modelbuilder.internals.model_state import update_model_state
+from modelbuilder.internals.model_state import update_model_state, update_ms_from_model
 
 
 def structural_callbacks(app):
@@ -18,8 +18,10 @@ def structural_callbacks(app):
             mfl = f'ABSORPTION({abs_rate})'
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
+                model = ms.generate_model()
+                ms = update_ms_from_model(model, ms)
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
+                return render_model_code(model)
         raise PreventUpdate
 
     @app.callback(
@@ -39,6 +41,7 @@ def structural_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("elim_radio", "value", allow_duplicate=True),
         Input("elim_radio", "value"),
         prevent_initial_call=True,
     )
@@ -47,8 +50,10 @@ def structural_callbacks(app):
             mfl = f'ELIMINATION({elim})'
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
+                model = ms.generate_model()
+                ms = update_ms_from_model(model, ms)
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
+                return render_model_code(model), elim
         raise PreventUpdate
 
     @app.callback(
@@ -61,8 +66,10 @@ def structural_callbacks(app):
             mfl = abs_delay
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
+                model = ms.generate_model()
+                ms = update_ms_from_model(model, ms)
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
+                return render_model_code(model)
         raise PreventUpdate
 
     @app.callback(
@@ -91,6 +98,8 @@ def structural_callbacks(app):
             mfl = f'PERIPHERALS({n})'
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
+                model = ms.generate_model()
+                ms = update_ms_from_model(model, ms)
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
+                return render_model_code(model)
         raise PreventUpdate

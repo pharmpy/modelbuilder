@@ -54,11 +54,10 @@ def parameter_callbacks(app):
     # Getting the model parameters
     @app.callback(
         Output("parameter-table", "data"),
-        Input("route-radio", "value"),
+        Input('all-tabs', 'value'),
     )
-    def create_table(route):
-        if route:
-            return config.model_state.parameters.to_dict()['parameters']
+    def create_table(tab):
+        return config.model_state.parameters.to_dict()['parameters']
 
     @app.callback(
         Output("parameter-table", "data", allow_duplicate=True),

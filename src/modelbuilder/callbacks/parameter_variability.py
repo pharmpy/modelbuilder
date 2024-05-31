@@ -12,7 +12,7 @@ from pharmpy.modeling import (
 )
 
 import modelbuilder.config as config
-from modelbuilder.internals.model_state import update_model_state
+from modelbuilder.internals.model_state import update_model_state, update_ms_from_model
 from modelbuilder.internals.help_functions import render_model_code
 from modelbuilder.design.style_elements import create_dropdown, create_options_dict
 
@@ -20,11 +20,11 @@ from modelbuilder.design.style_elements import create_dropdown, create_options_d
 def parameter_variability_callbacks(app):
     @app.callback(
         Output("iiv_table", "data"),
+        Output("iiv_table", "selected_rows"),
         Input('all-tabs', 'value'),
-        Input("elim_radio", "value"),
         prevent_initial_call=True,
     )
-    def render_iiv(tab, value):
+    def render_iiv(tab):
         if tab == "par-var-tab":
             rvs = config.model_state.rvs['iiv']
             parameter_names = config.model_state.individual_parameters
@@ -56,7 +56,13 @@ def parameter_variability_callbacks(app):
                 }
             )
             iiv_data = df.to_dict('records')
-            return iiv_data
+
+            selected_rows = []
+            if rvs:
+                for row in range(len(iiv_data)):
+                    if iiv_data[row]['list_of_parameters'] in parameter_etas:
+                        selected_rows.append(row)
+            return iiv_data, selected_rows
         else:
             raise PreventUpdate
 
@@ -127,8 +133,9 @@ def parameter_variability_callbacks(app):
             ms = update_model_state(config.model_state, rvs=rvs)
         else:
             ms = config.model_state
-        config.model_state = ms
-        return render_model_code(ms.generate_model())
+        model = ms.generate_model()
+        config.model_state = update_ms_from_model(model, ms)
+        return render_model_code(model)
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
