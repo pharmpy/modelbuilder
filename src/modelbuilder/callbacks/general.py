@@ -114,12 +114,16 @@ def general_callbacks(app):
             return "please provide model name"
         if name and n_clicks:
             if n_clicks:
-                if path:
-                    write_model(config.model, path=path)
-                    return f"Model written to {path}"
+                model = config.model_state.generate_model()
+                if model.dataset is None:
+                    return "Please provide a dataset"
                 else:
-                    write_model(config.model)
-                    return 'Model written to directory folder'
+                    if path:
+                        write_model(config.model_state.generate_model(), path=path)
+                        return f"Model written to {path}"
+                    else:
+                        write_model(config.model_state.generate_model())
+                        return 'Model written to directory folder'
         return f'Provided path {path} '
 
     return
