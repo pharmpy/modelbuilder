@@ -41,7 +41,6 @@ def structural_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
-        Output("elim_radio", "value", allow_duplicate=True),
         Input("elim_radio", "value"),
         prevent_initial_call=True,
     )
@@ -53,7 +52,7 @@ def structural_callbacks(app):
                 model = ms.generate_model()
                 ms = update_ms_from_model(model, ms)
                 config.model_state = ms
-                return render_model_code(model), elim
+                return render_model_code(model)
         raise PreventUpdate
 
     @app.callback(

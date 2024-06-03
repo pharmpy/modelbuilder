@@ -155,8 +155,13 @@ class ModelState(Immutable):
         for p in model_new.parameters:
             if p.name not in parameters.names:
                 parameters += p
+        # Delete parameters that are not in model
+        new_params = Parameters()
+        for p in parameters:
+            if p.name in model_new.parameters:
+                new_params += p
 
-        model_new = model_new.replace(parameters=parameters)
+        model_new = model_new.replace(parameters=new_params)
         return convert_model(model_new, self.model_format)
 
     def _get_mfl_funcs(self, model_base):
