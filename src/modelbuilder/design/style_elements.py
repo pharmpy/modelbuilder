@@ -74,6 +74,11 @@ def create_upload_group_button(button_id, input_id, button_text, default_value):
     )
 
 
+def create_button(button_id, button_text):
+    style = {'fontsize': 'medium'}
+    return dbc.Button(button_text, id=button_id, color=btn_color, style=style, n_clicks=0)
+
+
 def create_text(elem_id):
     style = {
         'font-family': 'monospace',

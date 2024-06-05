@@ -144,9 +144,9 @@ class ModelState(Immutable):
             for iiv_func in self.rvs['iiv']:
                 model_new = add_iiv(model_new, **iiv_func)
 
-        model_new = model_new.replace(dataset=self.dataset)
-        for iov_func in self.rvs['iov']:
-            model_new = add_iov(model_new, **iov_func)
+        if self.rvs['iov']:
+            model_new = model_new.replace(dataset=self.dataset)
+            model_new = add_iov(model_new, **self.rvs['iov'])
 
         # FIXME: This is needed since new parameters may have been added when e.g.
         #  changing the structural model. Ideally this should be done in
