@@ -15,9 +15,7 @@ import modelbuilder.config as config
 from modelbuilder.internals.model_state import update_model_state, update_ms_from_model
 from modelbuilder.internals.help_functions import render_model_code
 from modelbuilder.design.style_elements import (
-    create_dropdown,
-    create_options_dict,
-    create_options_list,
+    create_options_dropdown,
 )
 
 
@@ -64,8 +62,8 @@ def parameter_variability_callbacks(app):
 
     @app.callback(
         Output("iov_params_checklist", "options", allow_duplicate=True),
-        Output("iov_dropdown", "data", allow_duplicate=True),
-        Output("iov_dropdown", "dropdown"),
+        Output("occ_dropdown", "options"),
+        # Output("radio_iov_dist", "options")
         Input('all-tabs', 'value'),
         Input('iiv_table', 'selected_rows'),
         Input("dataset-path", 'value'),
@@ -82,13 +80,7 @@ def parameter_variability_callbacks(app):
             ]
 
             if config.model_state.dataset is None:
-                iov_data2 = pd.DataFrame(
-                    {
-                        'occ': [],
-                        'distribution': '',
-                    }
-                )
-                iov_dd_options = {}
+                occ_opts = {}
             else:
                 new_iov_checklist = []
                 for d in iov_checkboxes_options:
@@ -97,31 +89,10 @@ def parameter_variability_callbacks(app):
                     new_iov_checklist.append(d)
                 iov_checkboxes_options = new_iov_checklist
 
-                occ_opts = config.model_state.occ
-                iov_dd_options = create_dropdown(
-                    ['occ', 'distribution'],
-                    [
-                        create_options_dict({i: i for i in occ_opts if occ_opts}, clearable=False),
-                        create_options_dict(
-                            {
-                                'disjoint': 'disjoint',
-                                'joint': 'joint',
-                                'Same as IIV': 'same-as-iiv',
-                            },
-                            clearable=False,
-                        ),
-                    ],
-                )
-                iov_data2 = pd.DataFrame(
-                    {
-                        'occ': iov_dd_options['occ']['options'][0]['value'],
-                        'distribution': 'disjoint',
-                    },
-                    index=[0],
-                )
+                occ_data = config.model_state.occ
+                occ_opts = create_options_dropdown([i for i in occ_data if occ_data])
 
-            iov_data2 = iov_data2.to_dict('records')
-            return iov_checkboxes_options, iov_data2, iov_dd_options
+            return iov_checkboxes_options, occ_opts
         else:
             raise PreventUpdate
 
@@ -145,17 +116,19 @@ def parameter_variability_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
-        Input("iov_params_checklist", "value"),
-        Input("iov_dropdown", "data"),
+        State("iov_params_checklist", "value"),
+        State("occ_dropdown", "value"),
+        State('radio_iov_dist', 'value'),
         Input("iov_button", "n_clicks"),
         prevent_initial_call=True,
     )
-    def set_iov(iov_checklist, iov_dropdown, n_clicks):
+    def set_iov(iov_checklist, occ_dropdown, iov_dist, n_clicks):
         if n_clicks > 0:
             rvs = config.model_state.rvs
-            if iov_checklist:
-                occ = iov_dropdown[0]['occ']
-                dist = iov_dropdown[0]['distribution']
+            if iov_checklist and occ_dropdown:
+                occ = occ_dropdown
+                dist = iov_dist
+                print(occ, dist)
                 rvs['iov'] = {'list_of_parameters': iov_checklist, 'occ': occ, 'distribution': dist}
                 ms = update_model_state(config.model_state, rvs=rvs)
             else:
