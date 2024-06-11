@@ -12,6 +12,7 @@ from pharmpy.modeling import (
     create_basic_pk_model,
     create_joint_distribution,
     get_parameter_rv,
+    get_rv_parameters,
     set_additive_error_model,
     set_combined_error_model,
     set_iiv_on_ruv,
@@ -108,7 +109,8 @@ class ModelState(Immutable):
         mfl = ModelFeatures.create_from_mfl_string(mfl_str)
         error_funcs = ['prop']
         parameters = model.parameters
-        rvs = {'iiv': {}, 'iov': {}}
+        iiv_rvs = _get_iiv_rvs(model)
+        rvs = {'iiv': iiv_rvs, 'iov': {}}
         occ = model.datainfo.names
         individual_parameters = get_individual_parameters(model)
         dataset = None
@@ -253,3 +255,9 @@ def update_ms_from_model(model, ms):
     individual_parameters = get_individual_parameters(model)
     new_ms = ms.replace(parameters=parameters, individual_parameters=individual_parameters)
     return new_ms
+
+
+def _get_iiv_rvs(model):
+    rvs_model = model.random_variables.iiv.names
+    param_names = [get_rv_parameters(model, param)[0] for param in rvs_model]
+    return [{'list_of_parameters': param, 'expression': 'exp'} for param in param_names]
