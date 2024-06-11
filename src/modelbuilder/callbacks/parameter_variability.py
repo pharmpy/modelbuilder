@@ -55,7 +55,7 @@ def parameter_variability_callbacks(app):
                 create_col_dict('Parameter', 'list_of_parameters'),
                 create_col_dict('Expression', 'expression', presentation='dropdown'),
             ]
-            for i in range(1, len(parameter_names)):
+            for i in range(1, len(parameter_names) // 2 + 1):
                 col_names.append(f'corr_{i}')
                 col = (create_col_dict(f'Corr. {i}', f'corr_{i}', presentation='dropdown'),)
                 columns.append(col[0])
@@ -80,6 +80,14 @@ def parameter_variability_callbacks(app):
 
             df = pd.DataFrame(table_dict)
             iiv_data = df.to_dict('records')
+
+            block = config.model_state.block
+            if block:
+                for i in range(len(block)):
+                    bl = block[i]
+                    for row in range(len(iiv_data)):
+                        if iiv_data[row]['list_of_parameters'] in bl:
+                            iiv_data[row][f'corr_{i+1}'] = 'True'
 
             selected_rows = []
             if rvs:
