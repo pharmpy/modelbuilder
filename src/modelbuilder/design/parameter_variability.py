@@ -62,7 +62,7 @@ def create_iiv_table():
     ]
 
     dropdown = create_dropdown(
-        ['expression', 'correlation'],
+        ['expression'],
         [
             create_options_dict(
                 {'Additive': 'add', 'Proportional': 'prop', 'Exponential': 'exp', 'Logit': 'log'},

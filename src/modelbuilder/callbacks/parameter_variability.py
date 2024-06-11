@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 import pandas as pd
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -16,6 +17,9 @@ from modelbuilder.internals.model_state import update_model_state, update_ms_fro
 from modelbuilder.internals.help_functions import render_model_code
 from modelbuilder.design.style_elements import (
     create_options_dropdown,
+    create_col_dict,
+    create_dropdown,
+    create_options_dict,
 )
 
 
@@ -23,6 +27,8 @@ def parameter_variability_callbacks(app):
     @app.callback(
         Output("iiv_table", "data"),
         Output("iiv_table", "selected_rows"),
+        Output("iiv_table", "columns"),
+        Output("iiv_table", "dropdown"),
         Input('all-tabs', 'value'),
         prevent_initial_call=True,
     )
@@ -43,12 +49,36 @@ def parameter_variability_callbacks(app):
             else:
                 expr = 'exp'
 
-            df = pd.DataFrame(
-                {
-                    'list_of_parameters': parameter_names,
-                    'expression': expr,
-                }
-            )
+            table_dict = {'list_of_parameters': parameter_names, 'expression': expr}
+            col_names = []
+            columns = [
+                create_col_dict('Parameter', 'list_of_parameters'),
+                create_col_dict('Expression', 'expression', presentation='dropdown'),
+            ]
+            for i in range(1, len(parameter_names)):
+                col_names.append(f'corr_{i}')
+                col = (create_col_dict(f'Corr. {i}', f'corr_{i}', presentation='dropdown'),)
+                columns.append(col[0])
+                table_dict[f'corr_{i}'] = 'False'
+
+            options1 = [
+                create_options_dict(
+                    {
+                        'Additive': 'add',
+                        'Proportional': 'prop',
+                        'Exponential': 'exp',
+                        'Logit': 'log',
+                    },
+                    clearable=False,
+                )
+            ]
+            options2 = [
+                create_options_dict({'False': 'False', 'True': 'True'}, clearable=False)
+            ] * len(col_names)
+            options = options1 + options2
+            dropdown = create_dropdown(['expression'] + col_names, options)
+
+            df = pd.DataFrame(table_dict)
             iiv_data = df.to_dict('records')
 
             selected_rows = []
@@ -56,14 +86,13 @@ def parameter_variability_callbacks(app):
                 for row in range(len(iiv_data)):
                     if iiv_data[row]['list_of_parameters'] in parameter_etas:
                         selected_rows.append(row)
-            return iiv_data, selected_rows
+            return iiv_data, selected_rows, columns, dropdown
         else:
             raise PreventUpdate
 
     @app.callback(
         Output("iov_params_checklist", "options", allow_duplicate=True),
         Output("occ_dropdown", "options"),
-        # Output("radio_iov_dist", "options")
         Input('all-tabs', 'value'),
         Input('iiv_table', 'selected_rows'),
         Input("dataset-path", 'value'),
@@ -105,9 +134,25 @@ def parameter_variability_callbacks(app):
     def set_iivs(data, selected_rows):
         rvs = config.model_state.rvs
         if selected_rows:
-            new_data = [data[row] for row in selected_rows]
+            new_data = []
+            for row in selected_rows:
+                new_data.append({k: data[row][k] for k in ('list_of_parameters', 'expression')})
             rvs['iiv'] = new_data
             ms = update_model_state(config.model_state, rvs=rvs)
+
+        if len(selected_rows) > 1:
+            block_all = []
+            keys = list(data[row].keys())
+            for corr_col in keys[2:]:
+                block = []
+                for row in selected_rows:
+                    param = data[row]['list_of_parameters']
+                    if data[row][corr_col] == 'True':
+                        if param not in itertools.chain.from_iterable(block_all):
+                            block.append(param)
+                block_all.append(block)
+            if block_all:
+                ms = update_model_state(config.model_state, block=block_all)
         else:
             ms = config.model_state
         model = ms.generate_model()
@@ -128,7 +173,6 @@ def parameter_variability_callbacks(app):
             if iov_checklist and occ_dropdown:
                 occ = occ_dropdown
                 dist = iov_dist
-                print(occ, dist)
                 rvs['iov'] = {'list_of_parameters': iov_checklist, 'occ': occ, 'distribution': dist}
                 ms = update_model_state(config.model_state, rvs=rvs)
             else:
