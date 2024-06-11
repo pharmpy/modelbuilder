@@ -149,9 +149,9 @@ class ModelState(Immutable):
         for func_name in self.error_funcs:
             model_new = ERROR_FUNCS[func_name](model_new)
 
+        model_new = split_joint_distribution(model_new, model.random_variables.etas.names)
+        model_new = remove_iiv(model_new)
         if self.rvs['iiv']:
-            model_new = split_joint_distribution(model_new, model.random_variables.etas.names)
-            model_new = remove_iiv(model_new)
             for iiv_func in self.rvs['iiv']:
                 model_new = add_iiv(model_new, **iiv_func)
 

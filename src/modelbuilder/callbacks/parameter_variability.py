@@ -142,10 +142,14 @@ def parameter_variability_callbacks(app):
     def set_iivs(data, selected_rows):
         rvs = config.model_state.rvs
         if selected_rows:
+            rvs['iov'] = {}
             new_data = []
             for row in selected_rows:
                 new_data.append({k: data[row][k] for k in ('list_of_parameters', 'expression')})
             rvs['iiv'] = new_data
+            ms = update_model_state(config.model_state, rvs=rvs)
+        else:
+            rvs['iiv'] = {}
             ms = update_model_state(config.model_state, rvs=rvs)
 
         if len(selected_rows) > 1:
@@ -172,7 +176,7 @@ def parameter_variability_callbacks(app):
         State("iov_params_checklist", "value"),
         State("occ_dropdown", "value"),
         State('radio_iov_dist', 'value'),
-        Input("iov_button", "n_clicks"),
+        Input("iov_add_button", "n_clicks"),
         prevent_initial_call=True,
     )
     def set_iov(iov_checklist, occ_dropdown, iov_dist, n_clicks):
@@ -185,6 +189,22 @@ def parameter_variability_callbacks(app):
                 ms = update_model_state(config.model_state, rvs=rvs)
             else:
                 ms = config.model_state
+            model = ms.generate_model()
+            config.model_state = update_ms_from_model(model, ms)
+            return render_model_code(model)
+        else:
+            raise PreventUpdate
+
+    @app.callback(
+        Output("output-model", "value", allow_duplicate=True),
+        Input("iov_remove_button", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def remove_iov(n_clicks):
+        if n_clicks > 0:
+            rvs = config.model_state.rvs
+            rvs['iov'] = {}
+            ms = update_model_state(config.model_state, rvs=rvs)
             model = ms.generate_model()
             config.model_state = update_ms_from_model(model, ms)
             return render_model_code(model)

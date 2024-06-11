@@ -51,8 +51,9 @@ def create_iov_dist():
 
 
 def create_iov_button():
-    iov_button = create_button('iov_button', 'Add IOV')
-    return create_col([iov_button])
+    iov_add_button = create_button('iov_add_button', 'Add IOV')
+    iov_remove_button = create_button('iov_remove_button', 'Remove all IOVs')
+    return create_col([iov_add_button, iov_remove_button])
 
 
 def create_iiv_table():
