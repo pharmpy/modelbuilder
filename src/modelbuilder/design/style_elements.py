@@ -1,5 +1,6 @@
 import dash_bootstrap_components as dbc
 from dash import dash_table, dcc, html
+import dash_ag_grid as dag
 
 btn_color = "info"
 badge_color = "info"
@@ -11,6 +12,10 @@ def create_options_list(dict_original, disabled=False):
         {'label': " " + key, 'value': value, 'disabled': disabled}
         for key, value in dict_original.items()
     ]
+
+
+def create_options_dropdown(list_original):
+    return [{'label': i, 'value': i} for i in list_original]
 
 
 def create_options_dict(dict_original, **kwargs):
@@ -72,6 +77,11 @@ def create_upload_group_button(button_id, input_id, button_text, default_value):
             dbc.Input(id=input_id, placeholder=default_value),
         ]
     )
+
+
+def create_button(button_id, button_text):
+    style = {'fontsize': 'medium'}
+    return dbc.Button(button_text, id=button_id, color=btn_color, style=style, n_clicks=0)
 
 
 def create_text(elem_id):
@@ -146,3 +156,7 @@ def create_table(ID, COL, **kwargs):
         **kwargs,
     )
     return table
+
+
+def create_dropdown_component(ID, options, clearable=False):
+    return dcc.Dropdown(options=options, id=ID, clearable=clearable)

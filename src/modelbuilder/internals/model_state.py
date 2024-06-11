@@ -10,6 +10,9 @@ from pharmpy.modeling import (
     add_iov,
     convert_model,
     create_basic_pk_model,
+    create_joint_distribution,
+    get_parameter_rv,
+    get_rv_parameters,
     set_additive_error_model,
     set_combined_error_model,
     set_iiv_on_ruv,
@@ -45,6 +48,7 @@ class ModelState(Immutable):
     occ: list
     individual_parameters: list
     dataset: pd.DataFrame
+    block: list
 
     def __init__(
         self,
@@ -58,6 +62,7 @@ class ModelState(Immutable):
         occ=None,
         individual_parameters=None,
         dataset=None,
+        block=None,
     ):
         self.model_type = model_type
         self.model_format = model_format
@@ -69,6 +74,7 @@ class ModelState(Immutable):
         self.occ = occ
         self.individual_parameters = individual_parameters
         self.dataset = dataset
+        self.block = block
 
     def replace(self, **kwargs):
         model_format = kwargs.get('model_format', self.model_format)
@@ -80,6 +86,7 @@ class ModelState(Immutable):
         occ = kwargs.get('occ', self.occ)
         individual_parameters = kwargs.get('individual_parameters', self.individual_parameters)
         dataset = kwargs.get('dataset', self.dataset)
+        block = kwargs.get('block', self.block)
 
         return ModelState(
             model_type=self.model_type,
@@ -92,6 +99,7 @@ class ModelState(Immutable):
             occ=occ,
             individual_parameters=individual_parameters,
             dataset=dataset,
+            block=block,
         )
 
     @classmethod
@@ -101,10 +109,12 @@ class ModelState(Immutable):
         mfl = ModelFeatures.create_from_mfl_string(mfl_str)
         error_funcs = ['prop']
         parameters = model.parameters
-        rvs = {'iiv': {}, 'iov': {}}
+        iiv_rvs = _get_iiv_rvs(model)
+        rvs = {'iiv': iiv_rvs, 'iov': {}}
         occ = model.datainfo.names
         individual_parameters = get_individual_parameters(model)
         dataset = None
+        block = None
         return cls(
             model_type,
             'nonmem',
@@ -116,6 +126,7 @@ class ModelState(Immutable):
             occ,
             individual_parameters,
             dataset,
+            block,
         )
 
     @staticmethod
@@ -144,9 +155,16 @@ class ModelState(Immutable):
             for iiv_func in self.rvs['iiv']:
                 model_new = add_iiv(model_new, **iiv_func)
 
-        model_new = model_new.replace(dataset=self.dataset)
-        for iov_func in self.rvs['iov']:
-            model_new = add_iov(model_new, **iov_func)
+        if self.rvs['iov']:
+            model_new = model_new.replace(dataset=self.dataset)
+            model_new = add_iov(model_new, **self.rvs['iov'])
+
+        if self.block:
+            model_new = split_joint_distribution(model_new)
+            for bl in self.block:
+                params = [get_parameter_rv(model_new, param)[0] for param in bl]
+                if len(params) > 1:
+                    model_new = create_joint_distribution(model_new, params)
 
         # FIXME: This is needed since new parameters may have been added when e.g.
         #  changing the structural model. Ideally this should be done in
@@ -189,6 +207,7 @@ def update_model_state(ms_old, mfl=None, **kwargs):
     parameters = kwargs.get('parameters')
     rvs = kwargs.get('rvs')
     individual_parameters = kwargs.get('individual_parameters')
+    block = kwargs.get('block')
 
     if mfl:
         mfl_new = ms_old.mfl.replace_features(mfl)
@@ -205,6 +224,8 @@ def update_model_state(ms_old, mfl=None, **kwargs):
         return ms_old.replace(rvs=rvs)
     if individual_parameters:
         return ms_old.replace(individual_parameters=individual_parameters)
+    if block is not None:
+        return ms_old.replace(block=block)
     raise ValueError
 
 
@@ -234,3 +255,9 @@ def update_ms_from_model(model, ms):
     individual_parameters = get_individual_parameters(model)
     new_ms = ms.replace(parameters=parameters, individual_parameters=individual_parameters)
     return new_ms
+
+
+def _get_iiv_rvs(model):
+    rvs_model = model.random_variables.iiv.names
+    param_names = [get_rv_parameters(model, param)[0] for param in rvs_model]
+    return [{'list_of_parameters': param, 'expression': 'exp'} for param in param_names]
