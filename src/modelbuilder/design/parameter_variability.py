@@ -53,7 +53,7 @@ def create_iov_dist():
 def create_iov_button():
     iov_add_button = create_button('iov_add_button', 'Add IOV')
     iov_remove_button = create_button('iov_remove_button', 'Remove all IOVs', color='danger')
-    return create_col([iov_add_button, iov_remove_button])
+    return create_col([iov_add_button, iov_remove_button, html.Div(id='dataset_text')])
 
 
 def create_iiv_table():

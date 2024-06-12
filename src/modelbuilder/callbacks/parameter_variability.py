@@ -101,6 +101,7 @@ def parameter_variability_callbacks(app):
     @app.callback(
         Output("iov_params_checklist", "options", allow_duplicate=True),
         Output("occ_dropdown", "options"),
+        Output('dataset_text', 'children'),
         Input('all-tabs', 'value'),
         Input('iiv_table', 'selected_rows'),
         Input("dataset-path", 'value'),
@@ -118,6 +119,7 @@ def parameter_variability_callbacks(app):
 
             if config.model_state.dataset is None:
                 occ_opts = {}
+                outtext = 'Please provide a dataset to add IOVs'
             else:
                 new_iov_checklist = []
                 for d in iov_checkboxes_options:
@@ -128,8 +130,9 @@ def parameter_variability_callbacks(app):
 
                 occ_data = config.model_state.occ
                 occ_opts = create_options_dropdown([i for i in occ_data if occ_data])
+                outtext = ''
 
-            return iov_checkboxes_options, occ_opts
+            return iov_checkboxes_options, occ_opts, outtext
         else:
             raise PreventUpdate
 
