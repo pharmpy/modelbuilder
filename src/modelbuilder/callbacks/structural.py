@@ -18,7 +18,7 @@ def structural_callbacks(app):
             mfl = f'ABSORPTION({abs_rate})'
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
-                ms = update_model_state(config.model_state, rvs={'iiv': [], 'iov': []})
+                ms = ms.replace(rvs={'iiv': [], 'iov': []})
                 model = ms.generate_model()
                 ms = update_ms_from_model(model, ms)
                 config.model_state = ms
@@ -50,7 +50,7 @@ def structural_callbacks(app):
             mfl = f'ELIMINATION({elim})'
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
-                ms = update_model_state(config.model_state, rvs={'iiv': [], 'iov': []})
+                ms = ms.replace(rvs={'iiv': [], 'iov': []})
                 model = ms.generate_model()
                 ms = update_ms_from_model(model, ms)
                 config.model_state = ms
@@ -67,7 +67,7 @@ def structural_callbacks(app):
             mfl = abs_delay
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
-                ms = update_model_state(config.model_state, rvs={'iiv': [], 'iov': []})
+                ms = ms.replace(rvs={'iiv': [], 'iov': []})
                 model = ms.generate_model()
                 ms = update_ms_from_model(model, ms)
                 config.model_state = ms
@@ -100,7 +100,7 @@ def structural_callbacks(app):
             mfl = f'PERIPHERALS({n})'
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
-                ms = update_model_state(config.model_state, rvs={'iiv': [], 'iov': []})
+                ms = ms.replace(rvs={'iiv': [], 'iov': []})
                 model = ms.generate_model()
                 ms = update_ms_from_model(model, ms)
                 config.model_state = ms
