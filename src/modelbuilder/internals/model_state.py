@@ -109,7 +109,7 @@ class ModelState(Immutable):
         mfl = ModelFeatures.create_from_mfl_string(mfl_str)
         error_funcs = ['prop']
         parameters = model.parameters
-        iiv_rvs = _get_iiv_rvs(model)
+        iiv_rvs = _update_rvs_from_model(model)
         rvs = {'iiv': iiv_rvs, 'iov': {}}
         occ = model.datainfo.names
         individual_parameters = get_individual_parameters(model)
@@ -257,7 +257,10 @@ def update_ms_from_model(model, ms):
     return new_ms
 
 
-def _get_iiv_rvs(model):
-    rvs_model = model.random_variables.iiv.names
-    param_names = [get_rv_parameters(model, param)[0] for param in rvs_model]
-    return [{'list_of_parameters': param, 'expression': 'exp'} for param in param_names]
+def _update_rvs_from_model(model):
+    rvs_names = model.random_variables.iiv.names
+    if rvs_names:
+        param_names = [get_rv_parameters(model, param)[0] for param in rvs_names]
+        return [{'list_of_parameters': param, 'expression': 'exp'} for param in param_names]
+    else:
+        return []
