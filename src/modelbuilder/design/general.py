@@ -9,11 +9,11 @@ from .style_elements import (
 
 
 def create_type_component():
-    type_label_dict = {'PK': 'PK'}
+    type_label_dict = {'PK': 'PK', 'PD': 'PD'}
 
     type_badge = create_badge('Model type')
     type_options = create_options_list(type_label_dict)
-    type_radio = create_radio('model_type', options=type_options)
+    type_radio = create_radio('model_type', options=type_options, value='PK')
 
     return create_col([type_badge, type_radio])
 
