@@ -1,6 +1,5 @@
 import dash_bootstrap_components as dbc
 from dash import dash_table, dcc, html
-import dash_ag_grid as dag
 
 btn_color = "info"
 badge_color = "info"
@@ -79,9 +78,9 @@ def create_upload_group_button(button_id, input_id, button_text, default_value):
     )
 
 
-def create_button(button_id, button_text):
+def create_button(button_id, button_text, color=btn_color):
     style = {'fontsize': 'medium'}
-    return dbc.Button(button_text, id=button_id, color=btn_color, style=style, n_clicks=0)
+    return dbc.Button(button_text, id=button_id, color=color, style=style, n_clicks=0)
 
 
 def create_text(elem_id):

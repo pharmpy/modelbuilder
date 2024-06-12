@@ -17,7 +17,7 @@ from .style_elements import (
 
 
 def create_iov_badge():
-    iov_badge = create_badge("IOV")
+    iov_badge = create_badge("IOVs")
     return create_col([iov_badge])
 
 
@@ -52,7 +52,7 @@ def create_iov_dist():
 
 def create_iov_button():
     iov_add_button = create_button('iov_add_button', 'Add IOV')
-    iov_remove_button = create_button('iov_remove_button', 'Remove all IOVs')
+    iov_remove_button = create_button('iov_remove_button', 'Remove all IOVs', color='danger')
     return create_col([iov_add_button, iov_remove_button])
 
 
@@ -73,7 +73,12 @@ def create_iiv_table():
     )
 
     iiv_table = create_table(
-        'iiv_table', columns, dropdown=dropdown, row_selectable='multi', selected_rows=[]
+        'iiv_table',
+        columns,
+        dropdown=dropdown,
+        row_selectable='multi',
+        selected_rows=[],
+        fill_width=False,
     )
     iiv_badge = create_badge("IIVs")
     return create_col([iiv_badge, iiv_table])
