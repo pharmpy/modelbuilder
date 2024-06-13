@@ -46,6 +46,52 @@ def general_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output('pd_effect_radio', 'value'),
+        Output("pd_expression_radio", "value"),
+        Output("abs_rate-radio", "value", allow_duplicate=True),
+        Output("elim_radio", "value", allow_duplicate=True),
+        Output("peripheral-radio", "value", allow_duplicate=True),
+        Output("abs_delay_radio", "value", allow_duplicate=True),
+        Input("model_type", "value"),
+        Input("route-radio", "value"),
+        prevent_initial_call=True,
+    )
+    def change_model_type(model_type, route):
+        effect = None
+        expr = None
+
+        if route == "iv":
+            default_abs_rate = 0
+            default_abs_delay = 0
+        else:
+            default_abs_rate = 'FO'
+            default_abs_delay = 'LAGTIME(OFF);TRANSITS(0)'
+        default_elim = 'FO'
+        default_peripherals = 0
+
+        ms = ModelState.create(route)
+        config.model_state = ms
+
+        if model_type == 'PD':
+            mfl = 'DIRECTEFFECT(LINEAR)'
+            ms = ms.replace(mfl=mfl)
+            ms = update_model_state(config.model_state, mfl)
+            effect = 'DIRECTEFFECT'
+            expr = 'LINEAR'
+            config.model_state = ms
+
+        return (
+            render_model_code(ms.generate_model()),
+            effect,
+            expr,
+            default_abs_rate,
+            default_elim,
+            default_peripherals,
+            default_abs_delay,
+        )
+
+    @app.callback(
+        Output("output-model", "value", allow_duplicate=True),
         Input("model-name", "value"),
         Input("model-description", "value"),
         prevent_initial_call=True,
