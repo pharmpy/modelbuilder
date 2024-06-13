@@ -144,13 +144,13 @@ class ModelState(Immutable):
         mfl_funcs = self._get_mfl_funcs(model)
 
         model_new = model
+        model_new = remove_iiv(model_new)
+
         for func in mfl_funcs:
             model_new = func(model_new)
         for func_name in self.error_funcs:
             model_new = ERROR_FUNCS[func_name](model_new)
 
-        model_new = split_joint_distribution(model_new, model.random_variables.etas.names)
-        model_new = remove_iiv(model_new)
         if self.rvs['iiv']:
             for iiv_func in self.rvs['iiv']:
                 model_new = add_iiv(model_new, **iiv_func)
