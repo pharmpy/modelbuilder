@@ -26,6 +26,8 @@ def error_model_callbacks(app):
         prevent_initial_call=True,
     )
     def update_additional_error_model(additional_type):
+        # FIXME: when power is added after iiv on ruv then the resulting error model will be wrong
+        # Issue https://github.com/pharmpy/pharmpy/issues/3102
         if additional_type is not None:
             additional_types = ';'.join(additional_type)
             ms = update_model_state(config.model_state, error=additional_types)

@@ -27,8 +27,8 @@ def create_base_type_component():
 
 def create_additional_types_component():
     additional_types_label_dict = {
-        'IIV on RUV': 'iiv-on-ruv',
         'Power': 'power',
+        'IIV on RUV': 'iiv-on-ruv',
         'Time varying': 'time-varying',
     }
 
