@@ -30,23 +30,23 @@ def replace_empty(data):
     return data
 
 
-def fix_blocks(rvs, data):
+def fix_blocks(data):
+    old_params = config.model_state.parameters
+    ms = update_model_state(config.model_state, parameters=data)
+    model = ms.generate_model()
+    rvs = model.random_variables
     blocks = [rv.parameter_names for rv in rvs if isinstance(rv, JointNormalDistribution)]
 
-    params_in_block = []
-    for item in data:
-        for key, value in item.items():
-            if key == 'fix' and value == True:
-                param = item['name']
-                for block in blocks:
-                    if param in block:
-                        params_in_block.append(block)
-
-    for block in params_in_block:
-        for param in block:
-            for item in data:
-                if str(item['name']) == param:
-                    item['fix'] = True
+    for block in blocks:
+        old_param = old_params[block[0]].name
+        old_fix = old_params[block[0]].fix
+        for param in data:
+            if param['name'] in block:
+                new_fix = param['fix']
+                if old_fix != new_fix:
+                    for param in data:
+                        if param['name'] in block:
+                            param['fix'] = new_fix
     return data
 
 
@@ -68,7 +68,7 @@ def parameter_callbacks(app):
     def update_table(data):
         data = replace_empty(data)
 
-        # data = fix_blocks(model.random_variables, data)
+        data = fix_blocks(data)
         ms = update_model_state(config.model_state, parameters=data)
         config.model_state = ms
 
