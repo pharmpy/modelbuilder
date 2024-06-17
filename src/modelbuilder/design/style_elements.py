@@ -6,6 +6,10 @@ badge_color = "info"
 refreshtime = 1  # How often the model-code refreshes seconds
 
 
+def create_empty_line():
+    return html.Br()
+
+
 def create_options_list(dict_original, disabled=False):
     return [
         {'label': " " + key, 'value': value, 'disabled': disabled}

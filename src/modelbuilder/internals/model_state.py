@@ -107,7 +107,7 @@ class ModelState(Immutable):
         model = cls._create_base_model(model_type)
         mfl_str = get_model_features(model)
         mfl = ModelFeatures.create_from_mfl_string(mfl_str)
-        error_funcs = ['prop']
+        error_funcs = {1: ['prop']}
         parameters = model.parameters
         iiv_rvs = _update_rvs_from_model(model)
         rvs = {'iiv': iiv_rvs, 'iov': {}}
@@ -136,7 +136,7 @@ class ModelState(Immutable):
             model = model.replace(dataset=dataset, datainfo=datainfo)
         return model
 
-    def generate_model(self, dataset=None, datainfo=None):
+    def generate_model(self, dataset=None, datainfo=None, dv=None):
         model = self._create_base_model(self.model_type, dataset, datainfo)
         if self.model_attrs:
             model = model.replace(**self.model_attrs)
@@ -148,8 +148,9 @@ class ModelState(Immutable):
 
         for func in mfl_funcs:
             model_new = func(model_new)
-        for func_name in self.error_funcs:
-            model_new = ERROR_FUNCS[func_name](model_new)
+        for dv, func_names in self.error_funcs.items():
+            for func_name in func_names:
+                model_new = ERROR_FUNCS[func_name](model_new, dv=dv)
 
         if self.rvs['iiv']:
             for iiv_func in self.rvs['iiv']:
@@ -237,24 +238,38 @@ def update_model_state(ms_old, mfl=None, **kwargs):
 
 
 # FIXME: remove relevant functions when MFL supports that feature
-def _interpret_error_model(error_func, error_old):
+def _interpret_error_model(error_funcs, error_old):
     mutex = ['add', 'prop', 'comb']
     addons = ['iiv-on-ruv', 'power', 'time-varying']
 
-    base_error = set(error_old).intersection(mutex).pop()
+    base_error = {}
+    for key, value in error_old.items():
+        base = set(value).intersection(mutex).pop()
+        base_error[key] = base
 
-    if error_func in mutex:
-        error_addons = error_old.copy().remove(base_error)
-        if error_addons:
-            return [error_func] + error_addons
+    err_f = {}
+    for dv, error_func in error_funcs.items():
+        base_err = base_error.get(dv)
+        if error_func in mutex:
+            if base_err:
+                error_addons = error_old[dv].copy().remove(base_error[dv])
+            else:
+                error_addons = []
+            if error_addons:
+                err_f[dv] = [error_func] + error_addons
+            else:
+                err_f[dv] = [error_func]
+        elif error_func == '':
+            if base_err:
+                err_f[dv] = [base_error[dv]]
         else:
-            return [error_func]
-    elif error_func == '':
-        return [base_error]
-    else:
-        error_funcs = error_func.split(';')
-        assert all(func in addons for func in error_funcs)
-        return [base_error] + error_funcs
+            error_funcs = error_func.split(';')
+            assert all(func in addons for func in error_funcs)
+            if base_err:
+                err_f[dv] = [base_error[dv]] + error_funcs
+            else:
+                err_f[dv] = error_funcs
+    return err_f
 
 
 def update_ms_from_model(model, ms):
