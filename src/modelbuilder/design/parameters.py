@@ -5,6 +5,7 @@ from .style_elements import (
     create_options_list,
     create_table,
     create_options_dict,
+    create_header,
 )
 
 columns = [
@@ -21,5 +22,6 @@ dropdown = create_dropdown(
 )
 
 all_parameters_table = create_table('parameter-table', columns, dropdown=dropdown)
+header = create_header('Parameters')
 
-parameter_tab = create_container([all_parameters_table], className="mt-4")
+parameter_tab = create_container([header, all_parameters_table], className="mt-4")

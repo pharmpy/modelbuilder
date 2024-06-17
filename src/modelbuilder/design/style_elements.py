@@ -1,6 +1,9 @@
 import dash_bootstrap_components as dbc
 from dash import dash_table, dcc, html
 
+success_color = '#18bc9c'
+pharmpy_color = '#0f8282'
+main_color = pharmpy_color
 btn_color = "info"
 badge_color = "info"
 refreshtime = 1  # How often the model-code refreshes seconds
@@ -8,6 +11,12 @@ refreshtime = 1  # How often the model-code refreshes seconds
 
 def create_empty_line():
     return html.Br()
+
+
+def create_header(text):
+    line = html.Hr(style={'height': '2px', 'background': 'grey', 'color': 'grey'})
+    header = html.Header(text, style={'color': main_color, 'font-size': 30})
+    return create_col([header, line])
 
 
 def create_options_list(dict_original, disabled=False):
@@ -32,10 +41,10 @@ def create_col_dict(name, id, **kwargs):
 
 def create_badge(text, with_textbox=False):
     if with_textbox:
-        style = {"width": 150, 'fontSize': 'medium'}
+        style = {"width": 150, 'fontSize': 'large', 'padding': '15px'}
     else:
         style = {"font-size": "large"}
-    return dbc.Badge(text, color="success", style=style)
+    return dbc.Badge(text, color=main_color, style=style)
 
 
 def create_radio(elem_id, options, style=None, **kwargs):

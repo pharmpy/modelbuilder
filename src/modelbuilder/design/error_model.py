@@ -9,6 +9,7 @@ from .style_elements import (
     create_options_list,
     create_radio,
     create_empty_line,
+    create_header,
 )
 
 
@@ -23,7 +24,6 @@ def create_base_type_component():
         'Proportional': 'prop',
     }
 
-    base_type_badge = create_badge("Base types")
     dv1_badge = create_badge('DV = 1')
     line = create_empty_line()
 
@@ -35,9 +35,7 @@ def create_base_type_component():
     base_type_options_dv2.append(create_options_list({'Combined': 'combined'}, disabled=True)[0])
     base_type_radio_2 = create_radio('base-type-radio-dv2', options=base_type_options_dv2)
 
-    return create_col(
-        [base_type_badge, line, dv1_badge, base_type_radio, line, dv2_badge, base_type_radio_2]
-    )
+    return create_col([dv1_badge, base_type_radio, line, dv2_badge, base_type_radio_2])
 
 
 def create_additional_types_component():
@@ -47,7 +45,6 @@ def create_additional_types_component():
         'Time varying': 'time-varying',
     }
 
-    additional_types_badge = create_badge("Additional types")
     dv1_badge = create_badge('DV = 1')
     dv2_badge = create_badge('DV = 2')
     line = create_empty_line()
@@ -61,8 +58,6 @@ def create_additional_types_component():
 
     return create_col(
         [
-            additional_types_badge,
-            line,
             dv1_badge,
             additional_types_radio,
             line,
@@ -74,5 +69,9 @@ def create_additional_types_component():
 
 base_type_component = create_base_type_component()
 additional_types_component = create_additional_types_component()
+base_header = create_header('Base types')
+add_types_header = create_header('Additional types')
 
-error_tab = create_container([[base_type_component, additional_types_component]])
+error_tab = create_container(
+    [[base_header, add_types_header], [base_type_component, additional_types_component]]
+)

@@ -26,7 +26,7 @@ def create_model_format_component():
         model_format_options,
         inputStyle={"font-size": "large", "margin": "10px"},
         inline=True,
-        value='nonmem'
+        value='nonmem',
     )
     return create_col([model_format_radio])
 

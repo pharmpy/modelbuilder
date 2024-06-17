@@ -13,12 +13,9 @@ from .style_elements import (
     create_checklist,
     create_dropdown_component,
     create_radio,
+    create_empty_line,
+    create_header,
 )
-
-
-def create_iov_badge():
-    iov_badge = create_badge("IOVs")
-    return create_col([iov_badge])
 
 
 def create_iov_params_component():
@@ -80,8 +77,7 @@ def create_iiv_table():
         selected_rows=[],
         fill_width=False,
     )
-    iiv_badge = create_badge("IIVs")
-    return create_col([iiv_badge, iiv_table])
+    return create_col([iiv_table, create_empty_line()])
 
 
 iiv_table = create_iiv_table()
@@ -89,8 +85,9 @@ iov_checkbox = create_iov_params_component()
 iov_dropdown = create_occ_dropdown()
 iov_button = create_iov_button()
 iov_dist = create_iov_dist()
-iov_badge = create_iov_badge()
+iiv_header = create_header('IIVs')
+iov_header = create_header('IOVs')
 
 par_var_tab = create_container(
-    ([iiv_table], [iov_badge], [iov_checkbox, iov_dropdown, iov_dist], [iov_button])
+    ([iiv_header], [iiv_table], [iov_header], [iov_checkbox, iov_dropdown, iov_dist], [iov_button])
 )

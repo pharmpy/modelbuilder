@@ -4,17 +4,8 @@ from .style_elements import (
     create_container,
     create_options_list,
     create_radio,
+    create_header,
 )
-
-
-def create_pk_badge():
-    pk_badge = create_badge("PK")
-    return create_col([pk_badge])
-
-
-def create_pd_badge():
-    pd_badge = create_badge("PD")
-    return create_col([pd_badge])
 
 
 def create_absorption_rate_component():
@@ -117,18 +108,18 @@ abs_rate_component = create_absorption_rate_component()
 elim_component = create_elimination_rate_component()
 abs_delay_component = create_absorption_delay_component()
 peripherals_component = create_peripherals_component()
-pk_badge = create_pk_badge()
-pd_badge = create_pd_badge()
+pk_header = create_header('PK')
+pd_header = create_header('PD')
 pd_effect = create_pd_effect()
 pd_expression = create_pd_expression()
 pd_production = create_pd_production()
 
 structural_tab = create_container(
     (
-        [pk_badge],
+        [pk_header],
         [abs_rate_component, elim_component],
         [abs_delay_component, peripherals_component],
-        [pd_badge],
+        [pd_header],
         [pd_effect, pd_expression, pd_production],
     )
 )
