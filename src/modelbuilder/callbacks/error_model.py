@@ -17,6 +17,8 @@ def error_model_callbacks(app):
     )
     def update_base_error_model(base_error, base_error2):
         if base_error:
+            if base_error2 is None:
+                base_error2 = ''
             ms = update_model_state(config.model_state, error={1: base_error, 2: base_error2})
             if ms != config.model_state:
                 model = ms.generate_model()
@@ -35,7 +37,10 @@ def error_model_callbacks(app):
         # Issue https://github.com/pharmpy/pharmpy/issues/3102
         if additional_type is not None:
             additional_types = ';'.join(additional_type)
-            additional_types_2 = ';'.join(additional_type_2)
+            if additional_type_2 is not None:
+                additional_types_2 = ';'.join(additional_type_2)
+            else:
+                additional_types_2 = ''
             ms = update_model_state(
                 config.model_state, error={1: additional_types, 2: additional_types_2}
             )
