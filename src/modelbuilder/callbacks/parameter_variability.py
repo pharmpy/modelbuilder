@@ -57,7 +57,7 @@ def parameter_variability_callbacks(app):
             ]
             for i in range(1, len(parameter_names) // 2 + 1):
                 col_names.append(f'corr_{i}')
-                col = (create_col_dict(f'Corr. {i}', f'corr_{i}', presentation='dropdown'),)
+                col = (create_col_dict(f'Block {i}', f'corr_{i}', presentation='dropdown'),)
                 columns.append(col[0])
                 table_dict[f'corr_{i}'] = 'False'
 
@@ -73,7 +73,7 @@ def parameter_variability_callbacks(app):
                 )
             ]
             options2 = [
-                create_options_dict({'False': 'False', 'True': 'True'}, clearable=False)
+                create_options_dict({'□': 'False', 'X': 'True'}, clearable=False)
             ] * len(col_names)
             options = options1 + options2
             dropdown = create_dropdown(['expression'] + col_names, options)

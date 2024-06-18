@@ -100,7 +100,6 @@ def structural_callbacks(app):
             mfl = f'PERIPHERALS({n})'
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
-                ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
                 model = ms.generate_model()
                 ms = update_ms_from_model(model, ms)
                 config.model_state = ms
