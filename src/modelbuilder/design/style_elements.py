@@ -159,16 +159,22 @@ def create_table(ID, COL, **kwargs):
         style_data_conditional=[
             {
                 'if': {'state': 'active'},
-                'backgroundColor': 'rgba(0, 116, 217, 0.3)',
-                'border': '1px solid rgb(0, 116, 217)',
+                'backgroundColor': '#44bdbd',
+                'border': f'1px solid {main_color}',
             },
             {'if': {'column_type': 'numeric'}, 'textAlign': 'right'},
         ],
         style_cell={'textAlign': 'left', 'width': '20%'},
+        css=[
+            {
+                "selector": ".dash-spreadsheet .Select-option",
+                "rule": f"color: {main_color}",
+            },
+        ],
         **kwargs,
     )
     return table
 
 
 def create_dropdown_component(ID, options, clearable=False):
-    return dcc.Dropdown(options=options, id=ID, clearable=clearable)
+    return dcc.Dropdown(options=options, id=ID, clearable=clearable, style={'color': pharmpy_color})
