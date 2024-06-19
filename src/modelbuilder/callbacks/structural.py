@@ -118,9 +118,8 @@ def structural_callbacks(app):
             # FIXME: Workaround to reset to PK model
             mfl_pk = config.model_state.mfl.filter('pk')
             ms_pk = config.model_state.replace(mfl=mfl_pk)
-            if effect == 'INDIRECTEFFECT':
-                if prod:
-                    mfl = f'{effect}({expr},{prod})'
+            if effect == 'INDIRECTEFFECT' and prod:
+                mfl = f'{effect}({expr},{prod})'
             else:
                 mfl = f'{effect}({expr})'
             ms = update_model_state(ms_pk, mfl)

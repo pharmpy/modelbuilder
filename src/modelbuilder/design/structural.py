@@ -81,7 +81,6 @@ def create_pd_expression():
         'Linear': 'LINEAR',
         'Emax': 'EMAX',
         'Sigmoid': 'SIGMOID',
-        'Step': 'STEP',
     }
 
     pd_expr_badge = create_badge("Expression")
@@ -93,13 +92,13 @@ def create_pd_expression():
 
 def create_pd_production():
     pd_prod_label_dict = {
-        'True': 'True',
-        'False': 'False',
+        'Production': 'PRODUCTION',
+        'Degradation': 'DEGRADATION',
     }
 
-    pd_prod_badge = create_badge("Production")
+    pd_prod_badge = create_badge("Type")
     pd_prod_options = create_options_list(pd_prod_label_dict)
-    pd_prod_radio = create_radio('pd_production_radio', options=pd_prod_options, value='True')
+    pd_prod_radio = create_radio('pd_production_radio', options=pd_prod_options, value='PRODUCTION')
 
     return create_col([pd_prod_badge, pd_prod_radio])
 
