@@ -1,65 +1,58 @@
 <img src="https://pharmpy.github.io/latest/_images/Pharmpy_logo.svg"> 
 
-# PharmpyModelbuilder.Alpha 
+# Pharmpy Model Builder
 
-**WARNING** 
+## Overview
 
-This app is in early **alpha** stages and everything is subject to change.
-
-Please open issues so they can be resolved and the **ModelBuilder** can be improved.
-
-**WARNING**
-
----
-## INFO
-
-**PharmpyModelbuilder** is a **user interface** with the aim to provide a more graphical approach to using most of [Pharmpy](https://pharmpy.github.io/latest/index.html)'s functionality.
-A user can thus create a basic model, make changes in it and **live** see how it affects the model code. 
-
-Current functionality is:
-- Creating a basic PK model
-    - Specifying its route, name, description
-- Simultaneous update and switching between model code in formats:
-    - **nonmem**
-    - **rxode2**
-    - **nlmixr**
-- Modify the **DataInfo** file from a dataset
-- Make changes to model parameters, distributions, elimination
-- Write the model to path 
+The Pharmpy model builder is a **graphical user interface** for the creation of pharmacometric models.
+A user can create a basic model, make changes to it and **live** see how it affects the model code in different
+modeling languages.
 
 ## Installation
 
-To setup, clone this repository into a folder.
-This can be run directly on top of your `python` client or in a `venv`.
+To setup, clone this repository into a folder:
 
-To create a `venv` with the name ``pharmpy_ui`` run the following command:
 ```
-python -m venv pharmpy_ui
+git clone https://github.com/pharmpy/modelbuilder.git
 ```
+
+This can be run directly on top of your `python` client or in a virtual environment. We recommend
+using a virtual environment to not affect your standard python installation:
+
+To create a virtual environment with the name ``mymodelbuilder`` run the following command:
+
+```
+python -m venv mymodelbuilder
+```
+
 Then activate it using:
 
 **Windows**
+
 ```
-cd /path/modelbuilder/pharmpy_ui
-scripts/activate.ps1
+mymodelbuilder\scripts\activate.ps1
 ```
 
 **Linux/macOS**
+
 ```
-cd /path/modelbuilder/pharmpy_ui
-source bin/activate
+. ./mymodelbuilder/bin/activate
 ```
 
-Once done, navigate to the `/modelbuilder` folder and install necessary packages from **requirements.txt** using
+Now the modelbuilder can be installed with 
 
-`pip install -r requirements.txt`
+```
+pip install modelbuilder
+```
 
 ## Run the app
+
 To start the app:
 
-`python app.py`
+`pharmpy-modelbuilder`
 
-It should look something like
+In the commandline this should look something like
+
 ```
 Dash is running on http://127.0.0.1:8050/
 
@@ -71,5 +64,8 @@ Dash is running on http://127.0.0.1:8050/
  * Running on http://127.0.0.1:8050 (Press CTRL+C to quit)
 ```
 
-The app will then be hosted on `http://127.0.0.1:8050/`, navigate to that in your browser and you should see the app. 
+and a tab with the GUI should open in your browser. If not you could try to navigate to `http://127.0.0.1:8050/` in the browser.
 
+## Development
+
+Developers needs to have the python tox package installed and can start the app with `tox -e serve`
