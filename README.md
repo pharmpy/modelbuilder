@@ -42,7 +42,7 @@ mymodelbuilder\scripts\activate.ps1
 Now the modelbuilder can be installed with 
 
 ```
-pip install modelbuilder
+pip install ./modelbuilder
 ```
 
 ## Run the app
