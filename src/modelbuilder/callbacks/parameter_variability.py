@@ -1,3 +1,4 @@
+import ast
 import numpy as np
 import itertools
 import pandas as pd
@@ -72,9 +73,9 @@ def parameter_variability_callbacks(app):
                     clearable=False,
                 )
             ]
-            options2 = [
-                create_options_dict({'□': 'False', 'X': 'True'}, clearable=False)
-            ] * len(col_names)
+            options2 = [create_options_dict({'□': 'False', 'X': 'True'}, clearable=False)] * len(
+                col_names
+            )
             options = options1 + options2
             dropdown = create_dropdown(['expression'] + col_names, options)
 
@@ -100,15 +101,16 @@ def parameter_variability_callbacks(app):
 
     @app.callback(
         Output("iov_params_checklist", "options", allow_duplicate=True),
-        Output("occ_dropdown", "options"),
+        Output("iov_table", "data"),
+        Output("iov_table", "dropdown"),
         Output('dataset_text', 'children'),
         Input('all-tabs', 'value'),
-        Input('iiv_table', 'selected_rows'),
+        # Input('iiv_table', 'selected_rows'),
         Input("dataset-path", 'value'),
         State("iov_params_checklist", "value"),
         prevent_initial_call=True,
     )
-    def render_iov(tab, selected_rows, data, filename):
+    def render_iov(tab, data, filename):
         if tab == "par-var-tab":
             parameter_names = [rv['list_of_parameters'] for rv in config.model_state.rvs['iiv']]
             iov_checkboxes_options = config.model_state.individual_parameters
@@ -118,7 +120,14 @@ def parameter_variability_callbacks(app):
             ]
 
             if config.model_state.dataset is None:
-                occ_opts = {}
+                iov_data = pd.DataFrame(
+                    {
+                        'list_of_parameters': [],
+                        'occ': [],
+                        'distribution': '',
+                    }
+                )
+                dropdown_opts = {}
                 outtext = 'Please provide a dataset to add IOVs'
             else:
                 new_iov_checklist = []
@@ -128,16 +137,40 @@ def parameter_variability_callbacks(app):
                     new_iov_checklist.append(d)
                 iov_checkboxes_options = new_iov_checklist
 
-                occ_data = config.model_state.occ
-                occ_opts = create_options_dropdown([i for i in occ_data if occ_data])
+                occ_opts = config.model_state.occ
                 outtext = ''
+                dropdown_opts = create_dropdown(
+                    ['occ', 'distribution'],
+                    [
+                        create_options_dict({i: i for i in occ_opts if occ_opts}, clearable=False),
+                        create_options_dict(
+                            {
+                                'disjoint': 'disjoint',
+                                'joint': 'joint',
+                                'explicit': 'explicit',
+                                'Same as IIV': 'same-as-iiv',
+                            },
+                            clearable=False,
+                        ),
+                    ],
+                )
+                iov_data = pd.DataFrame(
+                    {
+                        'list_of_parameters': [],
+                        'occ': [],
+                        'distribution': [],
+                    }
+                )
 
-            return iov_checkboxes_options, occ_opts, outtext
+            iov_data = iov_data.to_dict('records')
+            return iov_checkboxes_options, iov_data, dropdown_opts, outtext
         else:
             raise PreventUpdate
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("iiv_table", "data", allow_duplicate=True),
+        Output("iov_table", "selected_rows"),
         Input("iiv_table", "data"),
         Input("iiv_table", "selected_rows"),
         prevent_initial_call=True,
@@ -166,50 +199,84 @@ def parameter_variability_callbacks(app):
                         if param not in itertools.chain.from_iterable(block_all):
                             block.append(param)
                 block_all.append(block)
-            if block_all:
-                ms = update_model_state(config.model_state, block=block_all)
         else:
-            ms = config.model_state
+            block_all = []
+
+        new_block = []
+        for bl in block_all:
+            if len(bl) < 2:
+                bl = []
+            new_block.append(bl)
+
+        ms = update_model_state(config.model_state, block=new_block)
+
+        model = ms.generate_model()
+        config.model_state = update_ms_from_model(model, ms)
+        return render_model_code(model), data, []
+
+    @app.callback(
+        Output("iov_table", "data", allow_duplicate=True),
+        Output("iov_params_checklist", 'value'),
+        Input("iov_add_button", "n_clicks"),
+        State("iov_params_checklist", "value"),
+        State('iov_table', 'data'),
+        State('iov_table', 'columns'),
+        prevent_initial_call=True,
+    )
+    def add_iov_to_table(n_clicks, iov_checklist, rows, columns):
+        if n_clicks > 0 and iov_checklist:
+            # parameter_names = [Expr.symbol(a) for a in iov_checklist]
+            rows.append(
+                {'list_of_parameters': f"{iov_checklist}", 'occ': "ID", 'distribution': "disjoint"}
+            )
+            return rows, []
+        else:
+            raise PreventUpdate
+
+    @app.callback(
+        Output("iov_params_checklist", "options"),
+        Input('iov_table', 'data'),
+        Input("iiv_table", "selected_rows"),
+        State("iov_params_checklist", "options"),
+        State("iiv_table", "data"),
+        prevent_initial_call=True,
+    )
+    def update_checklist(rows, iiv_selected_rows, options, iiv_data):
+        iiv_params = [iiv_data[row]['list_of_parameters'] for row in iiv_selected_rows]
+        print(iiv_params)
+        params = []
+        for row in rows:
+            params.extend(ast.literal_eval(row['list_of_parameters']))
+
+        new_options = []
+        for opt in options:
+            if (
+                opt['label'] in iiv_params
+                and config.model_state.dataset is not None
+                and not opt['label'] in params
+            ):
+                opt['disabled'] = False
+            else:
+                opt['disabled'] = True
+            new_options.append(opt)
+
+        return new_options
+
+    @app.callback(
+        Output("output-model", "value", allow_duplicate=True),
+        Input("iov_table", "data"),
+        Input("iov_table", "selected_rows"),
+        prevent_initial_call=True,
+    )
+    def set_iov(data, selected_rows):
+        rvs = config.model_state.rvs
+        if selected_rows:
+            new_data = [data[row] for row in selected_rows]
+            rvs['iov'] = new_data
+            ms = update_model_state(config.model_state, rvs=rvs)
+        else:
+            rvs['iov'] = {}
+            ms = update_model_state(config.model_state, rvs=rvs)
         model = ms.generate_model()
         config.model_state = update_ms_from_model(model, ms)
         return render_model_code(model)
-
-    @app.callback(
-        Output("output-model", "value", allow_duplicate=True),
-        State("iov_params_checklist", "value"),
-        State("occ_dropdown", "value"),
-        State('radio_iov_dist', 'value'),
-        Input("iov_add_button", "n_clicks"),
-        prevent_initial_call=True,
-    )
-    def set_iov(iov_checklist, occ_dropdown, iov_dist, n_clicks):
-        if n_clicks > 0:
-            rvs = config.model_state.rvs
-            if iov_checklist and occ_dropdown:
-                occ = occ_dropdown
-                dist = iov_dist
-                rvs['iov'] = {'list_of_parameters': iov_checklist, 'occ': occ, 'distribution': dist}
-                ms = update_model_state(config.model_state, rvs=rvs)
-            else:
-                ms = config.model_state
-            model = ms.generate_model()
-            config.model_state = update_ms_from_model(model, ms)
-            return render_model_code(model)
-        else:
-            raise PreventUpdate
-
-    @app.callback(
-        Output("output-model", "value", allow_duplicate=True),
-        Input("iov_remove_button", "n_clicks"),
-        prevent_initial_call=True,
-    )
-    def remove_iov(n_clicks):
-        if n_clicks > 0:
-            rvs = config.model_state.rvs
-            rvs['iov'] = {}
-            ms = update_model_state(config.model_state, rvs=rvs)
-            model = ms.generate_model()
-            config.model_state = update_ms_from_model(model, ms)
-            return render_model_code(model)
-        else:
-            raise PreventUpdate

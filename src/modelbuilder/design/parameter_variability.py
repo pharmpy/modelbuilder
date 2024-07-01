@@ -26,31 +26,31 @@ def create_iov_params_component():
     return create_col([iov_params_badge, iov_params_radio])
 
 
-def create_occ_dropdown():
-    occ_badge = create_badge("Occasion")
-    dropdown_options = create_dropdown(['occasion'], [])
-    dropdown = create_dropdown_component('occ_dropdown', options=dropdown_options)
-    return create_col([occ_badge, dropdown])
-
-
-def create_iov_dist():
-    iov_label_dict = {
-        'Joint': 'joint',
-        'Disjoint': 'disjoint',
-        'Same as IIV': 'same-as-iiv',
-    }
-
-    iov_dist_badge = create_badge("Distribution")
-    iov_dist_options = create_options_list(iov_label_dict)
-    iov_dist_radio = create_radio('radio_iov_dist', options=iov_dist_options, value='disjoint')
-
-    return create_col([iov_dist_badge, iov_dist_radio])
-
-
 def create_iov_button():
-    iov_add_button = create_button('iov_add_button', 'Add IOV')
-    iov_remove_button = create_button('iov_remove_button', 'Remove all IOVs', color='danger')
-    return create_col([iov_add_button, iov_remove_button, html.Div(id='dataset_text')])
+    add_btn = create_button('iov_add_button', 'Add')
+    return create_col([add_btn, html.Div(id='dataset_text')])
+
+
+def create_iov_table():
+    columns = [
+        create_col_dict('Parameters', 'list_of_parameters'),
+        create_col_dict('Occasion column', 'occ', presentation='dropdown'),
+        create_col_dict('Distribution', 'distribution', presentation='dropdown'),
+    ]
+    dropdown = create_dropdown(
+        ['occasion', 'distribution'], [create_options_dict({}), create_options_dict({})]
+    )
+
+    iov_table = create_table(
+        'iov_table',
+        columns,
+        dropdown=dropdown,
+        row_selectable='multi',
+        row_deletable=True,
+        selected_rows=[],
+    )
+
+    return create_col([iov_table])
 
 
 def create_iiv_table():
@@ -74,6 +74,7 @@ def create_iiv_table():
         columns,
         dropdown=dropdown,
         row_selectable='multi',
+        row_deletable=True,
         selected_rows=[],
         fill_width=False,
     )
@@ -82,12 +83,11 @@ def create_iiv_table():
 
 iiv_table = create_iiv_table()
 iov_checkbox = create_iov_params_component()
-iov_dropdown = create_occ_dropdown()
 iov_button = create_iov_button()
-iov_dist = create_iov_dist()
+iov_table = create_iov_table()
 iiv_header = create_header('IIVs')
 iov_header = create_header('IOVs')
 
 par_var_tab = create_container(
-    ([iiv_header], [iiv_table], [iov_header], [iov_checkbox, iov_dropdown, iov_dist], [iov_button])
+    ([iiv_header], [iiv_table], [iov_header], [iov_checkbox, iov_button], [iov_table])
 )
