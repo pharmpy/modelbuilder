@@ -155,7 +155,6 @@ def create_table(ID, COL, **kwargs):
         id=ID,
         columns=COL,
         editable=True,
-        row_deletable=False,
         style_data_conditional=[
             {
                 'if': {'state': 'active'},

@@ -1,3 +1,4 @@
+import ast
 from dataclasses import dataclass
 from functools import partial
 from typing import Union
@@ -158,7 +159,9 @@ class ModelState(Immutable):
 
         if self.rvs['iov']:
             model_new = model_new.replace(dataset=self.dataset)
-            model_new = add_iov(model_new, **self.rvs['iov'])
+            for rv in self.rvs['iov']:
+                rv['list_of_parameters'] = ast.literal_eval(rv['list_of_parameters'])
+                model_new = add_iov(model_new, **rv)
 
         if self.block:
             model_new = split_joint_distribution(model_new)
