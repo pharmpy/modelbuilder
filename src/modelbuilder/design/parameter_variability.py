@@ -23,12 +23,12 @@ def create_iov_params_component():
     iov_params_badge = create_badge("Parameters")
     iov_params_options = create_options_list(iov_params_label_dict)
     iov_params_radio = create_checklist('iov_params_checklist', options=iov_params_options)
-    return create_col([iov_params_badge, iov_params_radio])
+    return create_col([iov_params_badge, iov_params_radio, create_empty_line()])
 
 
 def create_iov_button():
     add_btn = create_button('iov_add_button', 'Add')
-    return create_col([add_btn, html.Div(id='dataset_text')])
+    return create_col([add_btn, html.Div(id='dataset_text'), create_empty_line()])
 
 
 def create_iov_table():
@@ -48,9 +48,14 @@ def create_iov_table():
         row_selectable='multi',
         row_deletable=True,
         selected_rows=[],
+        fill_width=False,
     )
 
     return create_col([iov_table])
+
+def create_iov_help_text():
+    help_text = "Add parameters to the IOV table. Select rows in the table to add IOVs to the model."
+    return create_col([html.Div(id='iov_help_text', children=help_text), create_empty_line()])
 
 
 def create_iiv_table():
@@ -87,7 +92,8 @@ iov_button = create_iov_button()
 iov_table = create_iov_table()
 iiv_header = create_header('IIVs')
 iov_header = create_header('IOVs')
+iov_help_text = create_iov_help_text()
 
 par_var_tab = create_container(
-    ([iiv_header], [iiv_table], [iov_header], [iov_checkbox, iov_button], [iov_table])
+    ([iiv_header], [iiv_table], [iov_header], [iov_help_text], [iov_checkbox], [iov_button], [iov_table])
 )
