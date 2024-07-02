@@ -7,6 +7,7 @@ import pandas as pd
 from pharmpy.internals.immutable import Immutable
 from pharmpy.model import Parameter, Parameters, RandomVariables
 from pharmpy.modeling import (
+    add_covariate_effect,
     add_iiv,
     add_iov,
     convert_model,
@@ -50,6 +51,7 @@ class ModelState(Immutable):
     individual_parameters: list
     dataset: pd.DataFrame
     block: list
+    covariates: list
 
     def __init__(
         self,
@@ -64,6 +66,7 @@ class ModelState(Immutable):
         individual_parameters=None,
         dataset=None,
         block=None,
+        covariates=None,
     ):
         self.model_type = model_type
         self.model_format = model_format
@@ -76,6 +79,7 @@ class ModelState(Immutable):
         self.individual_parameters = individual_parameters
         self.dataset = dataset
         self.block = block
+        self.covariates = covariates
 
     def replace(self, **kwargs):
         model_format = kwargs.get('model_format', self.model_format)
@@ -88,6 +92,7 @@ class ModelState(Immutable):
         individual_parameters = kwargs.get('individual_parameters', self.individual_parameters)
         dataset = kwargs.get('dataset', self.dataset)
         block = kwargs.get('block', self.block)
+        covariates = kwargs.get('covariates', self.covariates)
 
         return ModelState(
             model_type=self.model_type,
@@ -101,6 +106,7 @@ class ModelState(Immutable):
             individual_parameters=individual_parameters,
             dataset=dataset,
             block=block,
+            covariates=covariates,
         )
 
     @classmethod
@@ -116,6 +122,7 @@ class ModelState(Immutable):
         individual_parameters = get_individual_parameters(model)
         dataset = None
         block = [['CL', 'VC']]
+        covariates = None
         return cls(
             model_type,
             'nonmem',
@@ -128,6 +135,7 @@ class ModelState(Immutable):
             individual_parameters,
             dataset,
             block,
+            covariates,
         )
 
     @staticmethod
@@ -169,6 +177,11 @@ class ModelState(Immutable):
                 params = [get_parameter_rv(model_new, param)[0] for param in bl]
                 if len(params) > 1:
                     model_new = create_joint_distribution(model_new, params)
+
+        if self.covariates:
+            model_new = model_new.replace(dataset=self.dataset)
+            for cov in self.covariates:
+                model_new = add_covariate_effect(model_new, **cov)
 
         # FIXME: This is needed since new parameters may have been added when e.g.
         #  changing the structural model. Ideally this should be done in
@@ -219,6 +232,7 @@ def update_model_state(ms_old, mfl=None, **kwargs):
     rvs = kwargs.get('rvs')
     individual_parameters = kwargs.get('individual_parameters')
     block = kwargs.get('block')
+    covariates = kwargs.get('covariates')
 
     if mfl:
         mfl_new = ms_old.mfl.replace_features(mfl)
@@ -237,6 +251,8 @@ def update_model_state(ms_old, mfl=None, **kwargs):
         return ms_old.replace(individual_parameters=individual_parameters)
     if block is not None:
         return ms_old.replace(block=block)
+    if covariates is not None:
+        return ms_old.replace(covariates=covariates)
     raise ValueError
 
 

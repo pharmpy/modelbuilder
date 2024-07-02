@@ -14,6 +14,7 @@ from modelbuilder.callbacks.general import general_callbacks
 from modelbuilder.callbacks.parameters import parameter_callbacks
 from modelbuilder.callbacks.structural import structural_callbacks
 from modelbuilder.callbacks.parameter_variability import parameter_variability_callbacks
+from modelbuilder.callbacks.covariates import covariate_callbacks
 
 PHARMPY_LOGO = "https://pharmpy.github.io/latest/_images/Pharmpy_logo.svg"
 
@@ -32,6 +33,7 @@ structural_callbacks(app)
 parameter_callbacks(app)
 error_model_callbacks(app)
 parameter_variability_callbacks(app)
+covariate_callbacks(app)
 
 
 def open_browser():

@@ -9,6 +9,7 @@ from .model_view import model_format_div
 from .parameter_variability import par_var_tab
 from .parameters import parameter_tab
 from .structural import structural_tab
+from .covariates import covariate_tab
 
 # Navbar
 navbar = dbc.Navbar(
@@ -58,6 +59,7 @@ all_tabs = (
                 dcc.Tab(label='Parameters', value='parameters-tab', children=parameter_tab),
                 dcc.Tab(label='Parameter Variability', value='par-var-tab', children=par_var_tab),
                 dcc.Tab(label="Error model", value="error-tab", children=error_tab),
+                dcc.Tab(label="Covariates", value="covariate-tab", children=covariate_tab),
             ],
             className='nav-link active',
         )

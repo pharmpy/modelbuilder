@@ -243,7 +243,6 @@ def parameter_variability_callbacks(app):
     )
     def update_checklist(rows, iiv_selected_rows, options, iiv_data):
         iiv_params = [iiv_data[row]['list_of_parameters'] for row in iiv_selected_rows]
-        print(iiv_params)
         params = []
         for row in rows:
             params.extend(ast.literal_eval(row['list_of_parameters']))

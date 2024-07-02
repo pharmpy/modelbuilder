@@ -1,56 +1,68 @@
 import dash_bootstrap_components as dbc
-from dash import html
-
-from .style_elements import btn_color, create_badge
-
-covariate_effect = [
-    {"label": "linear", "value": "lin"},
-    {"label": "categorical", "value": "cat"},
-    {"label": "piece linear", "value": "piece_lin"},
-    {"label": "exponential", "value": "exp"},
-    {"label": "power", "value": "pow"},
-]
-
-covariate_options = dbc.Container(
-    [
-        create_badge("Specify covariate"),
-        dbc.InputGroup(
-            id="covar",
-            children=[
-                dbc.Select(id="covar-param-name", placeholder="Parameter name"),
-                dbc.Select(id="covar-name", placeholder="Covariate name"),
-                dbc.Select(id="covariate-effect", options=covariate_effect, placeholder="Effect"),
-                dbc.Input(id="covar-custom-eff", placeholder="Custom effect"),
-                dbc.Select(
-                    id="covar-operation",
-                    options=[
-                        {"label": "operation= +", "value": "+"},
-                        {"label": "operation= *", "value": "*"},
-                    ],
-                    placeholder="operation, defeault *",
-                ),
-                dbc.Select(
-                    id="covar-allow-nestle",
-                    options=[
-                        {"label": "allow-nestle=False", "value": "False"},
-                        {"label": "allow-nestle=True", "value": "True"},
-                    ],
-                    placeholder="allow-nestle=False",
-                ),
-                dbc.Button("Add covariate", id="covar-btn", color=btn_color, n_clicks=0),
-            ],
-        ),
-    ]
+from dash import dash_table, html
+from .style_elements import (
+    create_table,
+    create_dropdown,
+    create_container,
+    create_col_dict,
+    create_options_list,
+    create_options_dict,
+    create_button,
+    create_badge,
+    create_col,
+    create_checklist,
+    create_dropdown_component,
+    create_radio,
+    create_empty_line,
+    create_header,
 )
 
-model_covariate_list = html.Div(id="covar_div")
 
-covariate_tab = dbc.Container(
-    [
-        html.Br(),
-        dbc.Row(covariate_options),
-        html.Hr(),
-        html.P("Covariates"),
-        model_covariate_list,
+def create_cov_table():
+    columns = [
+        create_col_dict('Parameter', 'parameter', presentation='dropdown'),
+        create_col_dict('Covariate', 'covariate', presentation='dropdown'),
+        create_col_dict('Effect', 'effect', presentation='dropdown'),
+        create_col_dict('Operation', 'operation', presentation='dropdown'),
     ]
-)
+
+    dropdown = create_dropdown(
+        ['parameter', 'covariate', 'effect', 'operation'],
+        [
+            create_options_dict({'CL': 'CL'}),
+            create_options_dict({}),
+            create_options_dict(
+                {'lin': 'lin', 'cat': 'cat', 'cat2': 'cat2', 'exp': 'exp'},
+                clearable=False,
+            ),
+            create_options_dict(
+                {'+': '+', '*': '*'},
+                clearable=False,
+            ),
+        ],
+    )
+
+    cov_table = create_table(
+        'cov_table',
+        columns,
+        dropdown=dropdown,
+        row_selectable='multi',
+        row_deletable=True,
+        selected_rows=[],
+        fill_width=False,
+    )
+
+    line = create_empty_line()
+    return create_col([cov_table, line, html.Div(id='error_message'), line])
+
+
+def create_cov_button():
+    add_btn = create_button('cov_btn', 'Add row')
+    return create_col([add_btn])
+
+
+cov_table = create_cov_table()
+cov_header = create_header('Covariates')
+cov_btn = create_cov_button()
+
+covariate_tab = create_container(([cov_header], [cov_table], [cov_btn]))
