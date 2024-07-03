@@ -60,9 +60,13 @@ def create_cov_button():
     add_btn = create_button('cov_btn', 'Add row')
     return create_col([add_btn])
 
+
 def create_cov_help_text():
-    help_text = "Select rows to add covariates to the model. Click on 'Add row' to add more covariates."
+    help_text = (
+        "Select rows to add covariates to the model. Click on 'Add row' to add more covariates."
+    )
     return create_col([html.Div(id='cov_help_text', children=help_text), create_empty_line()])
+
 
 cov_table = create_cov_table()
 cov_header = create_header('Covariates')

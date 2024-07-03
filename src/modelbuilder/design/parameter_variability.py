@@ -53,8 +53,11 @@ def create_iov_table():
 
     return create_col([iov_table])
 
+
 def create_iov_help_text():
-    help_text = "Add parameters to the IOV table. Select rows in the table to add IOVs to the model."
+    help_text = (
+        "Add parameters to the IOV table. Select rows in the table to add IOVs to the model."
+    )
     return create_col([html.Div(id='iov_help_text', children=help_text), create_empty_line()])
 
 
@@ -95,5 +98,13 @@ iov_header = create_header('IOVs')
 iov_help_text = create_iov_help_text()
 
 par_var_tab = create_container(
-    ([iiv_header], [iiv_table], [iov_header], [iov_help_text], [iov_checkbox], [iov_button], [iov_table])
+    (
+        [iiv_header],
+        [iiv_table],
+        [iov_header],
+        [iov_help_text],
+        [iov_checkbox],
+        [iov_button],
+        [iov_table],
+    )
 )

@@ -2,7 +2,7 @@ import ast
 import numpy as np
 import itertools
 import pandas as pd
-from dash import Input, Output, State
+from dash import Input, Output, State, ctx
 from dash.exceptions import PreventUpdate
 from pharmpy.modeling import (
     create_joint_distribution,
@@ -104,8 +104,8 @@ def parameter_variability_callbacks(app):
         Output("iov_table", "data"),
         Output("iov_table", "dropdown"),
         Output('dataset_text', 'children'),
+        Output("iov_table", "selected_rows", allow_duplicate=True),
         Input('all-tabs', 'value'),
-        # Input('iiv_table', 'selected_rows'),
         Input("dataset-path", 'value'),
         State("iov_params_checklist", "value"),
         prevent_initial_call=True,
@@ -163,7 +163,17 @@ def parameter_variability_callbacks(app):
                 )
 
             iov_data = iov_data.to_dict('records')
-            return iov_checkboxes_options, iov_data, dropdown_opts, outtext
+
+            if config.model_state.rvs['iov']:
+                iov_data = config.model_state.rvs['iov']
+                # Lists must be converted to strings again
+                for dicts in iov_data:
+                    for keys in dicts:
+                        dicts[keys] = str(dicts[keys])
+                selected_rows = list(range(len(iov_data)))
+            else:
+                selected_rows = []
+            return iov_checkboxes_options, iov_data, dropdown_opts, outtext, selected_rows
         else:
             raise PreventUpdate
 
@@ -173,12 +183,18 @@ def parameter_variability_callbacks(app):
         Output("iov_table", "selected_rows"),
         Input("iiv_table", "data"),
         Input("iiv_table", "selected_rows"),
+        Input("iov_table", "selected_rows"),
         prevent_initial_call=True,
     )
-    def set_iivs(data, selected_rows):
+    def set_iivs(data, selected_rows, iov_selected_rows):
         rvs = config.model_state.rvs
+        selected_rows_changed = (
+            'iiv_table.selected_rows' in ctx.triggered_prop_ids.keys()
+            and not 'iiv_table.data' in ctx.triggered_prop_ids.keys()
+        )
         if selected_rows:
-            rvs['iov'] = {}
+            if selected_rows_changed:
+                rvs['iov'] = {}
             new_data = []
             for row in selected_rows:
                 new_data.append({k: data[row][k] for k in ('list_of_parameters', 'expression')})
@@ -212,7 +228,9 @@ def parameter_variability_callbacks(app):
 
         model = ms.generate_model()
         config.model_state = update_ms_from_model(model, ms)
-        return render_model_code(model), data, []
+        if selected_rows_changed:
+            iov_selected_rows = []
+        return render_model_code(model), data, iov_selected_rows
 
     @app.callback(
         Output("iov_table", "data", allow_duplicate=True),
@@ -225,7 +243,6 @@ def parameter_variability_callbacks(app):
     )
     def add_iov_to_table(n_clicks, iov_checklist, rows, columns):
         if n_clicks > 0 and iov_checklist:
-            # parameter_names = [Expr.symbol(a) for a in iov_checklist]
             rows.append(
                 {'list_of_parameters': f"{iov_checklist}", 'occ': "ID", 'distribution': "disjoint"}
             )
@@ -245,7 +262,10 @@ def parameter_variability_callbacks(app):
         iiv_params = [iiv_data[row]['list_of_parameters'] for row in iiv_selected_rows]
         params = []
         for row in rows:
-            params.extend(ast.literal_eval(row['list_of_parameters']))
+            if isinstance(row['list_of_parameters'], str):
+                params.extend(ast.literal_eval(row['list_of_parameters']))
+            else:
+                params.extend(row['list_of_parameters'])
 
         new_options = []
         for opt in options:

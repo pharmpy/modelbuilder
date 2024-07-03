@@ -153,6 +153,9 @@ class ModelState(Immutable):
         mfl_funcs = self._get_mfl_funcs(model)
 
         model_new = model
+        # FIXME: Is this OK here? Should the dataset be added in _create_base_model instead?
+        if self.dataset is not None:
+            model_new = model_new.replace(dataset=self.dataset)
         model_new = remove_iiv(model_new)
 
         for func in mfl_funcs:
@@ -166,9 +169,9 @@ class ModelState(Immutable):
                 model_new = add_iiv(model_new, **iiv_func)
 
         if self.rvs['iov']:
-            model_new = model_new.replace(dataset=self.dataset)
             for rv in self.rvs['iov']:
-                rv['list_of_parameters'] = ast.literal_eval(rv['list_of_parameters'])
+                if isinstance(rv['list_of_parameters'], str):
+                    rv['list_of_parameters'] = ast.literal_eval(rv['list_of_parameters'])
                 model_new = add_iov(model_new, **rv)
 
         if self.block:
