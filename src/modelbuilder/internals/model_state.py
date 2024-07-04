@@ -153,6 +153,10 @@ class ModelState(Immutable):
         mfl_funcs = self._get_mfl_funcs(model)
 
         model_new = model
+        # NOTE: Model needs to be converted here because when adding PD before model
+        # conversion it is not possible to save the model
+        model_new = convert_model(model_new, self.model_format)
+
         # FIXME: Is this OK here? Should the dataset be added in _create_base_model instead?
         if self.dataset is not None:
             model_new = model_new.replace(dataset=self.dataset)
@@ -200,7 +204,7 @@ class ModelState(Immutable):
                 new_params += p
 
         model_new = model_new.replace(parameters=new_params)
-        return convert_model(model_new, self.model_format)
+        return model_new
 
     def _get_mfl_funcs(self, model_base):
         mfl_str_start = get_model_features(model_base)
