@@ -97,13 +97,16 @@ def general_callbacks(app):
         prevent_initial_call=True,
     )
     def change_name_desc(name, description):
+        model_attrs = config.model_state.model_attrs
         if name:
-            ms = update_model_state(config.model_state, model_attrs={'name': name})
+            model_attrs['name'] = name
+            ms = update_model_state(config.model_state, model_attrs=model_attrs)
             if ms != config.model_state:
                 config.model_state = ms
                 return render_model_code(ms.generate_model())
         if description:
-            ms = update_model_state(config.model_state, model_attrs={'description': description})
+            model_attrs['description'] = description
+            ms = update_model_state(config.model_state, model_attrs=model_attrs)
             if ms != config.model_state:
                 config.model_state = ms
                 return render_model_code(ms.generate_model())
@@ -117,8 +120,11 @@ def general_callbacks(app):
     )
     def change_format(format):
         if format:
-            ms = config.model_state.replace(model_format=format)
-            if ms != config.model_state:
+            if format in ['python', 'r']:
+                code = config.model_state.get_code(language=format)
+                return code
+            else:
+                ms = config.model_state.replace(model_format=format)
                 config.model_state = ms
                 return render_model_code(ms.generate_model())
         raise PreventUpdate

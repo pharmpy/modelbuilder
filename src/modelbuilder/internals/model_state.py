@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from functools import partial
 from typing import Union
 import pandas as pd
+import pharmpy
 
 from pharmpy.internals.immutable import Immutable
 from pharmpy.model import Parameter, Parameters, RandomVariables
@@ -25,6 +26,12 @@ from pharmpy.modeling import (
     remove_iiv,
     remove_iov,
     split_joint_distribution,
+    set_initial_estimates,
+    set_lower_bounds,
+    set_name,
+    set_upper_bounds,
+    fix_parameters,
+    set_dataset,
 )
 from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
 
@@ -145,66 +152,158 @@ class ModelState(Immutable):
             model = model.replace(dataset=dataset, datainfo=datainfo)
         return model
 
-    def generate_model(self, dataset=None, datainfo=None, dv=None):
-        model = self._create_base_model(self.model_type, dataset, datainfo)
+    def list_functions(self, dataset=None, datainfo=None, dv=None):
+        funcs = []
+
+        funcs.append(partial(create_basic_pk_model, administration=self.model_type))
+        model = funcs[-1]()
+
+        if dataset is not None and datainfo:
+            funcs.append(partial(pharmpy.model.Model.replace, dataset=dataset, datainfo=datainfo))
+            model = funcs[-1](model)
+
         if self.model_attrs:
-            model = model.replace(**self.model_attrs)
+            attrs = self.model_attrs.copy()
+            if 'name' in attrs:
+                funcs.append(partial(set_name, new_name=attrs.pop('name')))
+                model = funcs[-1](model)
+            if attrs:
+                funcs.append(partial(pharmpy.model.Model.replace, **attrs))
+                model = funcs[-1](model)
 
         mfl_funcs = self._get_mfl_funcs(model)
 
-        model_new = model
-        # NOTE: Model needs to be converted here because when adding PD before model
-        # conversion it is not possible to save the model
-        model_new = convert_model(model_new, self.model_format)
+        funcs.append(partial(convert_model, to_format=self.model_format))
+        model = funcs[-1](model)
 
-        # FIXME: Is this OK here? Should the dataset be added in _create_base_model instead?
         if self.dataset is not None:
-            model_new = model_new.replace(dataset=self.dataset)
-        model_new = remove_iiv(model_new)
+            funcs.append(partial(set_dataset, path_or_df=self.dataset, datatype=self.model_format))
+            model = funcs[-1](model)
+
+        funcs.append(remove_iiv)
+        model = funcs[-1](model)
 
         for func in mfl_funcs:
-            model_new = func(model_new)
+            funcs.append(func)
+            model = funcs[-1](model)
         for dv, func_names in self.error_funcs.items():
             for func_name in func_names:
-                model_new = ERROR_FUNCS[func_name](model_new, dv=dv)
+                funcs.append(partial(ERROR_FUNCS[func_name], dv=dv))
+                model = funcs[-1](model)
 
         if self.rvs['iiv']:
-            for iiv_func in self.rvs['iiv']:
-                model_new = add_iiv(model_new, **iiv_func)
+            group_by_expr = group_by_key(self.rvs['iiv'], 'list_of_parameters', 'expression')
+            for iiv_func in group_by_expr:
+                funcs.append(partial(add_iiv, **iiv_func))
+                model = funcs[-1](model)
 
         if self.rvs['iov']:
             for rv in self.rvs['iov']:
                 if isinstance(rv['list_of_parameters'], str):
                     rv['list_of_parameters'] = ast.literal_eval(rv['list_of_parameters'])
-                model_new = add_iov(model_new, **rv)
+                funcs.append(partial(add_iov, **rv))
+                model = funcs[-1](model)
 
         if self.block:
-            model_new = split_joint_distribution(model_new)
+            funcs.append(split_joint_distribution)
             for bl in self.block:
-                params = [get_parameter_rv(model_new, param)[0] for param in bl]
+                params = [get_parameter_rv(model, param)[0] for param in bl]
                 if len(params) > 1:
-                    model_new = create_joint_distribution(model_new, params)
+                    funcs.append(partial(create_joint_distribution, rvs=params))
+                    model = funcs[-1](model)
 
         if self.covariates:
-            model_new = model_new.replace(dataset=self.dataset)
             for cov in self.covariates:
-                model_new = add_covariate_effect(model_new, **cov)
+                funcs.append(partial(add_covariate_effect, **cov))
+                model = funcs[-1](model)
 
-        # FIXME: This is needed since new parameters may have been added when e.g.
-        #  changing the structural model. Ideally this should be done in
-        #  ModelState.replace()
+        parameter_transformations = {'inits': {}, 'lower': {}, 'upper': {}, 'fix': [], 'unfix': []}
         parameters = self.parameters
-        for p in model_new.parameters:
+        for p in model.parameters:
             if p.name not in parameters.names:
                 parameters += p
-        # Delete parameters that are not in model
-        new_params = Parameters()
-        for p in parameters:
-            if p.name in model_new.parameters:
-                new_params += p
+            else:
+                param = parameters[p.name]
+                if param != p:
+                    if param.init != p.init:
+                        parameter_transformations['inits'][param.name] = param.init
+                    for attr in ['lower', 'upper']:
+                        if getattr(param, attr) != getattr(p, attr):
+                            parameter_transformations[attr][param.name] = getattr(param, attr)
+                    if param.fix != p.fix:
+                        (parameter_transformations['fix' if param.fix else 'unfix']).append(
+                            param.name
+                        )
 
-        model_new = model_new.replace(parameters=new_params)
-        return model_new
+        for attr, values in parameter_transformations.items():
+            if values:
+                func_name = {
+                    'inits': ('set_initial_estimates', 'inits'),
+                    'lower': ('set_lower_bounds', 'bounds'),
+                    'upper': ('set_upper_bounds', 'bounds'),
+                    'fix': ('fix_parameters', 'parameter_names'),
+                    'unfix': ('unfix_parameters', 'parameter_names'),
+                }[attr]
+                func = partial(globals()[func_name[0]], **{func_name[1]: values})
+                funcs.append(func)
+                model = func(model)
+
+        return funcs, model
+
+    def generate_model(self, dataset=None, datainfo=None, dv=None):
+        funcs, model = self.list_functions()
+        return model
+
+    def get_code(self, language):
+        if language == 'python':
+            funcs = self.list_functions()[0]
+            string_out = (
+                f"model = {funcs[0].func.__name__}"
+                + f"({', '.join('%s=%r' % x for x in funcs[0].keywords.items())})\n"
+            )
+            for func in funcs[1::]:
+                if isinstance(func, partial):
+                    items = func.keywords.items()
+                    func_name = func.func.__name__
+                    if func_name == 'replace':
+                        string_out += (
+                            f"model = model.{func_name}"
+                            + f"({', '.join('%s=%r' % x for x in items)})\n"
+                        )
+                    elif func_name == 'set_dataset':
+                        string_out += f"model = {func_name}" + "(model, path/to/dataset) \n"
+                    else:
+                        string_out += (
+                            f"model = {func_name}"
+                            + f"(model, {', '.join('%s=%r' % x for x in items)})\n"
+                        )
+                else:
+                    string_out += f"model = {func.__name__}(model)\n"
+        elif language == 'r':
+            funcs = self.list_functions()[0]
+            string_out = (
+                f"model <- {funcs[0].func.__name__}"
+                + f"({', '.join('%s=%r' % x for x in funcs[0].keywords.items())})"
+            )
+            for func in funcs[1::]:
+                if isinstance(func, partial):
+                    items = func.keywords.items()
+                    func_name = func.func.__name__
+                    if func_name == 'replace':
+                        string_out += (
+                            f" %>% \n model${func_name}"
+                            + f"({', '.join('%s=%r' % x for x in items)})"
+                        )
+                    elif func_name == 'set_dataset':
+                        string_out += f" %<% \n model${func_name}" + "(path/to/dataset)"
+                    else:
+                        string_out += (
+                            f" %>% \n {func_name}"
+                            + f"({', '.join('%s=%s' % convert_python_to_r(x) for x in items)})"
+                        )
+                else:
+                    string_out += f" %>% \n {func.__name__}()"
+        return string_out
 
     def _get_mfl_funcs(self, model_base):
         mfl_str_start = get_model_features(model_base)
@@ -312,3 +411,29 @@ def _update_rvs_from_model(model):
         return [{'list_of_parameters': param, 'expression': 'exp'} for param in param_names]
     else:
         return []
+
+
+def convert_python_to_r(dict_item):
+    key, value = dict_item
+    if isinstance(value, dict):
+        return key, f"list({', '.join(f'{k} = {v}' for k, v in value.items())})"
+    elif isinstance(value, list):
+        l = [f"'{item}'" for item in value]
+        return key, f"c({', '.join(l)})"
+    elif isinstance(value, int):
+        return key, f"{value}L"
+    elif isinstance(value, float):
+        return dict_item
+    else:
+        return key, f"'{value}'"
+
+
+def group_by_key(lst, key1, key2):
+    # Group key1 by key2
+    result = {}
+    for d in lst:
+        k = d[key2]
+        if k not in result:
+            result[k] = {key1: [], key2: k}
+        result[k][key1].append(d[key1])
+    return list(result.values())

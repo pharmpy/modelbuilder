@@ -32,8 +32,7 @@ def replace_empty(data):
 
 def fix_blocks(data):
     old_params = config.model_state.parameters
-    ms = update_model_state(config.model_state, parameters=data)
-    model = ms.generate_model()
+    model = config.model_state.generate_model()
     rvs = model.random_variables
     blocks = [rv.parameter_names for rv in rvs if isinstance(rv, JointNormalDistribution)]
 

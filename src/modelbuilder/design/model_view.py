@@ -18,6 +18,8 @@ def create_model_format_component():
         'nlmixr': 'nlmixr',
         'nonmem': 'nonmem',
         'rxode2': 'rxode',
+        'Python code': 'python',
+        'R code': 'r',
     }
     model_format_options = create_options_list(model_format_dict)
 
