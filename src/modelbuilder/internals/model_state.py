@@ -192,7 +192,7 @@ class ModelState(Immutable):
                 model = funcs[-1](model)
 
         if self.rvs['iiv']:
-            group_by_expr = group_by_key(self.rvs['iiv'], 'list_of_parameters', 'expression')
+            group_by_expr = _group_by_key(self.rvs['iiv'], 'list_of_parameters', 'expression')
             for iiv_func in group_by_expr:
                 funcs.append(partial(add_iiv, **iiv_func))
                 model = funcs[-1](model)
@@ -299,7 +299,7 @@ class ModelState(Immutable):
                     else:
                         string_out += (
                             f" %>% \n {func_name}"
-                            + f"({', '.join('%s=%s' % convert_python_to_r(x) for x in items)})"
+                            + f"({', '.join('%s=%s' % _convert_python_to_r(x) for x in items)})"
                         )
                 else:
                     string_out += f" %>% \n {func.__name__}()"
@@ -413,7 +413,7 @@ def _update_rvs_from_model(model):
         return []
 
 
-def convert_python_to_r(dict_item):
+def _convert_python_to_r(dict_item):
     key, value = dict_item
     if isinstance(value, dict):
         return key, f"list({', '.join(f'{k} = {v}' for k, v in value.items())})"
@@ -428,7 +428,7 @@ def convert_python_to_r(dict_item):
         return key, f"'{value}'"
 
 
-def group_by_key(lst, key1, key2):
+def _group_by_key(lst, key1, key2):
     # Group key1 by key2
     result = {}
     for d in lst:
