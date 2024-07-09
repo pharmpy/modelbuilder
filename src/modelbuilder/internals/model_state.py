@@ -295,7 +295,7 @@ class ModelState(Immutable):
                             + f"({', '.join('%s=%r' % x for x in items)})"
                         )
                     elif func_name == 'set_dataset':
-                        string_out += f" %<% \n model${func_name}" + "(path/to/dataset)"
+                        string_out += f" %>% \n model${func_name}" + "(path/to/dataset)"
                     else:
                         string_out += (
                             f" %>% \n {func_name}"
@@ -420,9 +420,7 @@ def _convert_python_to_r(dict_item):
     elif isinstance(value, list):
         l = [f"'{item}'" for item in value]
         return key, f"c({', '.join(l)})"
-    elif isinstance(value, int):
-        return key, f"{value}L"
-    elif isinstance(value, float):
+    elif isinstance(value, float) or isinstance(value, int):
         return dict_item
     else:
         return key, f"'{value}'"
