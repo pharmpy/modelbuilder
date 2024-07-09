@@ -1,8 +1,9 @@
 from pharmpy.modeling import get_model_code
+from pharmpy.model import Model
 
 
 def render_model_code(model):
-    if format != "generic":
+    if type(model) != Model:
         return get_model_code(model)
     else:
         text_renderer = _render_generic_model(model)
