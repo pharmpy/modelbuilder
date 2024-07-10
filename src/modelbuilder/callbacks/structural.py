@@ -4,7 +4,11 @@ from dash.exceptions import PreventUpdate
 import modelbuilder.config as config
 from modelbuilder.design.style_elements import disable_component, enable_component
 from modelbuilder.internals.help_functions import render_model_code
-from modelbuilder.internals.model_state import update_model_state, update_ms_from_model
+from modelbuilder.internals.model_state import (
+    update_model_state,
+    update_ms_from_model,
+    update_rvs_from_model,
+)
 
 
 def structural_callbacks(app):
@@ -21,6 +25,7 @@ def structural_callbacks(app):
                 ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
                 model = ms.generate_model()
                 ms = update_ms_from_model(model, ms)
+                ms = update_rvs_from_model(model, ms)
                 config.model_state = ms
                 return render_model_code(model)
         raise PreventUpdate
@@ -53,6 +58,7 @@ def structural_callbacks(app):
                 ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
                 model = ms.generate_model()
                 ms = update_ms_from_model(model, ms)
+                ms = update_rvs_from_model(model, ms)
                 config.model_state = ms
                 return render_model_code(model)
         raise PreventUpdate
@@ -70,6 +76,7 @@ def structural_callbacks(app):
                 ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
                 model = ms.generate_model()
                 ms = update_ms_from_model(model, ms)
+                ms = update_rvs_from_model(model, ms)
                 config.model_state = ms
                 return render_model_code(model)
         raise PreventUpdate

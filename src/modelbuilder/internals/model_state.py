@@ -16,6 +16,9 @@ from pharmpy.modeling import (
     create_joint_distribution,
     get_parameter_rv,
     get_rv_parameters,
+    has_additive_error_model,
+    has_combined_error_model,
+    has_proportional_error_model,
     set_additive_error_model,
     set_combined_error_model,
     set_iiv_on_ruv,
@@ -42,6 +45,11 @@ ERROR_FUNCS = {
     'iiv-on-ruv': set_iiv_on_ruv,
     'power': set_power_on_ruv,
     'time-varying': partial(set_time_varying_error_model, cutoff=1.0),
+}
+ERROR_FUNCS_DICT = {
+    set_proportional_error_model: has_proportional_error_model,
+    set_additive_error_model: has_additive_error_model,
+    set_combined_error_model: has_combined_error_model,
 }
 
 
@@ -180,21 +188,43 @@ class ModelState(Immutable):
             funcs.append(partial(set_dataset, path_or_df=self.dataset, datatype=self.model_format))
             model = funcs[-1](model)
 
-        funcs.append(remove_iiv)
-        model = funcs[-1](model)
-
         for func in mfl_funcs:
             funcs.append(func)
             model = funcs[-1](model)
+
         for dv, func_names in self.error_funcs.items():
             for func_name in func_names:
-                funcs.append(partial(ERROR_FUNCS[func_name], dv=dv))
-                model = funcs[-1](model)
+                if not ERROR_FUNCS_DICT[ERROR_FUNCS[func_name]](model):
+                    funcs.append(partial(ERROR_FUNCS[func_name], dv=dv))
+                    model = funcs[-1](model)
 
         if self.rvs['iiv']:
-            group_by_expr = _group_by_key(self.rvs['iiv'], 'list_of_parameters', 'expression')
-            for iiv_func in group_by_expr:
-                funcs.append(partial(add_iiv, **iiv_func))
+            params_to_get_iiv = {}
+            for rv in self.rvs['iiv']:
+                params_to_get_iiv[rv['list_of_parameters']] = rv['expression']
+            params_with_iiv = _get_params_with_iiv(model)
+
+            to_remove = []
+            for key, value in params_with_iiv.items():
+                if params_to_get_iiv.get(key, None) != value:
+                    to_remove.append(key)
+            etas_to_remove = [get_parameter_rv(model, param)[0] for param in to_remove]
+
+            to_add = []
+            for key, value in params_to_get_iiv.items():
+                if params_with_iiv.get(key, None) != value:
+                    iiv_func = {}
+                    iiv_func['list_of_parameters'] = key
+                    iiv_func['expression'] = value
+                    to_add.append(iiv_func)
+
+            group_by_expr_add = _group_by_key(to_add, 'list_of_parameters', 'expression')
+
+            if to_remove:
+                funcs.append(partial(remove_iiv, to_remove=etas_to_remove))
+                model = funcs[-1](model)
+            for param in group_by_expr_add:
+                funcs.append(partial(add_iiv, **param))
                 model = funcs[-1](model)
 
         if self.rvs['iov']:
@@ -205,10 +235,17 @@ class ModelState(Immutable):
                 model = funcs[-1](model)
 
         if self.block:
-            funcs.append(split_joint_distribution)
+            existing_block = [list(iiv.names) for iiv in model.random_variables.iiv]
+            should_be_block = []
             for bl in self.block:
                 params = [get_parameter_rv(model, param)[0] for param in bl]
-                if len(params) > 1:
+                should_be_block.append(params)
+            for params in existing_block:
+                if params not in should_be_block and len(params) > 1:
+                    funcs.append(partial(split_joint_distribution, rvs=params))
+                    model = funcs[-1](model)
+            for params in should_be_block:
+                if params not in existing_block and len(params) > 1:
                     funcs.append(partial(create_joint_distribution, rvs=params))
                     model = funcs[-1](model)
 
@@ -413,6 +450,23 @@ def _update_rvs_from_model(model):
         return []
 
 
+def update_rvs_from_model(model, ms):
+    iiv_names = model.random_variables.iiv.names
+    if iiv_names:
+        param_names = [get_rv_parameters(model, param)[0] for param in iiv_names]
+        iiv = [{'list_of_parameters': param, 'expression': 'exp'} for param in param_names]
+    else:
+        iiv = []
+
+    eta_block = [list(iiv.names) for iiv in model.random_variables.iiv]
+    existing_block = [
+        [get_rv_parameters(model, eta)[0] for eta in etas] for etas in eta_block if len(etas) > 1
+    ]
+
+    rvs = {'iiv': iiv, 'iov': []}
+    return ms.replace(rvs=rvs, block=existing_block)
+
+
 def _convert_python_to_r(dict_item):
     key, value = dict_item
     if isinstance(value, dict):
@@ -435,3 +489,10 @@ def _group_by_key(lst, key1, key2):
             result[k] = {key1: [], key2: k}
         result[k][key1].append(d[key1])
     return list(result.values())
+
+
+def _get_params_with_iiv(model):
+    params_with_iiv = {}
+    for rv in model.random_variables.iiv.names:
+        params_with_iiv[get_rv_parameters(model, rv)[0]] = 'exp'
+    return params_with_iiv
