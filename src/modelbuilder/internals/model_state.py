@@ -180,9 +180,11 @@ class ModelState(Immutable):
                 model = funcs[-1](model)
 
         mfl_funcs = self._get_mfl_funcs(model)
+        is_pd_model = self.mfl.filter('pd').get_number_of_features() > 0
 
-        funcs.append(partial(convert_model, to_format=self.model_format))
-        model = funcs[-1](model)
+        if is_pd_model:
+            funcs.append(partial(convert_model, to_format=self.model_format))
+            model = funcs[-1](model)
 
         if self.dataset is not None:
             funcs.append(partial(set_dataset, path_or_df=self.dataset, datatype=self.model_format))
@@ -285,6 +287,10 @@ class ModelState(Immutable):
                 funcs.append(func)
                 model = func(model)
 
+        if not is_pd_model:
+            funcs.append(partial(convert_model, to_format=self.model_format))
+            model = funcs[-1](model)
+
         return funcs, model
 
     def generate_model(self, dataset=None, datainfo=None, dv=None):
@@ -345,7 +351,7 @@ class ModelState(Immutable):
     def _get_mfl_funcs(self, model_base):
         mfl_str_start = get_model_features(model_base)
         mfl_start = ModelFeatures.create_from_mfl_string(mfl_str_start)
-        if mfl_start.filter('pd') is None:
+        if self.mfl.filter('pd').get_number_of_features() == 0:
             lnt = mfl_start.least_number_of_transformations(self.mfl, model_base)
             funcs = list(lnt.values())
         else:
