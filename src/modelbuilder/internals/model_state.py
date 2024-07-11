@@ -166,8 +166,12 @@ class ModelState(Immutable):
         funcs.append(partial(create_basic_pk_model, administration=self.model_type))
         model = funcs[-1]()
 
+        # FIXME: How to handle datainfo?
         if dataset is not None and datainfo:
             funcs.append(partial(pharmpy.model.Model.replace, dataset=dataset, datainfo=datainfo))
+            model = funcs[-1](model)
+        elif self.dataset is not None:
+            funcs.append(partial(set_dataset, path_or_df=self.dataset, datatype=self.model_format))
             model = funcs[-1](model)
 
         if self.model_attrs:
@@ -184,10 +188,6 @@ class ModelState(Immutable):
 
         if is_pd_model:
             funcs.append(partial(convert_model, to_format=self.model_format))
-            model = funcs[-1](model)
-
-        if self.dataset is not None:
-            funcs.append(partial(set_dataset, path_or_df=self.dataset, datatype=self.model_format))
             model = funcs[-1](model)
 
         for func in mfl_funcs:
