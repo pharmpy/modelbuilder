@@ -98,7 +98,7 @@ def create_pd_production():
 
     pd_prod_badge = create_badge("Type")
     pd_prod_options = create_options_list(pd_prod_label_dict)
-    pd_prod_radio = create_radio('pd_production_radio', options=pd_prod_options, value='PRODUCTION')
+    pd_prod_radio = create_radio('pd_production_radio', options=pd_prod_options)
 
     return create_col([pd_prod_badge, pd_prod_radio])
 

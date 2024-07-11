@@ -145,6 +145,7 @@ def structural_callbacks(app):
         Output("pd_effect_radio", "style"),
         Output("pd_production_radio", "options"),
         Output("pd_production_radio", "style"),
+        Output("pd_production_radio", "value"),
         Input("model_type", 'value'),
         Input("pd_effect_radio", "value"),
         State("pd_expression_radio", "options"),
@@ -164,11 +165,13 @@ def structural_callbacks(app):
         options_prod,
         style_prod,
     ):
+        type_value = None
         if model_type == 'PD':
             options_new_expr, style_new_expr = enable_component(options_expr, style_expr)
             options_new_eff, style_new_eff = enable_component(options_eff, style_eff)
             if effect == 'INDIRECTEFFECT':
                 options_new_prod, style_new_prod = enable_component(options_prod, style_prod)
+                type_value = 'PRODUCTION'
             else:
                 options_new_prod, style_new_prod = disable_component(options_prod, style_prod)
         else:
@@ -183,4 +186,5 @@ def structural_callbacks(app):
             style_new_eff,
             options_new_prod,
             style_new_prod,
+            type_value,
         )
