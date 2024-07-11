@@ -69,27 +69,20 @@ def covariate_callbacks(app):
                 dropdown = create_dropdown(
                     ['parameter', 'covariate', 'effect', 'operation'], options
                 )
-                cov_data = pd.DataFrame(
-                    {
-                        'parameter': parameter_names,
-                        'covariate': 'None',
-                        'effect': 'lin',
-                        'operation': '*',
-                    }
-                )
             else:
                 options = options_parameter + options_covariate + options_effect + options_operation
                 dropdown = create_dropdown(
                     ['parameter', 'covariate', 'effect', 'operation'], options
                 )
-                cov_data = pd.DataFrame(
-                    {
-                        'parameter': parameter_names,
-                        'covariate': cov_opts[0],
-                        'effect': 'lin',
-                        'operation': '*',
-                    }
-                )
+
+            cov_data = pd.DataFrame(
+                {
+                    'parameter': parameter_names,
+                    'covariate': '',
+                    'effect': '',
+                    'operation': '',
+                }
+            )
 
             cov_data = cov_data.to_dict('records')
             if covariates:

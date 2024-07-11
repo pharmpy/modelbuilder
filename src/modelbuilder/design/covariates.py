@@ -62,9 +62,7 @@ def create_cov_button():
 
 
 def create_cov_help_text():
-    help_text = (
-        "Select rows to add covariates to the model. Click on 'Add row' to add more covariates."
-    )
+    help_text = "Select rows to add covariates to the model. Click on 'Add row' to add more covariates to the table."
     return create_col([html.Div(id='cov_help_text', children=help_text), create_empty_line()])
 
 
