@@ -184,17 +184,31 @@ def parameter_variability_callbacks(app):
         Input("iiv_table", "data"),
         Input("iiv_table", "selected_rows"),
         Input("iov_table", "selected_rows"),
+        State("iov_table", "data"),
         prevent_initial_call=True,
     )
-    def set_iivs(data, selected_rows, iov_selected_rows):
+    def set_iivs(data, selected_rows, iov_selected_rows, iov_data):
         rvs = config.model_state.rvs
         selected_rows_changed = (
             'iiv_table.selected_rows' in ctx.triggered_prop_ids.keys()
             and not 'iiv_table.data' in ctx.triggered_prop_ids.keys()
         )
         if selected_rows:
+            # Remove/unselect IOV when IIV is removed
             if selected_rows_changed:
-                rvs['iov'] = {}
+                iiv_params = [data[row]['list_of_parameters'] for row in selected_rows]
+                new_iovs = []
+                new_iov_selected_rows = []
+                for iov_row in iov_selected_rows:
+                    params = iov_data[iov_row]['list_of_parameters']
+                    if isinstance(params, str):
+                        params = ast.literal_eval(params)
+                    if set(params) <= set(iiv_params):
+                        new_iovs.append(iov_data[iov_row])
+                        new_iov_selected_rows.append(iov_row)
+                iov_selected_rows = new_iov_selected_rows
+                rvs['iov'] = new_iovs
+
             new_data = []
             for row in selected_rows:
                 new_data.append({k: data[row][k] for k in ('list_of_parameters', 'expression')})
@@ -202,6 +216,8 @@ def parameter_variability_callbacks(app):
             ms = update_model_state(config.model_state, rvs=rvs)
         else:
             rvs['iiv'] = {}
+            rvs['iov'] = {}
+            iov_selected_rows = []
             ms = update_model_state(config.model_state, rvs=rvs)
 
         if len(selected_rows) > 1:
@@ -228,8 +244,6 @@ def parameter_variability_callbacks(app):
 
         model = ms.generate_model()
         config.model_state = update_ms_from_model(model, ms)
-        if selected_rows_changed:
-            iov_selected_rows = []
         return render_model_code(model), data, iov_selected_rows
 
     @app.callback(
@@ -260,19 +274,20 @@ def parameter_variability_callbacks(app):
     )
     def update_checklist(rows, iiv_selected_rows, options, iiv_data):
         iiv_params = [iiv_data[row]['list_of_parameters'] for row in iiv_selected_rows]
-        params = []
+        iov_params = []
         for row in rows:
+            # NOTE: values in data table cannot be lists. Therefore IOV parameters are strings of lists
             if isinstance(row['list_of_parameters'], str):
-                params.extend(ast.literal_eval(row['list_of_parameters']))
+                iov_params.extend(ast.literal_eval(row['list_of_parameters']))
             else:
-                params.extend(row['list_of_parameters'])
+                iov_params.extend(row['list_of_parameters'])
 
         new_options = []
         for opt in options:
             if (
                 opt['label'] in iiv_params
                 and config.model_state.dataset is not None
-                and not opt['label'] in params
+                and not opt['label'] in iov_params
             ):
                 opt['disabled'] = False
             else:
@@ -283,14 +298,26 @@ def parameter_variability_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output('dataset_text', 'children', allow_duplicate=True),
         Input("iov_table", "data"),
         Input("iov_table", "selected_rows"),
+        State('dataset_text', 'children'),
         prevent_initial_call=True,
     )
-    def set_iov(data, selected_rows):
+    def set_iov(data, selected_rows, outtext):
+        outtext = outtext
         rvs = config.model_state.rvs
+        iiv_params = [iiv['list_of_parameters'] for iiv in rvs['iiv']]
         if selected_rows:
-            new_data = [data[row] for row in selected_rows]
+            new_data = []
+            for row in selected_rows:
+                param = data[row]['list_of_parameters']
+                if isinstance(param, str):
+                    param = ast.literal_eval(param)
+                if not set(param) <= set(iiv_params):
+                    outtext = "Cannot add IOV on parameter without IIV! Please add IIV first."
+                else:
+                    new_data.append(data[row])
             rvs['iov'] = new_data
             ms = update_model_state(config.model_state, rvs=rvs)
         else:
@@ -298,4 +325,4 @@ def parameter_variability_callbacks(app):
             ms = update_model_state(config.model_state, rvs=rvs)
         model = ms.generate_model()
         config.model_state = update_ms_from_model(model, ms)
-        return render_model_code(model)
+        return render_model_code(model), outtext
