@@ -130,7 +130,6 @@ def structural_callbacks(app):
             else:
                 mfl = f'{effect}({expr})'
             ms = update_model_state(ms_pk, mfl)
-            ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
             model = ms.generate_model()
             ms = update_ms_from_model(model, ms)
             config.model_state = ms
