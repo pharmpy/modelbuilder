@@ -207,7 +207,7 @@ class ModelState(Immutable):
             for func_name in func_names:
                 if ERROR_FUNCS[func_name] not in ERROR_FUNCS_DICT.keys() or not ERROR_FUNCS_DICT[
                     ERROR_FUNCS[func_name]
-                ](model):
+                ](model, dv=dv):
                     funcs.append(partial(ERROR_FUNCS[func_name], dv=dv))
                     model = funcs[-1](model)
 

@@ -136,6 +136,17 @@ def test_update_model_error():
     assert has_additive_error_model(model)
     assert 'ETA_RV1' not in model.random_variables.names
 
+    model_state = ModelState.create('iv')
+    model_state = update_model_state(model_state, 'DIRECTEFFECT(LINEAR)')
+    model_state = update_model_state(model_state, error={1: 'add', 2: 'add'})
+    model = model_state.generate_model()
+    assert has_additive_error_model(model, dv=1)
+    assert has_additive_error_model(model, dv=2)
+    model_state = update_model_state(model_state, error={1: 'prop', 2: 'add'})
+    model = model_state.generate_model()
+    assert has_proportional_error_model(model, dv=1)
+    assert has_additive_error_model(model, dv=2)
+
 
 def test_update_model_parameters():
     model_state = ModelState.create('iv')
