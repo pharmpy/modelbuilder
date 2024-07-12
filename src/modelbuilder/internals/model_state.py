@@ -131,8 +131,7 @@ class ModelState(Immutable):
         mfl = ModelFeatures.create_from_mfl_string(mfl_str)
         error_funcs = {1: ['prop']}
         parameters = model.parameters
-        iiv_rvs = _update_rvs_from_model(model)
-        rvs = {'iiv': iiv_rvs, 'iov': {}}
+        rvs = _update_rvs_from_model(model)[0]
         occ = model.datainfo.names
         individual_parameters = get_individual_parameters(model)
         dataset = None
@@ -167,7 +166,7 @@ class ModelState(Immutable):
         model = funcs[-1]()
 
         # FIXME: How to handle datainfo?
-        if dataset is not None and datainfo:
+        if dataset is not None and datainfo is not None:
             funcs.append(partial(pharmpy.model.Model.replace, dataset=dataset, datainfo=datainfo))
             model = funcs[-1](model)
         elif self.dataset is not None:
@@ -194,9 +193,20 @@ class ModelState(Immutable):
             funcs.append(func)
             model = funcs[-1](model)
 
+        # Update rvs when individual parameters have changed
+        if self.individual_parameters != get_individual_parameters(model):
+            self.rvs, self.block = _update_rvs_from_model(model)
+        #  Update parameters when model parameters have changed
+        if self.parameters != model.parameters:
+            self.parameters, self.individual_parameters = _update_parameters_from_model(
+                self.parameters, model
+            )
+
         for dv, func_names in self.error_funcs.items():
             for func_name in func_names:
-                if not ERROR_FUNCS_DICT[ERROR_FUNCS[func_name]](model):
+                if ERROR_FUNCS[func_name] not in ERROR_FUNCS_DICT.keys() or not ERROR_FUNCS_DICT[
+                    ERROR_FUNCS[func_name]
+                ](model):
                     funcs.append(partial(ERROR_FUNCS[func_name], dv=dv))
                     model = funcs[-1](model)
 
@@ -294,7 +304,7 @@ class ModelState(Immutable):
         return funcs, model
 
     def generate_model(self, dataset=None, datainfo=None, dv=None):
-        funcs, model = self.list_functions()
+        funcs, model = self.list_functions(dataset, datainfo, dv)
         return model
 
     def get_code(self, language):
@@ -440,37 +450,33 @@ def _interpret_error_model(error_funcs, error_old):
     return err_f
 
 
-def update_ms_from_model(model, ms):
-    parameters = model.parameters
+def _update_parameters_from_model(ms_parameters, model):
+    new_params = Parameters()
+    for param in ms_parameters:
+        if param.name in model.parameters.names:
+            new_params += param
+    for param in model.parameters:
+        if param.name not in ms_parameters.names:
+            new_params += param
+
     individual_parameters = get_individual_parameters(model)
-    new_ms = ms.replace(parameters=parameters, individual_parameters=individual_parameters)
-    return new_ms
+    return new_params, individual_parameters
 
 
 def _update_rvs_from_model(model):
-    rvs_names = model.random_variables.iiv.names
-    if rvs_names:
-        param_names = [get_rv_parameters(model, param)[0] for param in rvs_names]
-        return [{'list_of_parameters': param, 'expression': 'exp'} for param in param_names]
-    else:
-        return []
-
-
-def update_rvs_from_model(model, ms):
     iiv_names = model.random_variables.iiv.names
     if iiv_names:
         param_names = [get_rv_parameters(model, param)[0] for param in iiv_names]
         iiv = [{'list_of_parameters': param, 'expression': 'exp'} for param in param_names]
     else:
         iiv = []
+    rvs = {'iiv': iiv, 'iov': []}
 
     eta_block = [list(iiv.names) for iiv in model.random_variables.iiv]
     existing_block = [
         [get_rv_parameters(model, eta)[0] for eta in etas] for etas in eta_block if len(etas) > 1
     ]
-
-    rvs = {'iiv': iiv, 'iov': []}
-    return ms.replace(rvs=rvs, block=existing_block)
+    return rvs, existing_block
 
 
 def _convert_python_to_r(dict_item):
@@ -500,5 +506,10 @@ def _group_by_key(lst, key1, key2):
 def _get_params_with_iiv(model):
     params_with_iiv = {}
     for rv in model.random_variables.iiv.names:
-        params_with_iiv[get_rv_parameters(model, rv)[0]] = 'exp'
+        try:
+            param = get_rv_parameters(model, rv)[0]
+        except ValueError:
+            continue
+        else:
+            params_with_iiv[param] = 'exp'
     return params_with_iiv

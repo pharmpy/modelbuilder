@@ -3,7 +3,7 @@ from dash.exceptions import PreventUpdate
 
 import modelbuilder.config as config
 from modelbuilder.internals.help_functions import render_model_code
-from modelbuilder.internals.model_state import update_model_state, update_ms_from_model
+from modelbuilder.internals.model_state import update_model_state
 from modelbuilder.design.style_elements import disable_component, enable_component
 
 
@@ -21,9 +21,8 @@ def error_model_callbacks(app):
                 base_error2 = ''
             ms = update_model_state(config.model_state, error={1: base_error, 2: base_error2})
             if ms != config.model_state:
-                model = ms.generate_model()
-                config.model_state = update_ms_from_model(model, ms)
-                return render_model_code(model), []
+                config.model_state = ms
+                return render_model_code(ms.generate_model()), []
         raise PreventUpdate
 
     @app.callback(
@@ -45,9 +44,8 @@ def error_model_callbacks(app):
                 config.model_state, error={1: additional_types, 2: additional_types_2}
             )
             if ms != config.model_state:
-                model = ms.generate_model()
-                config.model_state = update_ms_from_model(model, ms)
-                return render_model_code(model)
+                config.model_state = ms
+                return render_model_code(ms.generate_model())
         raise PreventUpdate
 
     @app.callback(
@@ -61,9 +59,8 @@ def error_model_callbacks(app):
         if base_error:
             ms = update_model_state(config.model_state, error={1: base_error1, 2: base_error})
             if ms != config.model_state:
-                model = ms.generate_model()
-                config.model_state = update_ms_from_model(model, ms)
-                return render_model_code(model), []
+                config.model_state = ms
+                return render_model_code(ms.generate_model()), []
         raise PreventUpdate
 
     @app.callback(
@@ -82,9 +79,8 @@ def error_model_callbacks(app):
                 config.model_state, error={1: additional_types_1, 2: additional_types}
             )
             if ms != config.model_state:
-                model = ms.generate_model()
-                config.model_state = update_ms_from_model(model, ms)
-                return render_model_code(model)
+                config.model_state = ms
+                return render_model_code(ms.generate_model())
         raise PreventUpdate
 
     @app.callback(

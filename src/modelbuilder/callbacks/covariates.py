@@ -5,7 +5,7 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 import modelbuilder.config as config
 from modelbuilder.internals.help_functions import render_model_code
-from modelbuilder.internals.model_state import update_model_state, update_ms_from_model
+from modelbuilder.internals.model_state import update_model_state
 
 from modelbuilder.design.style_elements import (
     create_options_dropdown,
@@ -124,9 +124,8 @@ def covariate_callbacks(app):
                 ms = config.model_state
         else:
             ms = update_model_state(config.model_state, covariates=[])
-        model = ms.generate_model()
-        config.model_state = update_ms_from_model(model, ms)
-        return render_model_code(model), error_message
+        config.model_state = ms
+        return render_model_code(ms.generate_model()), error_message
 
     @app.callback(
         Output("cov_table", "data", allow_duplicate=True),

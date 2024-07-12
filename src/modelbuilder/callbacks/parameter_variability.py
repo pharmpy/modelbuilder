@@ -14,7 +14,7 @@ from pharmpy.modeling import (
 )
 
 import modelbuilder.config as config
-from modelbuilder.internals.model_state import update_model_state, update_ms_from_model
+from modelbuilder.internals.model_state import update_model_state
 from modelbuilder.internals.help_functions import render_model_code
 from modelbuilder.design.style_elements import (
     create_options_dropdown,
@@ -240,11 +240,10 @@ def parameter_variability_callbacks(app):
                 bl = []
             new_block.append(bl)
 
-        ms = update_model_state(config.model_state, block=new_block)
+        ms = update_model_state(ms, block=new_block)
 
-        model = ms.generate_model()
-        config.model_state = update_ms_from_model(model, ms)
-        return render_model_code(model), data, iov_selected_rows
+        config.model_state = ms
+        return render_model_code(ms.generate_model()), data, iov_selected_rows
 
     @app.callback(
         Output("iov_table", "data", allow_duplicate=True),
@@ -323,6 +322,5 @@ def parameter_variability_callbacks(app):
         else:
             rvs['iov'] = {}
             ms = update_model_state(config.model_state, rvs=rvs)
-        model = ms.generate_model()
-        config.model_state = update_ms_from_model(model, ms)
-        return render_model_code(model), outtext
+        config.model_state = ms
+        return render_model_code(ms.generate_model()), outtext
