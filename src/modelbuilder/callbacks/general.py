@@ -22,8 +22,9 @@ def general_callbacks(app):
         Input("route-radio", "value"),
         Input("model-name", "value"),
         Input("model-description", "value"),
+        State("modelformat", "value"),
     )
-    def change_route(route, model_name, model_description):
+    def change_route(route, model_name, model_description, model_format):
         # Dataset is connected to model in parse_dataset
         # old_dataset = config.model.dataset
         # old_datainfo = config.model.datainfo
@@ -37,6 +38,8 @@ def general_callbacks(app):
         default_peripherals = 0
 
         ms = ModelState.create(route)
+        if model_format not in ['python', 'r'] and model_format != ms.model_format:
+            ms = ms.replace(model_format=model_format)
         if model_name and model_description:
             ms = update_model_state(
                 ms, model_attrs={'name': model_name, 'description': model_description}
@@ -58,14 +61,14 @@ def general_callbacks(app):
         Output("elim_radio", "value", allow_duplicate=True),
         Output("peripheral-radio", "value", allow_duplicate=True),
         Output("abs_delay_radio", "value", allow_duplicate=True),
-        Output("modelformat", "value"),
         Input("model_type", "value"),
         Input("route-radio", "value"),
         Input("model-name", "value"),
         Input("model-description", "value"),
+        State("modelformat", "value"),
         prevent_initial_call=True,
     )
-    def change_model_type(model_type, route, model_name, model_description):
+    def change_model_type(model_type, route, model_name, model_description, model_format):
         effect = None
         expr = None
 
@@ -79,6 +82,8 @@ def general_callbacks(app):
         default_peripherals = 0
 
         ms = ModelState.create(route)
+        if model_format not in ['python', 'r'] and model_format != ms.model_format:
+            ms = ms.replace(model_format=model_format)
         if model_name and model_description:
             ms = update_model_state(
                 ms, model_attrs={'name': model_name, 'description': model_description}
@@ -101,7 +106,6 @@ def general_callbacks(app):
             default_elim,
             default_peripherals,
             default_abs_delay,
-            "nonmem",
         )
 
     @app.callback(

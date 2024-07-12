@@ -170,7 +170,8 @@ class ModelState(Immutable):
             funcs.append(partial(pharmpy.model.Model.replace, dataset=dataset, datainfo=datainfo))
             model = funcs[-1](model)
         elif self.dataset is not None:
-            funcs.append(partial(set_dataset, path_or_df=self.dataset, datatype=self.model_format))
+            # FIXME: datatype has to be nonmem, if it is generic there will be an error
+            funcs.append(partial(set_dataset, path_or_df=self.dataset, datatype='nonmem'))
             model = funcs[-1](model)
 
         if self.model_attrs:
@@ -185,7 +186,7 @@ class ModelState(Immutable):
         mfl_funcs = self._get_mfl_funcs(model)
         is_pd_model = self.mfl.filter('pd').get_number_of_features() > 0
 
-        if is_pd_model:
+        if is_pd_model and self.model_format != "generic":
             funcs.append(partial(convert_model, to_format=self.model_format))
             model = funcs[-1](model)
 
@@ -297,7 +298,7 @@ class ModelState(Immutable):
                 funcs.append(func)
                 model = func(model)
 
-        if not is_pd_model:
+        if not is_pd_model and self.model_format != "generic":
             funcs.append(partial(convert_model, to_format=self.model_format))
             model = funcs[-1](model)
 
