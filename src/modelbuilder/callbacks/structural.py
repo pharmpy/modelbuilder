@@ -22,7 +22,10 @@ def structural_callbacks(app):
             if ms != config.model_state:
                 ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
+                if ms.language is not None:
+                    return ms.generate_code(language=ms.language)
+                else:
+                    return render_model_code(ms.generate_model())
         raise PreventUpdate
 
     @app.callback(
@@ -52,7 +55,10 @@ def structural_callbacks(app):
             if ms != config.model_state:
                 ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
+                if ms.language is not None:
+                    return ms.generate_code(language=ms.language)
+                else:
+                    return render_model_code(ms.generate_model())
         raise PreventUpdate
 
     @app.callback(
@@ -67,7 +73,10 @@ def structural_callbacks(app):
             if ms != config.model_state:
                 ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
+                if ms.language is not None:
+                    return ms.generate_code(language=ms.language)
+                else:
+                    return render_model_code(ms.generate_model())
         raise PreventUpdate
 
     @app.callback(
@@ -97,7 +106,10 @@ def structural_callbacks(app):
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
+                if ms.language is not None:
+                    return ms.generate_code(language=ms.language)
+                else:
+                    return render_model_code(ms.generate_model())
         raise PreventUpdate
 
     @app.callback(
@@ -118,7 +130,10 @@ def structural_callbacks(app):
                 mfl = f'{effect}({expr})'
             ms = update_model_state(ms_pk, mfl)
             config.model_state = ms
-            return render_model_code(ms.generate_model())
+            if ms.language is not None:
+                return ms.generate_code(language=ms.language)
+            else:
+                return render_model_code(ms.generate_model())
         else:
             raise PreventUpdate
 

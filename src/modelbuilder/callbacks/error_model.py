@@ -22,7 +22,10 @@ def error_model_callbacks(app):
             ms = update_model_state(config.model_state, error={1: base_error, 2: base_error2})
             if ms != config.model_state:
                 config.model_state = ms
-                return render_model_code(ms.generate_model()), []
+                if ms.language is not None:
+                    return ms.generate_code(language=ms.language), []
+                else:
+                    return render_model_code(ms.generate_model()), []
         raise PreventUpdate
 
     @app.callback(
@@ -45,7 +48,10 @@ def error_model_callbacks(app):
             )
             if ms != config.model_state:
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
+                if ms.language is not None:
+                    return ms.generate_code(language=ms.language)
+                else:
+                    return render_model_code(ms.generate_model())
         raise PreventUpdate
 
     @app.callback(
@@ -60,7 +66,10 @@ def error_model_callbacks(app):
             ms = update_model_state(config.model_state, error={1: base_error1, 2: base_error})
             if ms != config.model_state:
                 config.model_state = ms
-                return render_model_code(ms.generate_model()), []
+                if ms.language is not None:
+                    return ms.generate_code(language=ms.language), []
+                else:
+                    return render_model_code(ms.generate_model()), []
         raise PreventUpdate
 
     @app.callback(
@@ -80,7 +89,10 @@ def error_model_callbacks(app):
             )
             if ms != config.model_state:
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
+                if ms.language is not None:
+                    return ms.generate_code(language=ms.language)
+                else:
+                    return render_model_code(ms.generate_model())
         raise PreventUpdate
 
     @app.callback(

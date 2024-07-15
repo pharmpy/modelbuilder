@@ -138,7 +138,10 @@ def covariate_callbacks(app):
         else:
             ms = update_model_state(config.model_state, covariates=[])
         config.model_state = ms
-        return render_model_code(ms.generate_model()), error_message
+        if ms.language is not None:
+            return ms.generate_code(language=ms.language), error_message
+        else:
+            return render_model_code(ms.generate_model()), error_message
 
     @app.callback(
         Output("cov_table", "data", allow_duplicate=True),

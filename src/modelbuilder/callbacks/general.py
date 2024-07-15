@@ -44,9 +44,15 @@ def general_callbacks(app):
             ms = update_model_state(
                 ms, model_attrs={'name': model_name, 'description': model_description}
             )
+        if model_format in ['python', 'r']:
+            ms = ms.replace(language=model_format)
         config.model_state = ms
+        if ms.language is not None:
+            output = ms.generate_code(language=ms.language)
+        else:
+            output = render_model_code(ms.generate_model())
         return (
-            render_model_code(ms.generate_model()),
+            output,
             default_abs_rate,
             default_elim,
             default_peripherals,
@@ -88,6 +94,8 @@ def general_callbacks(app):
             ms = update_model_state(
                 ms, model_attrs={'name': model_name, 'description': model_description}
             )
+        if model_format in ['python', 'r']:
+            ms = ms.replace(language=model_format)
         config.model_state = ms
 
         if model_type == 'PD':
@@ -98,8 +106,12 @@ def general_callbacks(app):
             expr = 'LINEAR'
             config.model_state = ms
 
+        if ms.language is not None:
+            output = ms.generate_code(language=ms.language)
+        else:
+            output = render_model_code(ms.generate_model())
         return (
-            render_model_code(ms.generate_model()),
+            output,
             effect,
             expr,
             default_abs_rate,
@@ -125,19 +137,19 @@ def general_callbacks(app):
         prevent_initial_call=True,
     )
     def change_name_desc(name, description):
-        model_attrs = config.model_state.model_attrs
-        if name:
-            model_attrs['name'] = name
+        model_attrs = config.model_state.model_attrs.copy()
+        if name or description:
+            if name:
+                model_attrs['name'] = name
+            if description:
+                model_attrs['description'] = description
             ms = update_model_state(config.model_state, model_attrs=model_attrs)
             if ms != config.model_state:
                 config.model_state = ms
-                return render_model_code(ms.generate_model())
-        if description:
-            model_attrs['description'] = description
-            ms = update_model_state(config.model_state, model_attrs=model_attrs)
-            if ms != config.model_state:
-                config.model_state = ms
-                return render_model_code(ms.generate_model())
+                if ms.language is not None:
+                    return ms.generate_code(language=ms.language)
+                else:
+                    return render_model_code(ms.generate_model())
         raise PreventUpdate
 
     # Callback for changing the model print
@@ -149,10 +161,13 @@ def general_callbacks(app):
     def change_format(format):
         if format:
             if format in ['python', 'r']:
-                code = config.model_state.get_code(language=format)
+                ms = config.model_state.replace(language=format)
+                config.model_state = ms
+                code = ms.generate_code(language=format)
                 return code
             else:
                 ms = config.model_state.replace(model_format=format)
+                ms = ms.replace(language=None)
                 config.model_state = ms
                 return render_model_code(ms.generate_model())
         raise PreventUpdate

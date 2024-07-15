@@ -71,4 +71,7 @@ def parameter_callbacks(app):
         ms = update_model_state(config.model_state, parameters=data)
         config.model_state = ms
 
-        return data, render_model_code(ms.generate_model())
+        if ms.language is not None:
+            return data, ms.generate_code(language=ms.language)
+        else:
+            return data, render_model_code(ms.generate_model())
