@@ -309,13 +309,19 @@ def parameter_variability_callbacks(app):
         iiv_params = [iiv['list_of_parameters'] for iiv in rvs['iiv']]
         if selected_rows:
             new_data = []
+            covariates = []
+            if config.model_state.covariates:
+                covariates = [cov['covariate'] for cov in config.model_state.covariates]
             for row in selected_rows:
                 param = data[row]['list_of_parameters']
                 if isinstance(param, str):
                     param = ast.literal_eval(param)
                 if not set(param) <= set(iiv_params):
                     outtext = "Cannot add IOV on parameter without IIV! Please add IIV first."
+                elif data[row]['occ'] in covariates:
+                    outtext = f"{data[row]['occ']} is used as a covariate. Please choose an occasion column instead."
                 else:
+                    outtext = ''
                     new_data.append(data[row])
             rvs['iov'] = new_data
             ms = update_model_state(config.model_state, rvs=rvs)

@@ -104,20 +104,33 @@ def covariate_callbacks(app):
         error_message = error_msg
         if selected_rows and config.model_state.dataset is not None:
             error_message = ''
+
+            # Check that covariate is not used as an occasion column
+            occ = []
+            if config.model_state.rvs['iov']:
+                occ = [iov['occ'] for iov in config.model_state.rvs['iov']]
+
             new_data = [data[row] for row in selected_rows if all(data[row].values())]
             # Make sure that covariate cannot be added to a parameter twice
-            combinations = [
-                {'parameter': d['parameter'], 'covariate': d['covariate']} for d in new_data
-            ]
             combinations = []
             for d in new_data:
                 new_dict = {'parameter': d['parameter'], 'covariate': d['covariate']}
                 if new_dict in combinations:
-                    error_message = f"ERROR. {new_dict['covariate']} has already been added to {new_dict['parameter']}"
+                    error_message = (
+                        f"ERROR. {new_dict['covariate']} has already been added "
+                        + f"to {new_dict['parameter']}. Please choose another covariate"
+                    )
                     combinations = None
                     break
                 else:
                     combinations.append(new_dict)
+                if new_dict['covariate'] in occ:
+                    error_message = (
+                        f"ERROR. {new_dict['covariate']} is already used as "
+                        + "occasion in IOV. Please choose another covariate"
+                    )
+                    combinations = None
+                    break
             if combinations is not None:
                 ms = update_model_state(config.model_state, covariates=new_data)
             else:
