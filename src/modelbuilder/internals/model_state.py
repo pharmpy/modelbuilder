@@ -167,7 +167,7 @@ class ModelState(Immutable):
             model = model.replace(dataset=dataset, datainfo=datainfo)
         return model
 
-    def list_functions(self, dataset=None, datainfo=None, dv=None):
+    def list_functions(self, dataset=None, datainfo=None):
         funcs = []
 
         funcs.append(partial(create_basic_pk_model, administration=self.model_type))
@@ -312,8 +312,8 @@ class ModelState(Immutable):
 
         return funcs, model
 
-    def generate_model(self, dataset=None, datainfo=None, dv=None):
-        funcs, model = self.list_functions(dataset, datainfo, dv)
+    def generate_model(self, dataset=None, datainfo=None):
+        funcs, model = self.list_functions(dataset, datainfo)
         return model
 
     def generate_code(self, language):

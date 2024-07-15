@@ -20,7 +20,6 @@ def structural_callbacks(app):
             mfl = f'ABSORPTION({abs_rate})'
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
-                ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
                 config.model_state = ms
                 if ms.language is not None:
                     return ms.generate_code(language=ms.language)
@@ -53,7 +52,6 @@ def structural_callbacks(app):
             mfl = f'ELIMINATION({elim})'
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
-                ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
                 config.model_state = ms
                 if ms.language is not None:
                     return ms.generate_code(language=ms.language)
@@ -71,7 +69,6 @@ def structural_callbacks(app):
             mfl = abs_delay
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
-                ms = ms.replace(rvs={'iiv': [], 'iov': []}, block=[])
                 config.model_state = ms
                 if ms.language is not None:
                     return ms.generate_code(language=ms.language)
