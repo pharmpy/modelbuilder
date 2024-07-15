@@ -19,6 +19,7 @@ def covariate_callbacks(app):
     @app.callback(
         Output("cov_table", "data"),
         Output("cov_table", "dropdown"),
+        Output("cov_table", "selected_rows"),
         Output('error_message', 'children'),
         Input('all-tabs', 'value'),
         Input("dataset-path", 'value'),
@@ -87,8 +88,11 @@ def covariate_callbacks(app):
             cov_data = cov_data.to_dict('records')
             if covariates:
                 cov_data = covariates
+                selected_rows = list(range(len(cov_data)))
+            else:
+                selected_rows = []
 
-            return cov_data, dropdown, error_message
+            return cov_data, dropdown, selected_rows, error_message
         else:
             raise PreventUpdate
 
