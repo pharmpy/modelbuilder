@@ -20,8 +20,8 @@ def general_callbacks(app):
         Output("peripheral-radio", "value"),
         Output("abs_delay_radio", "value"),
         Input("route-radio", "value"),
-        Input("model-name", "value"),
-        Input("model-description", "value"),
+        State("model-name", "value"),
+        State("model-description", "value"),
         State("modelformat", "value"),
     )
     def change_route(route, model_name, model_description, model_format):
@@ -63,8 +63,8 @@ def general_callbacks(app):
         Output("abs_delay_radio", "value", allow_duplicate=True),
         Input("model_type", "value"),
         Input("route-radio", "value"),
-        Input("model-name", "value"),
-        Input("model-description", "value"),
+        State("model-name", "value"),
+        State("model-description", "value"),
         State("modelformat", "value"),
         prevent_initial_call=True,
     )
@@ -107,6 +107,16 @@ def general_callbacks(app):
             default_peripherals,
             default_abs_delay,
         )
+
+    @app.callback(
+        Output("dataset-path", 'value', allow_duplicate=True),
+        Output('upload-dataset', 'contents'),
+        Input("model_type", "value"),
+        Input("route-radio", "value"),
+        prevent_initial_call=True,
+    )
+    def reset_dataset(model_type, route):
+        return "", None
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
