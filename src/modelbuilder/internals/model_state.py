@@ -29,6 +29,7 @@ from pharmpy.modeling import (
     remove_iiv,
     remove_iov,
     split_joint_distribution,
+    set_description,
     set_initial_estimates,
     set_lower_bounds,
     set_name,
@@ -177,10 +178,10 @@ class ModelState(Immutable):
         if self.model_attrs:
             attrs = self.model_attrs.copy()
             if 'name' in attrs:
-                funcs.append(partial(set_name, new_name=attrs.pop('name')))
+                funcs.append(partial(set_name, new_name=attrs['name']))
                 model = funcs[-1](model)
-            if attrs:
-                funcs.append(partial(pharmpy.model.Model.replace, **attrs))
+            if 'description' in attrs:
+                funcs.append(partial(set_description, new_description=attrs['description']))
                 model = funcs[-1](model)
 
         mfl_funcs = self._get_mfl_funcs(model)
@@ -319,13 +320,11 @@ class ModelState(Immutable):
                 if isinstance(func, partial):
                     items = func.keywords.items()
                     func_name = func.func.__name__
-                    if func_name == 'replace':
+                    if func_name == 'set_dataset':
+                        string_out += "dataset_path = 'path/to/dataset'\n"
                         string_out += (
-                            f"model = model.{func_name}"
-                            + f"({', '.join('%s=%r' % x for x in items)})\n"
+                            f"model = {func_name}" + "(model, dataset_path, datatype='nonmem') \n"
                         )
-                    elif func_name == 'set_dataset':
-                        string_out += f"model = {func_name}" + "(model, path/to/dataset) \n"
                     else:
                         string_out += (
                             f"model = {func_name}"
@@ -343,13 +342,10 @@ class ModelState(Immutable):
                 if isinstance(func, partial):
                     items = func.keywords.items()
                     func_name = func.func.__name__
-                    if func_name == 'replace':
+                    if func_name == 'set_dataset':
                         string_out += (
-                            f" %>% \n model${func_name}"
-                            + f"({', '.join('%s=%r' % x for x in items)})"
+                            f" %>% \n model${func_name}" + "(path/to/dataset, datatype='nonmem')"
                         )
-                    elif func_name == 'set_dataset':
-                        string_out += f" %>% \n model${func_name}" + "(path/to/dataset)"
                     else:
                         string_out += (
                             f" %>% \n {func_name}"
