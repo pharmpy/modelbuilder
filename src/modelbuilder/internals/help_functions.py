@@ -13,11 +13,15 @@ def render_model_code(model):
 # FIXME: Something similar should be a __repr__ method in Model
 def _render_generic_model(model):
     s = ""
-    s += "------------------STATEMENTS----------------" + "\n\n"
-    s += str(model.statements) + "\n\n"
-    s += "------------------ETAS----------------------" + "\n\n"
+    s += "-----------STATEMENTS BEFORE ODE------------" + "\n\n"
+    s += str(model.statements.before_odes) + "\n\n"
+    s += "--------------------ODE---------------------" + "\n\n"
+    s += str(model.statements.ode_system) + "\n\n"
+    s += "-------------------ERROR--------------------" + "\n\n"
+    s += str(model.statements.error) + "\n\n"
+    s += "--------------------ETAS--------------------" + "\n\n"
     s += str(model.random_variables.etas) + "\n\n"
-    s += "------------------PARAMETERS----------------" + "\n\n"
+    s += "-----------------PARAMETERS-----------------" + "\n\n"
     s += str(model.parameters) + "\n\n"
 
     return s

@@ -73,7 +73,7 @@ def parameter_variability_callbacks(app):
                     clearable=False,
                 )
             ]
-            options2 = [create_options_dict({'□': 'False', 'X': 'True'}, clearable=False)] * len(
+            options2 = [create_options_dict({' ': 'False', 'X': 'True'}, clearable=False)] * len(
                 col_names
             )
             options = options1 + options2
