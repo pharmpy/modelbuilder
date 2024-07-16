@@ -51,9 +51,10 @@ navbar = dbc.Navbar(
 background_color = '#0f8282'
 border_color = '#0f8282'
 tab_style = {
-    'borderTop': f'2px solid {border_color}',
-    'borderLeft': f'2px solid {border_color}',
-    'borderRight': f'2px solid {border_color}',
+    'borderTop': f'1px solid {border_color}',
+    'borderBottom': f'1px solid {border_color}',
+    'borderLeft': f'1px solid {border_color}',
+    'borderRight': f'1px solid {border_color}',
     'backgroundColor': background_color,
     'color': 'white',
 }
