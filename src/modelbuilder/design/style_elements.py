@@ -53,10 +53,11 @@ def create_radio(elem_id, options, style=None, **kwargs):
     return dcc.RadioItems(options=options, id=elem_id, style=style, **kwargs)
 
 
-def create_checklist(elem_id, options):
+def create_checklist(elem_id, options, **kwargs):
     return dbc.Checklist(
         options=options,
         id=elem_id,
+        **kwargs,
     )
 
 

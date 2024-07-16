@@ -63,15 +63,19 @@ def structural_callbacks(app):
         Output("output-model", "value", allow_duplicate=True),
         Input("abs_delay_radio", "value"),
         Input("transits_no", "value"),
+        Input("depot_checklist", "value"),
         prevent_initial_call=True,
     )
-    def update_abs_delay_on_click(abs_delay, no_transits):
+    def update_abs_delay_on_click(abs_delay, no_transits, depot):
         if abs_delay:
             if abs_delay == 'transits':
                 if no_transits is not None:
-                    mfl = f'LAGTIME(OFF);TRANSITS({no_transits})'
+                    if not depot or depot is None:
+                        mfl = f'LAGTIME(OFF);TRANSITS({no_transits}, NODEPOT)'
+                    else:
+                        mfl = f'LAGTIME(OFF);TRANSITS({no_transits}, DEPOT)'
                 else:
-                    mfl = f'LAGTIME(OFF);TRANSITS(0)'
+                    mfl = f'LAGTIME(OFF);TRANSITS(0, NODEPOT)'
             else:
                 mfl = abs_delay
             ms = update_model_state(config.model_state, mfl)
@@ -195,11 +199,15 @@ def structural_callbacks(app):
     @app.callback(
         Output("transits_no", "disabled"),
         Output("transits_no", "value"),
+        Output("depot_checklist", "options"),
         Input("abs_delay_radio", "value"),
+        Input("depot_checklist", "options"),
         prevent_initial_call=True,
     )
-    def enable_no_of_transits(abs_delay):
+    def enable_no_of_transits(abs_delay, depot_options):
         if abs_delay == 'transits':
-            return False, 1
+            depot_options[0]['disabled'] = False
+            return False, 1, depot_options
         else:
-            return True, 'No. transits'
+            depot_options[0]['disabled'] = True
+            return True, 'No. transits', depot_options

@@ -1,5 +1,6 @@
 from .style_elements import (
     create_badge,
+    create_checklist,
     create_col,
     create_container,
     create_options_list,
@@ -54,11 +55,14 @@ def create_absorption_delay_component():
         MIN=1,
         MAX=98,
         PLACEHOLDER='No. transits',
-        style={'width': '110px'},
+        style={'width': '110px', 'marginLeft': '20px'},
         disabled=True,
     )
-
-    return create_col([abs_delay_badge, abs_delay_radio, number_of_transits])
+    depot_opts = create_options_list({'Depot': 'depot'}, disabled=True)
+    depot_checkbox = create_checklist(
+        'depot_checklist', options=depot_opts, style={'padding-left': '20px'}
+    )
+    return create_col([abs_delay_badge, abs_delay_radio, number_of_transits, depot_checkbox])
 
 
 def create_peripherals_component():
