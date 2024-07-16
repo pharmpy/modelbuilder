@@ -183,3 +183,7 @@ def create_number_input(ID, MIN=0, MAX=100, STEP=1, PLACEHOLDER="", **kwargs):
     return dcc.Input(
         id=ID, type='number', min=MIN, max=MAX, step=STEP, placeholder=PLACEHOLDER, **kwargs
     )
+
+
+def create_text_component(ID, text, **kwargs):
+    return html.Div(id=ID, children=text, **kwargs)

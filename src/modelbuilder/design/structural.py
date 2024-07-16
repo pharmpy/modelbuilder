@@ -6,6 +6,7 @@ from .style_elements import (
     create_radio,
     create_header,
     create_number_input,
+    create_empty_line,
 )
 
 
@@ -112,6 +113,10 @@ def create_pd_production():
     return create_col([pd_prod_badge, pd_prod_radio])
 
 
+def create_space():
+    return create_col([create_empty_line()])
+
+
 abs_rate_component = create_absorption_rate_component()
 elim_component = create_elimination_rate_component()
 abs_delay_component = create_absorption_delay_component()
@@ -121,12 +126,14 @@ pd_header = create_header('PD')
 pd_effect = create_pd_effect()
 pd_expression = create_pd_expression()
 pd_production = create_pd_production()
+space = create_space()
 
 structural_tab = create_container(
     (
         [pk_header],
         [abs_rate_component, elim_component],
         [abs_delay_component, peripherals_component],
+        [space],
         [pd_header],
         [pd_effect, pd_expression, pd_production],
     )

@@ -15,15 +15,18 @@ from .style_elements import (
     create_radio,
     create_empty_line,
     create_header,
+    create_text_component,
 )
 
 
 def create_iov_params_component():
     iov_params_label_dict = {}
     iov_params_badge = create_badge("Parameters")
+    params_text = 'Select parameters to add to table:'
+    params_text_component = create_text_component('params_text_id', params_text)
     iov_params_options = create_options_list(iov_params_label_dict)
     iov_params_radio = create_checklist('iov_params_checklist', options=iov_params_options)
-    return create_col([iov_params_badge, iov_params_radio, create_empty_line()])
+    return create_col([params_text_component, iov_params_radio, create_empty_line()])
 
 
 def create_iov_button():
@@ -51,24 +54,16 @@ def create_iov_table():
         fill_width=False,
     )
 
-    return create_col([iov_table])
+    help_text = 'Select rows in the table to add IOVs to the model:'
+    help_text_component = create_text_component('help_text_id', help_text)
 
-
-def create_iov_help_text_1():
-    help_text = "Add parameters to the IOV table."
-    return create_col([html.Div(id='iov_help_text_1', children=help_text), create_empty_line()])
-
-
-def create_iov_help_text_2():
-    help_text = "Select rows in the table to add IOVs to the model."
-    return create_col([html.Div(id='iov_help_text_2', children=help_text), create_empty_line()])
+    return create_col([help_text_component, iov_table])
 
 
 def create_iov_error_message():
     error_text = ""
-    return create_col(
-        [create_empty_line(), html.Div(id='dataset_text', children=error_text), create_empty_line()]
-    )
+    error_text_component = create_text_component('dataset_text', error_text, style={'color': 'red'})
+    return create_col([create_empty_line(), error_text_component, create_empty_line()])
 
 
 def create_iiv_table():
@@ -105,8 +100,6 @@ iov_button = create_iov_button()
 iov_table = create_iov_table()
 iiv_header = create_header('IIVs')
 iov_header = create_header('IOVs')
-iov_help_text_1 = create_iov_help_text_1()
-iov_help_text_2 = create_iov_help_text_2()
 iov_error_message = create_iov_error_message()
 
 par_var_tab = create_container(
@@ -114,10 +107,8 @@ par_var_tab = create_container(
         [iiv_header],
         [iiv_table],
         [iov_header],
-        [iov_help_text_1],
         [iov_checkbox],
         [iov_button],
-        [iov_help_text_2],
         [iov_table],
         [iov_error_message],
     )

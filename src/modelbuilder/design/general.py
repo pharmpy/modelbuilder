@@ -5,6 +5,7 @@ from .style_elements import (
     create_options_list,
     create_radio,
     create_text_input,
+    create_empty_line,
 )
 
 
@@ -15,7 +16,7 @@ def create_type_component():
     type_options = create_options_list(type_label_dict)
     type_radio = create_radio('model_type', options=type_options, value='PK')
 
-    return create_col([type_badge, type_radio])
+    return create_col([create_empty_line(), type_badge, type_radio])
 
 
 def create_route_component():
@@ -25,7 +26,7 @@ def create_route_component():
     route_options = create_options_list(route_label_dict)
     route_radio = create_radio('route-radio', options=route_options, value='iv')
 
-    return create_col([route_badge, route_radio])
+    return create_col([create_empty_line(), route_badge, route_radio])
 
 
 name_component = create_text_input('model-name', 'Name', 'Write model name here...')
