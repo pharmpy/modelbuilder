@@ -48,18 +48,72 @@ navbar = dbc.Navbar(
     )
 )
 
+background_color = '#0f8282'
+border_color = '#0f8282'
+tab_style = {
+    'borderTop': f'2px solid {border_color}',
+    'borderLeft': f'2px solid {border_color}',
+    'borderRight': f'2px solid {border_color}',
+    'backgroundColor': background_color,
+    'color': 'white',
+}
+border_color = 'white'
+tab_selected_style = {
+    'borderTop': f'1px solid {border_color}',
+    'borderLeft': f'1px solid {border_color}',
+    'borderRight': f'1px solid {border_color}',
+    'backgroundColor': 'white',
+    'color': 'black',
+}
+
 all_tabs = (
     html.Div(
         dcc.Tabs(
             id="all-tabs",
             value='general-tab',
             children=[
-                dcc.Tab(label="General", value='general-tab', children=general_tab),
-                dcc.Tab(label="Structural", value='structural-tab', children=structural_tab),
-                dcc.Tab(label='Parameters', value='parameters-tab', children=parameter_tab),
-                dcc.Tab(label='Parameter Variability', value='par-var-tab', children=par_var_tab),
-                dcc.Tab(label="Error model", value="error-tab", children=error_tab),
-                dcc.Tab(label="Covariates", value="covariate-tab", children=covariate_tab),
+                dcc.Tab(
+                    label="General",
+                    value='general-tab',
+                    children=general_tab,
+                    style=tab_style,
+                    selected_style=tab_selected_style,
+                ),
+                dcc.Tab(
+                    label="Structural",
+                    value='structural-tab',
+                    children=structural_tab,
+                    style=tab_style,
+                    selected_style=tab_selected_style,
+                ),
+                dcc.Tab(
+                    label='Parameters',
+                    value='parameters-tab',
+                    children=parameter_tab,
+                    style=tab_style,
+                    selected_style=tab_selected_style,
+                ),
+                dcc.Tab(
+                    label='Parameter Variability',
+                    value='par-var-tab',
+                    children=par_var_tab,
+                    style=tab_style,
+                    selected_style=tab_selected_style,
+                ),
+                dcc.Tab(
+                    label="Error model",
+                    value="error-tab",
+                    children=error_tab,
+                    style=tab_style,
+                    selected_style=tab_selected_style,
+                ),
+                dcc.Tab(
+                    label="Covariates",
+                    value="covariate-tab",
+                    children=covariate_tab,
+                    style=tab_style,
+                    selected_style=tab_selected_style,
+                ),
             ],
             className='nav-link active',
         )
