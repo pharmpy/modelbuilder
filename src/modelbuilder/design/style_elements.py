@@ -123,7 +123,9 @@ def create_clipboard(target_id):
 def create_text_input(elem_id, label, placeholder):
     label_badge = create_badge(label, with_textbox=True)
     input_text = dbc.Input(id=elem_id, placeholder=placeholder, type="text")
-    return dbc.InputGroup([label_badge, input_text], style={"margin-bottom": "5px"})
+    return dbc.InputGroup(
+        [label_badge, input_text], style={"margin-bottom": "5px", 'width': '700px'}
+    )
 
 
 def create_col(children, **kwargs):
@@ -131,7 +133,7 @@ def create_col(children, **kwargs):
 
 
 def create_container(rows, **kwargs):
-    return dbc.Container([html.Br(), *[dbc.Row(row) for row in rows]], **kwargs)
+    return dbc.Col([html.Br(), *[dbc.Row(row) for row in rows]], **kwargs)
 
 
 def disable_component(options, style=None):
