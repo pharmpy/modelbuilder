@@ -98,8 +98,8 @@ iiv_table = create_iiv_table()
 iov_checkbox = create_iov_params_component()
 iov_button = create_iov_button()
 iov_table = create_iov_table()
-iiv_header = create_header('IIVs')
-iov_header = create_header('IOVs')
+iiv_header = create_header('IIV')
+iov_header = create_header('IOV')
 iov_error_message = create_iov_error_message()
 
 par_var_tab = create_container(
