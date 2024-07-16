@@ -62,11 +62,18 @@ def structural_callbacks(app):
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
         Input("abs_delay_radio", "value"),
+        Input("transits_no", "value"),
         prevent_initial_call=True,
     )
-    def update_abs_delay_on_click(abs_delay):
+    def update_abs_delay_on_click(abs_delay, no_transits):
         if abs_delay:
-            mfl = abs_delay
+            if abs_delay == 'transits':
+                if no_transits is not None:
+                    mfl = f'LAGTIME(OFF);TRANSITS({no_transits})'
+                else:
+                    mfl = f'LAGTIME(OFF);TRANSITS(0)'
+            else:
+                mfl = abs_delay
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
                 config.model_state = ms
@@ -184,3 +191,15 @@ def structural_callbacks(app):
             style_new_prod,
             type_value,
         )
+
+    @app.callback(
+        Output("transits_no", "disabled"),
+        Output("transits_no", "value"),
+        Input("abs_delay_radio", "value"),
+        prevent_initial_call=True,
+    )
+    def enable_no_of_transits(abs_delay):
+        if abs_delay == 'transits':
+            return False, 1
+        else:
+            return True, 'No. transits'

@@ -177,3 +177,9 @@ def create_table(ID, COL, **kwargs):
 
 def create_dropdown_component(ID, options, clearable=False):
     return dcc.Dropdown(options=options, id=ID, clearable=clearable, style={'color': pharmpy_color})
+
+
+def create_number_input(ID, MIN=0, MAX=100, STEP=1, PLACEHOLDER="", **kwargs):
+    return dcc.Input(
+        id=ID, type='number', min=MIN, max=MAX, step=STEP, placeholder=PLACEHOLDER, **kwargs
+    )

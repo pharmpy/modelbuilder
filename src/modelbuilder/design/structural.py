@@ -5,6 +5,7 @@ from .style_elements import (
     create_options_list,
     create_radio,
     create_header,
+    create_number_input,
 )
 
 
@@ -41,14 +42,22 @@ def create_absorption_delay_component():
     abs_delay_label_dict = {
         'No absorption delay': 'LAGTIME(OFF);TRANSITS(0)',
         'Lag time': 'LAGTIME(ON);TRANSITS(0)',
-        'Transits': 'LAGTIME(OFF);TRANSITS(1)',
+        'Transits': 'transits',
     }
 
     abs_delay_badge = create_badge("Absorption delay")
     abs_delay_options = create_options_list(abs_delay_label_dict)
     abs_delay_radio = create_radio('abs_delay_radio', options=abs_delay_options)
+    number_of_transits = create_number_input(
+        'transits_no',
+        MIN=1,
+        MAX=98,
+        PLACEHOLDER='No. transits',
+        style={'width': '110px'},
+        disabled=True,
+    )
 
-    return create_col([abs_delay_badge, abs_delay_radio])
+    return create_col([abs_delay_badge, abs_delay_radio, number_of_transits])
 
 
 def create_peripherals_component():
