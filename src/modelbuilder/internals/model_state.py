@@ -141,7 +141,7 @@ class ModelState(Immutable):
         return cls(
             model_type,
             'nonmem',
-            {'name': 'start'},
+            {},
             mfl,
             error_funcs,
             parameters,
