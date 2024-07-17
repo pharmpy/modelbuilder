@@ -98,6 +98,8 @@ def covariate_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Output('error_message', 'children', allow_duplicate=True),
         Input("cov_table", "data"),
         Input("cov_table", "selected_rows"),
@@ -142,10 +144,7 @@ def covariate_callbacks(app):
         else:
             ms = update_model_state(config.model_state, covariates=[])
         config.model_state = ms
-        if ms.language is not None:
-            return ms.generate_code(language=ms.language), error_message
-        else:
-            return render_model_code(ms.generate_model()), error_message
+        return *render_model_code(ms), error_message
 
     @app.callback(
         Output("cov_table", "data", allow_duplicate=True),

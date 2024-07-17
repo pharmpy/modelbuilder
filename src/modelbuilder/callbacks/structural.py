@@ -12,6 +12,8 @@ from modelbuilder.internals.model_state import (
 def structural_callbacks(app):
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Input("abs_rate-radio", "value"),
         prevent_initial_call=True,
     )
@@ -21,10 +23,7 @@ def structural_callbacks(app):
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
                 config.model_state = ms
-                if ms.language is not None:
-                    return ms.generate_code(language=ms.language)
-                else:
-                    return render_model_code(ms.generate_model())
+                return render_model_code(ms)
         raise PreventUpdate
 
     @app.callback(
@@ -44,6 +43,8 @@ def structural_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Input("elim_radio", "value"),
         prevent_initial_call=True,
     )
@@ -53,14 +54,13 @@ def structural_callbacks(app):
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
                 config.model_state = ms
-                if ms.language is not None:
-                    return ms.generate_code(language=ms.language)
-                else:
-                    return render_model_code(ms.generate_model())
+                return render_model_code(ms)
         raise PreventUpdate
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Input("abs_delay_radio", "value"),
         Input("transits_no", "value"),
         Input("depot_checklist", "value"),
@@ -81,10 +81,7 @@ def structural_callbacks(app):
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
                 config.model_state = ms
-                if ms.language is not None:
-                    return ms.generate_code(language=ms.language)
-                else:
-                    return render_model_code(ms.generate_model())
+                return render_model_code(ms)
         raise PreventUpdate
 
     @app.callback(
@@ -105,6 +102,8 @@ def structural_callbacks(app):
     # callback for peripheral compartments
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Input("peripheral-radio", "value"),
         prevent_initial_call=True,
     )
@@ -114,14 +113,13 @@ def structural_callbacks(app):
             ms = update_model_state(config.model_state, mfl)
             if ms != config.model_state:
                 config.model_state = ms
-                if ms.language is not None:
-                    return ms.generate_code(language=ms.language)
-                else:
-                    return render_model_code(ms.generate_model())
+                return render_model_code(ms)
         raise PreventUpdate
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Input("pd_expression_radio", "value"),
         Input('pd_effect_radio', 'value'),
         Input('pd_production_radio', 'value'),
@@ -138,10 +136,7 @@ def structural_callbacks(app):
                 mfl = f'{effect}({expr})'
             ms = update_model_state(ms_pk, mfl)
             config.model_state = ms
-            if ms.language is not None:
-                return ms.generate_code(language=ms.language)
-            else:
-                return render_model_code(ms.generate_model())
+            return render_model_code(ms)
         else:
             raise PreventUpdate
 

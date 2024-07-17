@@ -1,8 +1,19 @@
 from pharmpy.modeling import get_model_code
 from pharmpy.model import Model
 
+# from functools import partial
+from .model_state import ModelState
 
-def render_model_code(model):
+
+def render_model_code(ms: ModelState):
+    return (
+        _render_model_code(ms.generate_model()),
+        ms.generate_code('python'),
+        ms.generate_code('r'),
+    )
+
+
+def _render_model_code(model):
     if type(model) != Model:
         return get_model_code(model)
     else:

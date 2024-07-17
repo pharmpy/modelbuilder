@@ -9,6 +9,8 @@ from .style_elements import (
     create_options_list,
     create_radio,
     create_text,
+    create_empty_line,
+    create_text_component,
 )
 
 
@@ -18,8 +20,6 @@ def create_model_format_component():
         'nlmixr': 'nlmixr',
         'nonmem': 'nonmem',
         'rxode2': 'rxode',
-        'Python code': 'python',
-        'R code': 'r',
     }
     model_format_options = create_options_list(model_format_dict)
 
@@ -30,19 +30,72 @@ def create_model_format_component():
         inline=True,
         value='nonmem',
     )
-    return create_col([model_format_radio])
+    return create_col([model_format_radio, create_empty_line()])
+
+
+background_color = 'white'
+border_color = '#0f8282'
+tab_style = {
+    'borderTop': 'white',
+    'borderBottom': f'1px solid {border_color}',
+    'borderLeft': 'white',
+    'borderRight': 'white',
+    'backgroundColor': background_color,
+    'color': '#0f8282',
+    'border-top-right-radius': '10px',
+    'border-top-left-radius': '10px',
+    'padding': '6px',
+}
+tab_selected_style = {
+    'borderTop': f'1px solid {border_color}',
+    'borderLeft': f'1px solid {border_color}',
+    'borderRight': f'1px solid {border_color}',
+    'backgroundColor': 'white',
+    'color': '#0f8282',
+    'border-top-right-radius': '10px',
+    'border-top-left-radius': '10px',
+    'padding': '6px',
+}
 
 
 def create_model_code_component():
     model_code_text = create_text('output-model')
     model_code_clipboard = create_clipboard('output-model')
-    return create_col(
-        [
-            model_code_clipboard,
-            model_code_text,
-            html.Br(),
-        ]
+    python_code_text = create_text('output-python')
+    python_code_clipboard = create_clipboard('output-python')
+    r_code_text = create_text('output-r')
+    r_code_clipboard = create_clipboard('output-r')
+
+    tabs = dcc.Tabs(
+        id="model-view-tabs",
+        value='output-model',
+        children=[
+            dcc.Tab(
+                label='Model',
+                value='output-model',
+                children=[model_code_clipboard, model_code_text, html.Br()],
+                style=tab_style,
+                selected_style=tab_selected_style,
+            ),
+            dcc.Tab(
+                label='Python',
+                value='output-python',
+                children=[python_code_clipboard, python_code_text, html.Br()],
+                style=tab_style,
+                selected_style=tab_selected_style,
+            ),
+            dcc.Tab(
+                label='R',
+                value='output-r',
+                children=[r_code_clipboard, r_code_text, html.Br()],
+                style=tab_style,
+                selected_style=tab_selected_style,
+            ),
+        ],
+        style={'margin-bottom': '-25px'},
     )
+
+    return tabs
 
 
 def create_download_model_component():

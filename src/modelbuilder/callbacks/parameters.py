@@ -61,6 +61,8 @@ def parameter_callbacks(app):
     @app.callback(
         Output("parameter-table", "data", allow_duplicate=True),
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Input("parameter-table", "data"),
         prevent_initial_call=True,
     )
@@ -71,7 +73,4 @@ def parameter_callbacks(app):
         ms = update_model_state(config.model_state, parameters=data)
         config.model_state = ms
 
-        if ms.language is not None:
-            return data, ms.generate_code(language=ms.language)
-        else:
-            return data, render_model_code(ms.generate_model())
+        return data, *render_model_code(ms)

@@ -179,6 +179,8 @@ def parameter_variability_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Output("iiv_table", "data", allow_duplicate=True),
         Output("iov_table", "selected_rows"),
         Input("iiv_table", "data"),
@@ -243,10 +245,7 @@ def parameter_variability_callbacks(app):
         ms = update_model_state(ms, block=new_block)
 
         config.model_state = ms
-        if ms.language is not None:
-            return ms.generate_code(language=ms.language), data, iov_selected_rows
-        else:
-            return render_model_code(ms.generate_model()), data, iov_selected_rows
+        return *render_model_code(ms), data, iov_selected_rows
 
     @app.callback(
         Output("iov_table", "data", allow_duplicate=True),
@@ -300,6 +299,8 @@ def parameter_variability_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Output('dataset_text', 'children', allow_duplicate=True),
         Input("iov_table", "data"),
         Input("iov_table", "selected_rows"),
@@ -332,7 +333,4 @@ def parameter_variability_callbacks(app):
             rvs['iov'] = {}
             ms = update_model_state(config.model_state, rvs=rvs)
         config.model_state = ms
-        if ms.language is not None:
-            return ms.generate_code(language=ms.language), outtext
-        else:
-            return render_model_code(ms.generate_model()), outtext
+        return *render_model_code(ms), outtext

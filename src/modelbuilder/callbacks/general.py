@@ -15,6 +15,8 @@ def general_callbacks(app):
     # Create model
     @app.callback(
         Output("output-model", "value"),
+        Output("output-python", "value"),
+        Output("output-r", "value"),
         Output("abs_rate-radio", "value"),
         Output("elim_radio", "value"),
         Output("peripheral-radio", "value"),
@@ -44,15 +46,9 @@ def general_callbacks(app):
             ms = update_model_state(
                 ms, model_attrs={'name': model_name, 'description': model_description}
             )
-        if model_format in ['python', 'r']:
-            ms = ms.replace(language=model_format)
         config.model_state = ms
-        if ms.language is not None:
-            output = ms.generate_code(language=ms.language)
-        else:
-            output = render_model_code(ms.generate_model())
         return (
-            output,
+            *render_model_code(ms),
             default_abs_rate,
             default_elim,
             default_peripherals,
@@ -61,6 +57,8 @@ def general_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Output('pd_effect_radio', 'value'),
         Output("pd_expression_radio", "value"),
         Output("abs_rate-radio", "value", allow_duplicate=True),
@@ -94,8 +92,6 @@ def general_callbacks(app):
             ms = update_model_state(
                 ms, model_attrs={'name': model_name, 'description': model_description}
             )
-        if model_format in ['python', 'r']:
-            ms = ms.replace(language=model_format)
         config.model_state = ms
 
         if model_type == 'PD':
@@ -106,12 +102,8 @@ def general_callbacks(app):
             expr = 'LINEAR'
             config.model_state = ms
 
-        if ms.language is not None:
-            output = ms.generate_code(language=ms.language)
-        else:
-            output = render_model_code(ms.generate_model())
         return (
-            output,
+            *render_model_code(ms),
             effect,
             expr,
             default_abs_rate,
@@ -132,6 +124,8 @@ def general_callbacks(app):
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Input("model-name", "value"),
         Input("model-description", "value"),
         prevent_initial_call=True,
@@ -146,30 +140,22 @@ def general_callbacks(app):
             ms = update_model_state(config.model_state, model_attrs=model_attrs)
             if ms != config.model_state:
                 config.model_state = ms
-                if ms.language is not None:
-                    return ms.generate_code(language=ms.language)
-                else:
-                    return render_model_code(ms.generate_model())
+                return render_model_code(ms)
         raise PreventUpdate
 
     # Callback for changing the model print
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Input("modelformat", 'value'),
         prevent_initial_call=True,
     )
     def change_format(format):
         if format:
-            if format in ['python', 'r']:
-                ms = config.model_state.replace(language=format)
-                config.model_state = ms
-                code = ms.generate_code(language=format)
-                return code
-            else:
-                ms = config.model_state.replace(model_format=format)
-                ms = ms.replace(language=None)
-                config.model_state = ms
-                return render_model_code(ms.generate_model())
+            ms = config.model_state.replace(model_format=format)
+            config.model_state = ms
+            return render_model_code(ms)
         raise PreventUpdate
 
     # Dataset-parsing

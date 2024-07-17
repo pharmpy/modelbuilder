@@ -68,7 +68,6 @@ class ModelState(Immutable):
     dataset: pd.DataFrame
     block: list
     covariates: list
-    language: str
 
     def __init__(
         self,
@@ -84,7 +83,6 @@ class ModelState(Immutable):
         dataset=None,
         block=None,
         covariates=None,
-        language=None,
     ):
         self.model_type = model_type
         self.model_format = model_format
@@ -98,7 +96,6 @@ class ModelState(Immutable):
         self.dataset = dataset
         self.block = block
         self.covariates = covariates
-        self.language = language
 
     def replace(self, **kwargs):
         model_format = kwargs.get('model_format', self.model_format)
@@ -112,7 +109,6 @@ class ModelState(Immutable):
         dataset = kwargs.get('dataset', self.dataset)
         block = kwargs.get('block', self.block)
         covariates = kwargs.get('covariates', self.covariates)
-        language = kwargs.get('language', self.language)
 
         return ModelState(
             model_type=self.model_type,
@@ -127,7 +123,6 @@ class ModelState(Immutable):
             dataset=dataset,
             block=block,
             covariates=covariates,
-            language=language,
         )
 
     @classmethod
@@ -143,7 +138,6 @@ class ModelState(Immutable):
         dataset = None
         block = [['CL', 'VC']]
         covariates = None
-        language = None
         return cls(
             model_type,
             'nonmem',
@@ -157,7 +151,6 @@ class ModelState(Immutable):
             dataset,
             block,
             covariates,
-            language,
         )
 
     @staticmethod

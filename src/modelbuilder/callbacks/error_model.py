@@ -10,6 +10,8 @@ from modelbuilder.design.style_elements import disable_component, enable_compone
 def error_model_callbacks(app):
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Output("additional-types-checklist", "value"),
         Input("base-type-radio", "value"),
         State("base-type-radio-dv2", "value"),
@@ -22,14 +24,13 @@ def error_model_callbacks(app):
             ms = update_model_state(config.model_state, error={1: base_error, 2: base_error2})
             if ms != config.model_state:
                 config.model_state = ms
-                if ms.language is not None:
-                    return ms.generate_code(language=ms.language), []
-                else:
-                    return render_model_code(ms.generate_model()), []
+                return *render_model_code(ms), []
         raise PreventUpdate
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Input("additional-types-checklist", "value"),
         State("additional-types-checklist-dv2", "value"),
         prevent_initial_call=True,
@@ -48,14 +49,13 @@ def error_model_callbacks(app):
             )
             if ms != config.model_state:
                 config.model_state = ms
-                if ms.language is not None:
-                    return ms.generate_code(language=ms.language)
-                else:
-                    return render_model_code(ms.generate_model())
+                return render_model_code(ms)
         raise PreventUpdate
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Output("additional-types-checklist-dv2", "value"),
         Input("base-type-radio-dv2", "value"),
         State("base-type-radio", "value"),
@@ -66,14 +66,13 @@ def error_model_callbacks(app):
             ms = update_model_state(config.model_state, error={1: base_error1, 2: base_error})
             if ms != config.model_state:
                 config.model_state = ms
-                if ms.language is not None:
-                    return ms.generate_code(language=ms.language), []
-                else:
-                    return render_model_code(ms.generate_model()), []
+                return *render_model_code(ms), []
         raise PreventUpdate
 
     @app.callback(
         Output("output-model", "value", allow_duplicate=True),
+        Output("output-python", "value", allow_duplicate=True),
+        Output("output-r", "value", allow_duplicate=True),
         Input("additional-types-checklist-dv2", "value"),
         State("additional-types-checklist", "value"),
         prevent_initial_call=True,
@@ -89,10 +88,7 @@ def error_model_callbacks(app):
             )
             if ms != config.model_state:
                 config.model_state = ms
-                if ms.language is not None:
-                    return ms.generate_code(language=ms.language)
-                else:
-                    return render_model_code(ms.generate_model())
+                return render_model_code(ms)
         raise PreventUpdate
 
     @app.callback(
