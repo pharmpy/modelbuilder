@@ -4,7 +4,7 @@ version = "0.1"
 dependencies = [
     "dash",
     "dash-bootstrap-components",
-    "pharmpy-core>=0.110.0",
+    "pharmpy-core>=1.1.0",
 ]
 
 [tool.setuptools.packages.find]
