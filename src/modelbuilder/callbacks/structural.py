@@ -69,13 +69,13 @@ def structural_callbacks(app):
     def update_abs_delay_on_click(abs_delay, no_transits, depot):
         if abs_delay:
             if abs_delay == 'transits':
-                if no_transits is not None:
+                if no_transits is not None and isinstance(no_transits, int):
                     if not depot or depot is None:
                         mfl = f'LAGTIME(OFF);TRANSITS({no_transits}, NODEPOT)'
                     else:
                         mfl = f'LAGTIME(OFF);TRANSITS({no_transits}, DEPOT)'
                 else:
-                    mfl = f'LAGTIME(OFF);TRANSITS(0, NODEPOT)'
+                    mfl = f'LAGTIME(OFF);TRANSITS(0)'
             else:
                 mfl = abs_delay
             ms = update_model_state(config.model_state, mfl)
