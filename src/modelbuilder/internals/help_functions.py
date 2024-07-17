@@ -1,15 +1,14 @@
 from pharmpy.modeling import get_model_code
 from pharmpy.model import Model
-
-# from functools import partial
-from .model_state import ModelState
+from .model_state import ModelState, generate_code
 
 
 def render_model_code(ms: ModelState):
+    funcs, model = ms.list_functions()
     return (
-        _render_model_code(ms.generate_model()),
-        ms.generate_code('python'),
-        ms.generate_code('r'),
+        _render_model_code(model),
+        generate_code(funcs, 'python'),
+        generate_code(funcs, 'r'),
     )
 
 

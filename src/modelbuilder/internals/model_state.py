@@ -309,52 +309,6 @@ class ModelState(Immutable):
         funcs, model = self.list_functions(dataset, datainfo)
         return model
 
-    def generate_code(self, language):
-        if language == 'python':
-            funcs = self.list_functions()[0]
-            string_out = (
-                f"model = {funcs[0].func.__name__}"
-                + f"({', '.join('%s=%r' % x for x in funcs[0].keywords.items())})\n"
-            )
-            for func in funcs[1::]:
-                if isinstance(func, partial):
-                    items = func.keywords.items()
-                    func_name = func.func.__name__
-                    if func_name == 'set_dataset':
-                        string_out += "dataset_path = 'path/to/dataset'\n"
-                        string_out += (
-                            f"model = {func_name}" + "(model, dataset_path, datatype='nonmem') \n"
-                        )
-                    else:
-                        string_out += (
-                            f"model = {func_name}"
-                            + f"(model, {', '.join('%s=%r' % x for x in items)})\n"
-                        )
-                else:
-                    string_out += f"model = {func.__name__}(model)\n"
-        elif language == 'r':
-            funcs = self.list_functions()[0]
-            string_out = (
-                f"model <- {funcs[0].func.__name__}"
-                + f"({', '.join('%s=%r' % x for x in funcs[0].keywords.items())})"
-            )
-            for func in funcs[1::]:
-                if isinstance(func, partial):
-                    items = func.keywords.items()
-                    func_name = func.func.__name__
-                    if func_name == 'set_dataset':
-                        string_out += (
-                            f" %>% \n model${func_name}" + "(path/to/dataset, datatype='nonmem')"
-                        )
-                    else:
-                        string_out += (
-                            f" %>% \n {func_name}"
-                            + f"({', '.join('%s=%s' % _convert_python_to_r(x) for x in items)})"
-                        )
-                else:
-                    string_out += f" %>% \n {func.__name__}()"
-        return string_out
-
     def _get_mfl_funcs(self, model_base):
         mfl_str_start = get_model_features(model_base)
         mfl_start = ModelFeatures.create_from_mfl_string(mfl_str_start)
@@ -474,6 +428,51 @@ def _update_rvs_from_model(model):
         [get_rv_parameters(model, eta)[0] for eta in etas] for etas in eta_block if len(etas) > 1
     ]
     return rvs, existing_block
+
+
+def generate_code(funcs, language):
+    if language == 'python':
+        string_out = (
+            f"model = {funcs[0].func.__name__}"
+            + f"({', '.join('%s=%r' % x for x in funcs[0].keywords.items())})\n"
+        )
+        for func in funcs[1::]:
+            if isinstance(func, partial):
+                items = func.keywords.items()
+                func_name = func.func.__name__
+                if func_name == 'set_dataset':
+                    string_out += "dataset_path = 'path/to/dataset'\n"
+                    string_out += (
+                        f"model = {func_name}" + "(model, dataset_path, datatype='nonmem') \n"
+                    )
+                else:
+                    string_out += (
+                        f"model = {func_name}"
+                        + f"(model, {', '.join('%s=%r' % x for x in items)})\n"
+                    )
+            else:
+                string_out += f"model = {func.__name__}(model)\n"
+    elif language == 'r':
+        string_out = (
+            f"model <- {funcs[0].func.__name__}"
+            + f"({', '.join('%s=%r' % x for x in funcs[0].keywords.items())})"
+        )
+        for func in funcs[1::]:
+            if isinstance(func, partial):
+                items = func.keywords.items()
+                func_name = func.func.__name__
+                if func_name == 'set_dataset':
+                    string_out += (
+                        f" %>% \n model${func_name}" + "(path/to/dataset, datatype='nonmem')"
+                    )
+                else:
+                    string_out += (
+                        f" %>% \n {func_name}"
+                        + f"({', '.join('%s=%s' % _convert_python_to_r(x) for x in items)})"
+                    )
+            else:
+                string_out += f" %>% \n {func.__name__}()"
+    return string_out
 
 
 def _convert_python_to_r(dict_item):
