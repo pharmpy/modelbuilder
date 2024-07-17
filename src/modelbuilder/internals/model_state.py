@@ -29,7 +29,7 @@ from pharmpy.modeling import (
     remove_iiv,
     remove_iov,
     split_joint_distribution,
-    set_description,
+    #set_description,
     set_initial_estimates,
     set_lower_bounds,
     set_name,
@@ -188,6 +188,9 @@ class ModelState(Immutable):
                 funcs.append(partial(set_name, new_name=attrs['name']))
                 model = funcs[-1](model)
             if 'description' in attrs:
+                def set_description(model, description):
+                    model = model.replace(description=description)
+                    return model
                 funcs.append(partial(set_description, new_description=attrs['description']))
                 model = funcs[-1](model)
 
