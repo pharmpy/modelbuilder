@@ -97,16 +97,17 @@ def create_button(button_id, button_text, color=btn_color):
     return dbc.Button(button_text, id=button_id, color=color, style=style, n_clicks=0)
 
 
-def create_text(elem_id):
-    style = {
-        'font-family': 'monospace',
-        'resize': 'None',
-        'height': '70vh',
-        'fontSize': '12px',
-        "backgroundColor": '#ffffff',
-        'overflow-x': 'auto',
-        'white-space': 'pre',
-    }
+def create_text(elem_id, style=None):
+    if style is None:
+        style = {
+            'font-family': 'monospace',
+            'resize': 'None',
+            'height': '70vh',
+            'fontSize': '12px',
+            "backgroundColor": '#ffffff',
+            'overflow-x': 'auto',
+            'white-space': 'pre',
+        }
     return dbc.Textarea(id=elem_id, readOnly=True, style=style)
 
 

@@ -56,14 +56,29 @@ tab_selected_style = {
     'border-top-left-radius': '10px',
     'padding': '6px',
 }
+text_style = {
+    'font-family': 'monospace',
+    'resize': 'None',
+    'height': '70vh',
+    'fontSize': '12px',
+    "backgroundColor": '#ffffff',
+    'overflow-x': 'auto',
+    'white-space': 'pre',
+    'borderTop': 'white',
+    'borderLeft': f'1px solid {border_color}',
+    'borderRight': f'1px solid {border_color}',
+    'borderBottom': f'1px solid {border_color}',
+    'border-top-right-radius': '0',
+    'border-top-left-radius': '0',
+}
 
 
 def create_model_code_component():
-    model_code_text = create_text('output-model')
+    model_code_text = create_text('output-model', style=text_style)
     model_code_clipboard = create_clipboard('output-model')
-    python_code_text = create_text('output-python')
+    python_code_text = create_text('output-python', style=text_style)
     python_code_clipboard = create_clipboard('output-python')
-    r_code_text = create_text('output-r')
+    r_code_text = create_text('output-r', style=text_style)
     r_code_clipboard = create_clipboard('output-r')
 
     tabs = dcc.Tabs(
@@ -92,7 +107,7 @@ def create_model_code_component():
                 selected_style=tab_selected_style,
             ),
         ],
-        style={'margin-bottom': '-25px'},
+        style={'margin-bottom': '-24px'},
     )
 
     return tabs
