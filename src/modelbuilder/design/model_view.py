@@ -44,7 +44,6 @@ tab_style = {
     'color': '#0f8282',
     'border-top-right-radius': '10px',
     'border-top-left-radius': '10px',
-    'padding': '6px',
 }
 tab_selected_style = {
     'borderTop': f'1px solid {border_color}',
@@ -54,7 +53,6 @@ tab_selected_style = {
     'color': '#0f8282',
     'border-top-right-radius': '10px',
     'border-top-left-radius': '10px',
-    'padding': '6px',
 }
 text_style = {
     'font-family': 'monospace',
