@@ -36,6 +36,7 @@ from pharmpy.modeling import (
     set_upper_bounds,
     fix_parameters,
     set_dataset,
+    unfix_parameters,
 )
 from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
 
@@ -198,11 +199,6 @@ class ModelState(Immutable):
         # Update rvs when individual parameters have changed
         if self.individual_parameters != get_individual_parameters(model):
             self.rvs, self.block = _update_rvs_from_model(model)
-        #  Update parameters when model parameters have changed
-        if self.parameters != model.parameters:
-            self.parameters, self.individual_parameters = _update_parameters_from_model(
-                self.parameters, model
-            )
 
         for dv, func_names in self.error_funcs.items():
             for func_name in func_names:
@@ -268,23 +264,22 @@ class ModelState(Immutable):
                 funcs.append(partial(add_covariate_effect, **cov))
                 model = funcs[-1](model)
 
+        #  Update parameters when model parameters have changed
+        if self.parameters != model.parameters:
+            self.parameters, self.individual_parameters = _update_parameters_from_model(
+                self.parameters, model
+            )
         parameter_transformations = {'inits': {}, 'lower': {}, 'upper': {}, 'fix': [], 'unfix': []}
-        parameters = self.parameters
         for p in model.parameters:
-            if p.name not in parameters.names:
-                parameters += p
-            else:
-                param = parameters[p.name]
-                if param != p:
-                    if param.init != p.init:
-                        parameter_transformations['inits'][param.name] = param.init
-                    for attr in ['lower', 'upper']:
-                        if getattr(param, attr) != getattr(p, attr):
-                            parameter_transformations[attr][param.name] = getattr(param, attr)
-                    if param.fix != p.fix:
-                        (parameter_transformations['fix' if param.fix else 'unfix']).append(
-                            param.name
-                        )
+            param = self.parameters[p.name]
+            if param != p:
+                if param.init != p.init:
+                    parameter_transformations['inits'][param.name] = param.init
+                for attr in ['lower', 'upper']:
+                    if getattr(param, attr) != getattr(p, attr):
+                        parameter_transformations[attr][param.name] = getattr(param, attr)
+                if param.fix != p.fix:
+                    (parameter_transformations['fix' if param.fix else 'unfix']).append(param.name)
 
         for attr, values in parameter_transformations.items():
             if values:

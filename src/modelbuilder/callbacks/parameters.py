@@ -56,7 +56,10 @@ def parameter_callbacks(app):
         Input('all-tabs', 'value'),
     )
     def create_table(tab):
-        return config.model_state.parameters.to_dict()['parameters']
+        if tab == 'parameters-tab':
+            return config.model_state.parameters.to_dict()['parameters']
+        else:
+            raise PreventUpdate
 
     @app.callback(
         Output("parameter-table", "data", allow_duplicate=True),
@@ -64,13 +67,17 @@ def parameter_callbacks(app):
         Output("output-python", "value", allow_duplicate=True),
         Output("output-r", "value", allow_duplicate=True),
         Input("parameter-table", "data"),
+        Input('all-tabs', 'value'),
         prevent_initial_call=True,
     )
-    def update_table(data):
-        data = replace_empty(data)
+    def update_table(data, tab):
+        if tab == 'parameters-tab':
+            data = replace_empty(data)
 
-        data = fix_blocks(data)
-        ms = update_model_state(config.model_state, parameters=data)
-        config.model_state = ms
+            data = fix_blocks(data)
+            ms = update_model_state(config.model_state, parameters=data)
+            config.model_state = ms
 
-        return data, *render_model_code(ms)
+            return data, *render_model_code(ms)
+        else:
+            raise PreventUpdate
