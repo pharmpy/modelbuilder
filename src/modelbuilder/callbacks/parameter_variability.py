@@ -137,7 +137,7 @@ def parameter_variability_callbacks(app):
                     new_iov_checklist.append(d)
                 iov_checkboxes_options = new_iov_checklist
 
-                occ_opts = config.model_state.occ
+                occ_opts = config.model_state.col
                 outtext = ''
                 dropdown_opts = create_dropdown(
                     ['occ', 'distribution'],

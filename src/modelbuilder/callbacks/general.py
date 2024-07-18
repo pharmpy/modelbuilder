@@ -178,6 +178,7 @@ def general_callbacks(app):
                 return error
             else:
                 config.model_state.dataset = data
+                config.model_state.col = list(data.columns)
                 return (str(filename),)
         else:
             raise PreventUpdate

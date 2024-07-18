@@ -46,7 +46,7 @@ def covariate_callbacks(app):
             options_parameter = [
                 create_options_dict({i: i for i in parameter_names}, clearable=False)
             ]
-            cov_opts = config.model_state.occ
+            cov_opts = config.model_state.col
             options_covariate = [
                 create_options_dict({i: i for i in cov_opts if cov_opts}, clearable=False)
             ]

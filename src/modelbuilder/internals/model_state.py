@@ -64,7 +64,7 @@ class ModelState(Immutable):
     error_funcs: list[str]
     parameters: Parameters
     rvs: dict
-    occ: list
+    col: list
     individual_parameters: list
     dataset: pd.DataFrame
     block: list
@@ -79,7 +79,7 @@ class ModelState(Immutable):
         error_funcs,
         parameters,
         rvs=None,
-        occ=None,
+        col=None,
         individual_parameters=None,
         dataset=None,
         block=None,
@@ -92,7 +92,7 @@ class ModelState(Immutable):
         self.error_funcs = error_funcs
         self.parameters = parameters
         self.rvs = rvs
-        self.occ = occ
+        self.col = col
         self.individual_parameters = individual_parameters
         self.dataset = dataset
         self.block = block
@@ -105,7 +105,7 @@ class ModelState(Immutable):
         error_funcs = kwargs.get('error_funcs', self.error_funcs)
         parameters = kwargs.get('parameters', self.parameters)
         rvs = kwargs.get('rvs', self.rvs)
-        occ = kwargs.get('occ', self.occ)
+        col = kwargs.get('col', self.col)
         individual_parameters = kwargs.get('individual_parameters', self.individual_parameters)
         dataset = kwargs.get('dataset', self.dataset)
         block = kwargs.get('block', self.block)
@@ -119,7 +119,7 @@ class ModelState(Immutable):
             error_funcs=error_funcs,
             parameters=parameters,
             rvs=rvs,
-            occ=occ,
+            col=col,
             individual_parameters=individual_parameters,
             dataset=dataset,
             block=block,
@@ -134,7 +134,7 @@ class ModelState(Immutable):
         error_funcs = {1: ['prop']}
         parameters = model.parameters
         rvs = _update_rvs_from_model(model)[0]
-        occ = model.datainfo.names
+        col = model.datainfo.names
         individual_parameters = get_individual_parameters(model)
         dataset = None
         block = [['CL', 'VC']]
@@ -147,7 +147,7 @@ class ModelState(Immutable):
             error_funcs,
             parameters,
             rvs,
-            occ,
+            col,
             individual_parameters,
             dataset,
             block,
