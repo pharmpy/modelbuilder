@@ -196,9 +196,11 @@ class ModelState(Immutable):
             funcs.append(func)
             model = funcs[-1](model)
 
-        # Update rvs when individual parameters have changed
+        # Update rvs and covariates when individual parameters have changed
         if self.individual_parameters != get_individual_parameters(model):
             self.rvs, self.block = _update_rvs_from_model(model)
+            if self.covariates is not None:
+                self.covariates = _update_covariates(model, self.covariates)
 
         for dv, func_names in self.error_funcs.items():
             for func_name in func_names:
@@ -426,6 +428,13 @@ def _update_rvs_from_model(model):
         [get_rv_parameters(model, eta)[0] for eta in etas] for etas in eta_block if len(etas) > 1
     ]
     return rvs, existing_block
+
+
+def _update_covariates(model, covariates):
+    new_covariates = [
+        cov for cov in covariates if cov['parameter'] in get_individual_parameters(model)
+    ]
+    return new_covariates
 
 
 def generate_code(funcs, language):
