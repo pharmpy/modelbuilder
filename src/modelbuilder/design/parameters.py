@@ -6,6 +6,9 @@ from .style_elements import (
     create_table,
     create_options_dict,
     create_header,
+    create_text_component,
+    create_empty_line,
+    create_col,
 )
 
 columns = [
@@ -21,7 +24,12 @@ dropdown = create_dropdown(
     [create_options_dict({'true': True, 'false': False}, clearable=False)],
 )
 
+help_text = "Please note that parameters will be reset if any model feature is changed."
+help_text_component = create_text_component('param_help_text', help_text)
+
+help_text = create_col([create_empty_line(), help_text_component])
+
 all_parameters_table = create_table('parameter-table', columns, dropdown=dropdown)
 header = create_header('Parameters')
 
-parameter_tab = create_container([header, all_parameters_table], className="mt-4")
+parameter_tab = create_container([header, all_parameters_table, help_text], className="mt-4")

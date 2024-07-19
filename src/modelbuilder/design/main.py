@@ -88,13 +88,6 @@ all_tabs = (
                     selected_style=tab_selected_style,
                 ),
                 dcc.Tab(
-                    label='Parameters',
-                    value='parameters-tab',
-                    children=parameter_tab,
-                    style=tab_style,
-                    selected_style=tab_selected_style,
-                ),
-                dcc.Tab(
                     label='Parameter Variability',
                     value='par-var-tab',
                     children=par_var_tab,
@@ -112,6 +105,13 @@ all_tabs = (
                     label="Covariates",
                     value="covariate-tab",
                     children=covariate_tab,
+                    style=tab_style,
+                    selected_style=tab_selected_style,
+                ),
+                dcc.Tab(
+                    label='Parameters',
+                    value='parameters-tab',
+                    children=parameter_tab,
                     style=tab_style,
                     selected_style=tab_selected_style,
                 ),

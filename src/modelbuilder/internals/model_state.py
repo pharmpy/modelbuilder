@@ -339,6 +339,9 @@ def update_model_state(ms_old, mfl=None, **kwargs):
     block = kwargs.get('block')
     covariates = kwargs.get('covariates')
 
+    if not parameters:
+        ms_old = ms_old.replace(parameters=Parameters())
+
     if mfl:
         mfl_new = ms_old.mfl.replace_features(mfl)
         return ms_old.replace(mfl=mfl_new)
