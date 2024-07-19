@@ -44,6 +44,7 @@ tab_style = {
     'color': '#0f8282',
     'border-top-right-radius': '10px',
     'border-top-left-radius': '10px',
+    'padding': '5px',
 }
 tab_selected_style = {
     'borderTop': f'1px solid {border_color}',
@@ -53,6 +54,7 @@ tab_selected_style = {
     'color': '#0f8282',
     'border-top-right-radius': '10px',
     'border-top-left-radius': '10px',
+    'padding': '5px',
 }
 text_style = {
     'font-family': 'monospace',
@@ -68,6 +70,7 @@ text_style = {
     'borderBottom': f'1px solid {border_color}',
     'border-top-right-radius': '0',
     'border-top-left-radius': '0',
+    'margin-top': '-24px',
 }
 
 
@@ -105,7 +108,6 @@ def create_model_code_component():
                 selected_style=tab_selected_style,
             ),
         ],
-        style={'margin-bottom': '-24px'},
     )
 
     return tabs
