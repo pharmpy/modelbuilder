@@ -195,6 +195,7 @@ def structural_callbacks(app):
         Output("transits_no", "disabled"),
         Output("transits_no", "value"),
         Output("depot_checklist", "options"),
+        Output("depot_checklist", "value"),
         Input("abs_delay_radio", "value"),
         Input("depot_checklist", "options"),
         prevent_initial_call=True,
@@ -202,7 +203,7 @@ def structural_callbacks(app):
     def enable_no_of_transits(abs_delay, depot_options):
         if abs_delay == 'transits':
             depot_options[0]['disabled'] = False
-            return False, 1, depot_options
+            return False, 1, depot_options, ['depot']
         else:
             depot_options[0]['disabled'] = True
-            return True, 'No. transits', depot_options
+            return True, 'No. transits', depot_options, [None]
