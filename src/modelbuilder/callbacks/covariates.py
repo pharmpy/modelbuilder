@@ -46,7 +46,12 @@ def covariate_callbacks(app):
             options_parameter = [
                 create_options_dict({i: i for i in parameter_names}, clearable=False)
             ]
-            cov_opts = config.model_state.col
+            datainfo = config.model_state.generate_model().datainfo
+            cov_opts = []
+            if 'covariate' in datainfo.types:
+                cov_opts.extend(datainfo.typeix['covariate'].names)
+            if 'unknown' in datainfo.types:
+                cov_opts.extend(datainfo.typeix['unknown'].names)
             options_covariate = [
                 create_options_dict({i: i for i in cov_opts if cov_opts}, clearable=False)
             ]
