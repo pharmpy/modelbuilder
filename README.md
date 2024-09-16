@@ -10,39 +10,10 @@ modeling languages.
 
 ## Installation
 
-To setup, clone this repository into a folder:
+Install the modelbuilder GUI, either globally or in a virtual environment, using pip:
 
 ```
-git clone https://github.com/pharmpy/modelbuilder.git
-```
-
-This can be run directly on top of your `python` client or in a virtual environment. We recommend
-using a virtual environment to not affect your standard python installation:
-
-To create a virtual environment with the name ``mymodelbuilder`` run the following command:
-
-```
-python -m venv mymodelbuilder
-```
-
-Then activate it using:
-
-**Windows**
-
-```
-mymodelbuilder\scripts\activate.ps1
-```
-
-**Linux/macOS**
-
-```
-. ./mymodelbuilder/bin/activate
-```
-
-Now the modelbuilder can be installed with 
-
-```
-pip install ./modelbuilder
+pip install git+https://github.com/pharmpy/modelbuilder.git
 ```
 
 ## Run the app
@@ -51,7 +22,7 @@ To start the app:
 
 `pharmpy-modelbuilder`
 
-In the commandline this should look something like
+In the command line this should look something like:
 
 ```
 Dash is running on http://127.0.0.1:8050/
