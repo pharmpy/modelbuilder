@@ -1,2 +1,3 @@
 pharmpy-core==1.12.0
+pywrapr @ git+https://github.com/pharmpy/pywrapr@main
 dash==3.3.0

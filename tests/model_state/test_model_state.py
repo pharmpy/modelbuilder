@@ -1,3 +1,4 @@
+import pytest
 from pharmpy.modeling import (
     create_basic_pk_model,
     has_additive_error_model,
@@ -12,7 +13,7 @@ from pharmpy.modeling import (
 )
 from pharmpy.tools.mfl.parse import get_model_features, parse
 
-from modelbuilder.internals.model_state import ModelState, update_model_state
+from modelbuilder.internals.model_state import ModelState, generate_code, update_model_state
 
 
 def test_model_state_init():
@@ -198,3 +199,24 @@ def test_update_model_covariates():
     model_state_new = update_model_state(model_state, covariates=covariate)
     model_new = model_state_new.generate_model(dataset, datainfo)
     assert has_covariate_effect(model_new, 'CL', 'AMT')
+
+
+@pytest.mark.parametrize(
+    'language, expected',
+    [
+        (
+            'python',
+            'model = create_basic_pk_model(administration=\'iv\')\n'
+            'model = convert_model(model, to_format=\'nonmem\')\n',
+        ),
+        (
+            'r',
+            'model <- create_basic_pk_model(administration=\'iv\') %>%\n'
+            ' convert_model(to_format=\'nonmem\')\n',
+        ),
+    ],
+)
+def test_generate_code(language, expected):
+    model_state = ModelState.create('iv')
+    funcs, _ = model_state.list_functions()
+    assert generate_code(funcs, language) == expected

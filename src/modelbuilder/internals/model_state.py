@@ -40,6 +40,8 @@ from pharmpy.modeling import (
 from pharmpy.tools.mfl.least_number_of_transformations import least_number_of_transformations
 from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
 
+from pywrapr.docs_conversion import translate_python_row
+
 ERROR_FUNCS = {
     'add': set_additive_error_model,
     'prop': set_proportional_error_model,
@@ -438,61 +440,35 @@ def _update_covariates(model, covariates):
 
 
 def generate_code(funcs, language):
-    if language == 'python':
-        string_out = (
-            f"model = {funcs[0].func.__name__}"
-            + f"({', '.join('%s=%r' % x for x in funcs[0].keywords.items())})\n"
-        )
-        for func in funcs[1::]:
-            if isinstance(func, partial):
-                items = func.keywords.items()
-                func_name = func.func.__name__
-                if func_name == 'set_dataset':
-                    string_out += "dataset_path = 'path/to/dataset'\n"
-                    string_out += (
-                        f"model = {func_name}" + "(model, dataset_path, datatype='nonmem') \n"
-                    )
-                else:
-                    string_out += (
-                        f"model = {func_name}"
-                        + f"(model, {', '.join('%s=%r' % x for x in items)})\n"
-                    )
+    string_out = ''
+    for i, func in enumerate(funcs):
+        if isinstance(func, partial):
+            items = func.keywords.items()
+            func_name = func.func.__name__
+            args = ', '.join('%s=%r' % x for x in items)
+            if i > 0 and language == 'python':
+                args = 'model, ' + args
+            func_call = f"{func_name}({args})"
+            if language == 'r':
+                func_call = translate_python_row(func_call)
+        else:
+            func_call = f"{func.__name__}(model)"
+            if language == 'r':
+                func_call = translate_python_row(func_call)
+        if language == 'python':
+            string_out += f"model = {func_call}\n"
+        else:
+            if i == 0:
+                r_str = f"model <- {func_call}"
+                spacing = ''
             else:
-                string_out += f"model = {func.__name__}(model)\n"
-    elif language == 'r':
-        string_out = (
-            f"model <- {funcs[0].func.__name__}"
-            + f"({', '.join('%s=%r' % x for x in funcs[0].keywords.items())})"
-        )
-        for func in funcs[1::]:
-            if isinstance(func, partial):
-                items = func.keywords.items()
-                func_name = func.func.__name__
-                if func_name == 'set_dataset':
-                    string_out += (
-                        f" %>% \n model${func_name}" + "(path/to/dataset, datatype='nonmem')"
-                    )
-                else:
-                    string_out += (
-                        f" %>% \n {func_name}"
-                        + f"({', '.join('%s=%s' % _convert_python_to_r(x) for x in items)})"
-                    )
-            else:
-                string_out += f" %>% \n {func.__name__}()"
+                r_str = func_call
+                spacing = ' '
+            r_str = f"{spacing}{r_str}"
+            if i < len(funcs) - 1:
+                r_str += ' %>%'
+            string_out += f"{r_str}\n"
     return string_out
-
-
-def _convert_python_to_r(dict_item):
-    key, value = dict_item
-    if isinstance(value, dict):
-        return key, f"list({', '.join(f'{k} = {v}' for k, v in value.items())})"
-    elif isinstance(value, list):
-        l = [f"'{item}'" for item in value]
-        return key, f"c({', '.join(l)})"
-    elif isinstance(value, float) or isinstance(value, int):
-        return dict_item
-    else:
-        return key, f"'{value}'"
 
 
 def _group_by_key(lst, key1, key2):

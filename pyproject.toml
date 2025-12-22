@@ -42,3 +42,12 @@ extend-ignore = [
     # See https://github.com/PyCQA/pycodestyle/issues/373
     "E203",
 ]
+
+[tool.pytest]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--tb=short",
+]
