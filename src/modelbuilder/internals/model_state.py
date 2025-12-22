@@ -39,6 +39,7 @@ from pharmpy.modeling import (
     unfix_parameters,
 )
 from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
+from pharmpy.tools.mfl.least_number_of_transformations import least_number_of_transformations
 
 ERROR_FUNCS = {
     'add': set_additive_error_model,
@@ -310,11 +311,11 @@ class ModelState(Immutable):
         mfl_str_start = get_model_features(model_base)
         mfl_start = ModelFeatures.create_from_mfl_string(mfl_str_start)
         if self.mfl.filter('pd').get_number_of_features() == 0:
-            lnt = mfl_start.least_number_of_transformations(self.mfl, model_base)
+            lnt = least_number_of_transformations(mfl_start, self.mfl, model_base)
             funcs = list(lnt.values())
         else:
             pk_mfl = self.mfl.filter('pk')
-            lnt = mfl_start.least_number_of_transformations(pk_mfl, model_base)
+            lnt = least_number_of_transformations(mfl_start, pk_mfl, model_base)
             funcs = list(lnt.values())
             pd_funcs = self.mfl.convert_to_funcs(model=model_base, subset_features='pd')
             funcs += list(pd_funcs.values())

@@ -1,9 +1,3 @@
-import os
-import sys
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../src/'))
-import modelbuilder
-
 from pharmpy.modeling import (
     create_basic_pk_model,
     has_additive_error_model,
@@ -179,7 +173,7 @@ def test_update_model_rvs():
     model_state_new = update_model_state(model_state, rvs=rvs)
     model_state_new = update_model_state(model_state_new, block=[['CL']])
     model_new = model_state_new.generate_model()
-    assert model_new.random_variables.iiv.names == ['ETA_CL']
+    assert model_new.random_variables.iiv.names == ('ETA_CL',)
 
 
 def test_update_model_block():
