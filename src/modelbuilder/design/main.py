@@ -9,7 +9,6 @@ from .model_view import model_format_div
 from .parameter_variability import par_var_tab
 from .parameters import parameter_tab
 from .structural import structural_tab
-from .covariates import covariate_tab
 
 # Navbar
 navbar = dbc.Navbar(
@@ -38,7 +37,7 @@ navbar = dbc.Navbar(
             html.A(
                 dbc.Row(
                     [
-                        dbc.Col(html.Img(src="assets\github-mark.png", height="50px")),
+                        dbc.Col(html.Img(src="assets/github-mark.png", height="50px")),
                     ]
                 ),
                 href="https://github.com/pharmpy/modelbuilder",

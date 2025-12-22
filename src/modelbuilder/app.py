@@ -9,12 +9,12 @@ import dash_bootstrap_components as dbc
 from dash import Dash
 
 import modelbuilder.design.main as df
+from modelbuilder.callbacks.covariates import covariate_callbacks
 from modelbuilder.callbacks.error_model import error_model_callbacks
 from modelbuilder.callbacks.general import general_callbacks
+from modelbuilder.callbacks.parameter_variability import parameter_variability_callbacks
 from modelbuilder.callbacks.parameters import parameter_callbacks
 from modelbuilder.callbacks.structural import structural_callbacks
-from modelbuilder.callbacks.parameter_variability import parameter_variability_callbacks
-from modelbuilder.callbacks.covariates import covariate_callbacks
 
 PHARMPY_LOGO = "https://pharmpy.github.io/latest/_images/Pharmpy_logo.svg"
 

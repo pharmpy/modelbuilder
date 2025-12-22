@@ -14,7 +14,7 @@ def datainfo_callbacks(app):
                 df = pd.DataFrame(datainf["columns"])
                 usable = df.to_dict('records')
                 return usable
-            except:
+            except:  # noqa E722
                 PreventUpdate
 
     @app.callback(
@@ -29,7 +29,7 @@ def datainfo_callbacks(app):
             datainf = config.model.datainfo.from_dict(datainf)
             config.model = config.model.replace(datainfo=datainf)
             return True
-        except:
+        except:  # noqa E722
             raise PreventUpdate
 
     @app.callback(Output("download_dtainf", "data"), Input("makedatainf", "n_clicks"))

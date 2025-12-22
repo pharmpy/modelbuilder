@@ -1,18 +1,15 @@
-import dash_bootstrap_components as dbc
+import pandas as pd
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-import pandas as pd
 import modelbuilder.config as config
-from modelbuilder.internals.help_functions import render_model_code
-from modelbuilder.internals.model_state import update_model_state
-
 from modelbuilder.design.style_elements import (
-    create_options_dropdown,
     create_col_dict,
     create_dropdown,
     create_options_dict,
 )
+from modelbuilder.internals.help_functions import render_model_code
+from modelbuilder.internals.model_state import update_model_state
 
 
 def covariate_callbacks(app):

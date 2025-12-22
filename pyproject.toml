@@ -27,5 +27,18 @@ skip-string-normalization = 1
 [tool.isort]
 profile = "black"
 line_length = 100
+known_first_party = "pywrapr"
+default_section = "THIRDPARTY"
 multi_line_output = 3
 include_trailing_comma = true
+
+[tool.pyright]
+reportUnnecessaryTypeIgnoreComment = true
+
+[tool.flake8]
+# Set to 120 instead of 100 because black sometimes creates longer lines
+max-line-length = 120
+extend-ignore = [
+    # See https://github.com/PyCQA/pycodestyle/issues/373
+    "E203",
+]

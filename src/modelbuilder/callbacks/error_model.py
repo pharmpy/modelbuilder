@@ -2,9 +2,9 @@ from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 import modelbuilder.config as config
+from modelbuilder.design.style_elements import disable_component, enable_component
 from modelbuilder.internals.help_functions import render_model_code
 from modelbuilder.internals.model_state import update_model_state
-from modelbuilder.design.style_elements import disable_component, enable_component
 
 
 def error_model_callbacks(app):

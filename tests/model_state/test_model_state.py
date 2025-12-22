@@ -168,7 +168,6 @@ def test_update_model_attrs():
 
 def test_update_model_rvs():
     model_state = ModelState.create('iv')
-    model = model_state.generate_model()
     rvs = {'iiv': [{'list_of_parameters': 'CL', 'expression': 'add'}], 'iov': []}
     model_state_new = update_model_state(model_state, rvs=rvs)
     model_state_new = update_model_state(model_state_new, block=[['CL']])

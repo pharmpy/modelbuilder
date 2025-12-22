@@ -1,12 +1,11 @@
 import ast
 from dataclasses import dataclass
 from functools import partial
-from typing import Union
+
 import pandas as pd
 import pharmpy
-
 from pharmpy.internals.immutable import Immutable
-from pharmpy.model import Parameter, Parameters, RandomVariables
+from pharmpy.model import Parameter, Parameters
 from pharmpy.modeling import (
     add_covariate_effect,
     add_iiv,
@@ -14,32 +13,32 @@ from pharmpy.modeling import (
     convert_model,
     create_basic_pk_model,
     create_joint_distribution,
+    fix_parameters,
+    get_individual_parameters,
     get_parameter_rv,
     get_rv_parameters,
     has_additive_error_model,
     has_combined_error_model,
     has_proportional_error_model,
-    set_additive_error_model,
-    set_combined_error_model,
-    set_iiv_on_ruv,
-    set_power_on_ruv,
-    set_proportional_error_model,
-    set_time_varying_error_model,
-    get_individual_parameters,
     remove_iiv,
     remove_iov,
-    split_joint_distribution,
+    set_additive_error_model,
+    set_combined_error_model,
+    set_dataset,
     set_description,
+    set_iiv_on_ruv,
     set_initial_estimates,
     set_lower_bounds,
     set_name,
+    set_power_on_ruv,
+    set_proportional_error_model,
+    set_time_varying_error_model,
     set_upper_bounds,
-    fix_parameters,
-    set_dataset,
+    split_joint_distribution,
     unfix_parameters,
 )
-from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
 from pharmpy.tools.mfl.least_number_of_transformations import least_number_of_transformations
+from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
 
 ERROR_FUNCS = {
     'add': set_additive_error_model,

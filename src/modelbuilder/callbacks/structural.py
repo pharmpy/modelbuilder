@@ -1,4 +1,4 @@
-from dash import Input, Output, State, ctx
+from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 import modelbuilder.config as config
@@ -75,7 +75,7 @@ def structural_callbacks(app):
                     else:
                         mfl = f'LAGTIME(OFF);TRANSITS({no_transits}, DEPOT)'
                 else:
-                    mfl = f'LAGTIME(OFF);TRANSITS(0)'
+                    mfl = 'LAGTIME(OFF);TRANSITS(0)'
             else:
                 mfl = abs_delay
             ms = update_model_state(config.model_state, mfl)

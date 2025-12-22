@@ -1,27 +1,18 @@
 import ast
-import numpy as np
 import itertools
+
 import pandas as pd
 from dash import Input, Output, State, ctx
 from dash.exceptions import PreventUpdate
-from pharmpy.modeling import (
-    create_joint_distribution,
-    get_individual_parameters,
-    has_random_effect,
-    remove_iiv,
-    remove_iov,
-    split_joint_distribution,
-)
 
 import modelbuilder.config as config
-from modelbuilder.internals.model_state import update_model_state
-from modelbuilder.internals.help_functions import render_model_code
 from modelbuilder.design.style_elements import (
-    create_options_dropdown,
     create_col_dict,
     create_dropdown,
     create_options_dict,
 )
+from modelbuilder.internals.help_functions import render_model_code
+from modelbuilder.internals.model_state import update_model_state
 
 
 def parameter_variability_callbacks(app):

@@ -1,14 +1,13 @@
 from .style_elements import (
+    create_col,
     create_col_dict,
     create_container,
     create_dropdown,
-    create_options_list,
-    create_table,
-    create_options_dict,
-    create_header,
-    create_text_component,
     create_empty_line,
-    create_col,
+    create_header,
+    create_options_dict,
+    create_table,
+    create_text_component,
 )
 
 columns = [

@@ -172,7 +172,7 @@ def general_callbacks(app):
                 data = pd.read_table(
                     io.StringIO(decoded.decode('utf-8')), sep=r'\s+|,', engine='python'
                 )
-            except:
+            except:  # noqa E722
                 error = "Dataset error!"
                 config.model_state.dataset = None
                 return error

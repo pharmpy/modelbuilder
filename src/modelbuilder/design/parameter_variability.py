@@ -1,20 +1,16 @@
-import dash_bootstrap_components as dbc
-from dash import dash_table, html
 from .style_elements import (
-    create_table,
-    create_dropdown,
-    create_container,
-    create_col_dict,
-    create_options_list,
-    create_options_dict,
-    create_button,
     create_badge,
-    create_col,
+    create_button,
     create_checklist,
-    create_dropdown_component,
-    create_radio,
+    create_col,
+    create_col_dict,
+    create_container,
+    create_dropdown,
     create_empty_line,
     create_header,
+    create_options_dict,
+    create_options_list,
+    create_table,
     create_text_component,
 )
 

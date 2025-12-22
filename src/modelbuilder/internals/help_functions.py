@@ -1,5 +1,6 @@
-from pharmpy.modeling import get_model_code
 from pharmpy.model import Model
+from pharmpy.modeling import get_model_code
+
 from .model_state import ModelState, generate_code
 
 
