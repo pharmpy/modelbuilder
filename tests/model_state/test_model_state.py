@@ -11,20 +11,16 @@ from pharmpy.modeling import (
     has_zero_order_absorption,
     load_example_model,
 )
-from pharmpy.tools.mfl.parse import get_model_features, parse
+from pharmpy.modeling.mfl import get_model_features
 
 from modelbuilder.internals.model_state import ModelState, generate_code, update_model_state
 
 
 def test_model_state_init():
     model = create_basic_pk_model('iv')
-    mfl_str = get_model_features(model)
-    mfl = parse(mfl_str, mfl_class=True)
+    mfl = get_model_features(model, type='pk')
     model_state = ModelState('iv', 'nonmem', {}, mfl, ['prop'], model.parameters)
-    assert (
-        repr(model_state.mfl)
-        == 'ABSORPTION(INST);ELIMINATION(FO);TRANSITS(0);PERIPHERALS(0);LAGTIME(OFF)'
-    )
+    assert repr(model_state.mfl) == 'ELIMINATION(FO);PERIPHERALS(0)'
     assert model_state.error_funcs == ['prop']
     assert len(model_state.parameters) == 6
 
@@ -35,10 +31,7 @@ def test_create_model():
     assert has_instantaneous_absorption(model)
     assert has_first_order_elimination(model)
     assert has_proportional_error_model(model)
-    assert (
-        repr(model_state.mfl)
-        == 'ABSORPTION(INST);ELIMINATION(FO);TRANSITS(0);PERIPHERALS(0);LAGTIME(OFF)'
-    )
+    assert repr(model_state.mfl) == 'ELIMINATION(FO);PERIPHERALS(0)'
     assert model_state.error_funcs == {1: ['prop']}
     assert len(model_state.parameters) == 6
     assert len(model_state.parameters) == len(model.parameters)
@@ -50,7 +43,7 @@ def test_create_model():
     assert has_proportional_error_model(model)
     assert (
         repr(model_state.mfl)
-        == 'ABSORPTION(FO);ELIMINATION(FO);TRANSITS(0);PERIPHERALS(0);LAGTIME(OFF)'
+        == 'ABSORPTION(FO);TRANSITS(0);LAGTIME(OFF);ELIMINATION(FO);PERIPHERALS(0)'
     )
     assert model_state.error_funcs == {1: ['prop']}
     assert len(model_state.parameters) == len(model.parameters)

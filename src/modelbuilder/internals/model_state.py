@@ -5,6 +5,7 @@ from functools import partial
 import pandas as pd
 import pharmpy
 from pharmpy.internals.immutable import Immutable
+from pharmpy.mfl import ModelFeatures
 from pharmpy.model import Parameter, Parameters
 from pharmpy.modeling import (
     add_covariate_effect,
@@ -37,8 +38,7 @@ from pharmpy.modeling import (
     split_joint_distribution,
     unfix_parameters,
 )
-from pharmpy.tools.mfl.least_number_of_transformations import least_number_of_transformations
-from pharmpy.tools.mfl.parse import ModelFeatures, get_model_features
+from pharmpy.modeling.mfl import generate_transformations, get_model_features
 
 from pywrapr.docs_conversion import translate_python_row
 
@@ -131,8 +131,7 @@ class ModelState(Immutable):
     @classmethod
     def create(cls, model_type):
         model = cls._create_base_model(model_type)
-        mfl_str = get_model_features(model)
-        mfl = ModelFeatures.create_from_mfl_string(mfl_str)
+        mfl = get_model_features(model, type='pk')
         error_funcs = {1: ['prop']}
         parameters = model.parameters
         rvs = _update_rvs_from_model(model)[0]
@@ -188,7 +187,7 @@ class ModelState(Immutable):
                 model = funcs[-1](model)
 
         mfl_funcs = self._get_mfl_funcs(model)
-        is_pd_model = self.mfl.filter('pd').get_number_of_features() > 0
+        is_pd_model = self._is_pd_model()
 
         if is_pd_model and self.model_format != "generic":
             funcs.append(partial(convert_model, to_format=self.model_format))
@@ -309,18 +308,16 @@ class ModelState(Immutable):
         return model
 
     def _get_mfl_funcs(self, model_base):
-        mfl_str_start = get_model_features(model_base)
-        mfl_start = ModelFeatures.create_from_mfl_string(mfl_str_start)
-        if self.mfl.filter('pd').get_number_of_features() == 0:
-            lnt = least_number_of_transformations(mfl_start, self.mfl, model_base)
-            funcs = list(lnt.values())
-        else:
-            pk_mfl = self.mfl.filter('pk')
-            lnt = least_number_of_transformations(mfl_start, pk_mfl, model_base)
-            funcs = list(lnt.values())
-            pd_funcs = self.mfl.convert_to_funcs(model=model_base, subset_features='pd')
-            funcs += list(pd_funcs.values())
-        return funcs
+        mfl_start = get_model_features(model_base)
+        mfl_diff = self.mfl - mfl_start
+        return generate_transformations(mfl_diff)
+
+    def _is_pd_model(self):
+        return (
+            len(self.mfl.direct_effects) > 0
+            or len(self.mfl.indirect_effects) > 0
+            or len(self.mfl.effect_compartments) > 0
+        )
 
     def __eq__(self, other):
         return (
@@ -347,7 +344,10 @@ def update_model_state(ms_old, mfl=None, **kwargs):
         ms_old = ms_old.replace(parameters=Parameters())
 
     if mfl:
-        mfl_new = ms_old.mfl.replace_features(mfl)
+        mfl_parsed = ModelFeatures.create(mfl)
+        feature_types = [type(feature) for feature in mfl_parsed]
+        previous_features = [feature for feature in ms_old.mfl if type(feature in feature_types)]
+        mfl_new = ms_old.mfl - previous_features + mfl_parsed
         return ms_old.replace(mfl=mfl_new)
     if model_attrs:
         return ms_old.replace(model_attrs=model_attrs)
