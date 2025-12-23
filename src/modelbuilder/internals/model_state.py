@@ -444,9 +444,11 @@ def generate_code(funcs, language):
     string_out = ''
     for i, func in enumerate(funcs):
         if isinstance(func, partial):
-            items = func.keywords.items()
+            keyword_dict = func.keywords.copy()
             func_name = func.func.__name__
-            args = ', '.join('%s=%r' % x for x in items)
+            if 'path_or_df' in keyword_dict.keys():
+                keyword_dict['path_or_df'] = 'path/to/dataset'
+            args = ', '.join('%s=%r' % x for x in keyword_dict.items())
             if i > 0 and language == 'python':
                 args = 'model, ' + args
             func_call = f"{func_name}({args})"
