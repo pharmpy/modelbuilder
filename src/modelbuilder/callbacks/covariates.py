@@ -1,6 +1,7 @@
 import pandas as pd
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
+from pharmpy.mfl import Covariate, ModelFeatures
 
 import modelbuilder.config as config
 from modelbuilder.design.style_elements import (
@@ -29,7 +30,7 @@ def covariate_callbacks(app):
             else:
                 error_message = ''
 
-            covariates = config.model_state.covariates
+            covariates = config.model_state.mfl.covariates
 
             parameter_names = config.model_state.individual_parameters
 
@@ -89,7 +90,16 @@ def covariate_callbacks(app):
 
             cov_data = cov_data.to_dict('records')
             if covariates:
-                cov_data = covariates
+                cov_data_rows = [
+                    {
+                        'parameter': cov.parameter,
+                        'covariate': cov.covariate,
+                        'effect': cov.fp,
+                        'operation': cov.op,
+                    }
+                    for cov in covariates
+                ]
+                cov_data = pd.DataFrame(cov_data_rows)
                 selected_rows = list(range(len(cov_data)))
             else:
                 selected_rows = []
@@ -140,11 +150,21 @@ def covariate_callbacks(app):
                     combinations = None
                     break
             if combinations is not None:
-                ms = update_model_state(config.model_state, covariates=new_data)
+                covariates = []
+                for d in new_data:
+                    param, cov, fp, op = d['parameter'], d['covariate'], d['effect'], d['operation']
+                    cov = Covariate.create(
+                        parameter=param, covariate=cov, fp=fp, op=op, optional=False
+                    )
+                    covariates.append(cov)
+                mfl_new = ModelFeatures.create(covariates)
+                ms = update_model_state(config.model_state, mfl=mfl_new)
             else:
                 ms = config.model_state
         else:
-            ms = update_model_state(config.model_state, covariates=[])
+            mfl_old = config.model_state.mfl
+            mfl_new = mfl_old - mfl_old.covariates
+            ms = update_model_state(config.model_state, mfl=mfl_new)
         config.model_state = ms
         return *render_model_code(ms), error_message
 

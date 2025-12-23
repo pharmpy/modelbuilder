@@ -1,4 +1,5 @@
 import pytest
+from pharmpy.mfl import Covariate, ModelFeatures
 from pharmpy.modeling import (
     create_basic_pk_model,
     has_additive_error_model,
@@ -188,8 +189,9 @@ def test_update_model_covariates():
     example_model = load_example_model('pheno')
     dataset, datainfo = example_model.dataset, example_model.datainfo
     model_state = ModelState.create('iv')
-    covariate = [{'parameter': 'CL', 'covariate': 'AMT', 'effect': 'exp', 'operation': '*'}]
-    model_state_new = update_model_state(model_state, covariates=covariate)
+    covariate = Covariate.create('CL', 'AMT', 'exp', '*', optional=False)
+    mfl_new = ModelFeatures.create([covariate])
+    model_state_new = update_model_state(model_state, mfl_new)
     model_new = model_state_new.generate_model(dataset, datainfo)
     assert has_covariate_effect(model_new, 'CL', 'AMT')
 

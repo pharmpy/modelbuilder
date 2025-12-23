@@ -85,7 +85,6 @@ class ModelState(Immutable):
         individual_parameters=None,
         dataset=None,
         block=None,
-        covariates=None,
     ):
         self.model_type = model_type
         self.model_format = model_format
@@ -98,7 +97,6 @@ class ModelState(Immutable):
         self.individual_parameters = individual_parameters
         self.dataset = dataset
         self.block = block
-        self.covariates = covariates
 
     def replace(self, **kwargs):
         model_format = kwargs.get('model_format', self.model_format)
@@ -111,7 +109,6 @@ class ModelState(Immutable):
         individual_parameters = kwargs.get('individual_parameters', self.individual_parameters)
         dataset = kwargs.get('dataset', self.dataset)
         block = kwargs.get('block', self.block)
-        covariates = kwargs.get('covariates', self.covariates)
 
         return ModelState(
             model_type=self.model_type,
@@ -125,13 +122,12 @@ class ModelState(Immutable):
             individual_parameters=individual_parameters,
             dataset=dataset,
             block=block,
-            covariates=covariates,
         )
 
     @classmethod
     def create(cls, model_type):
         model = cls._create_base_model(model_type)
-        mfl = get_model_features(model, type='pk')
+        mfl = get_model_features(model, type='pk') + get_model_features(model, type='covariates')
         error_funcs = {1: ['prop']}
         parameters = model.parameters
         rvs = _update_rvs_from_model(model)[0]
@@ -139,7 +135,6 @@ class ModelState(Immutable):
         individual_parameters = get_individual_parameters(model)
         dataset = None
         block = [['CL', 'VC']]
-        covariates = None
         return cls(
             model_type,
             'nonmem',
@@ -152,7 +147,6 @@ class ModelState(Immutable):
             individual_parameters,
             dataset,
             block,
-            covariates,
         )
 
     @staticmethod
@@ -200,8 +194,8 @@ class ModelState(Immutable):
         # Update rvs and covariates when individual parameters have changed
         if self.individual_parameters != get_individual_parameters(model):
             self.rvs, self.block = _update_rvs_from_model(model)
-            if self.covariates is not None:
-                self.covariates = _update_covariates(model, self.covariates)
+            if self.mfl.covariates:
+                self.covariates = _update_covariates(model, self.mfl.covariates)
 
         for dv, func_names in self.error_funcs.items():
             for func_name in func_names:
@@ -262,9 +256,12 @@ class ModelState(Immutable):
                     funcs.append(partial(create_joint_distribution, rvs=params))
                     model = funcs[-1](model)
 
-        if self.covariates:
-            for cov in self.covariates:
-                funcs.append(partial(add_covariate_effect, **cov))
+        if self.mfl.covariates:
+            print(self.mfl.covariates)
+            covariate_funcs = generate_transformations(self.mfl.covariates, include_remove=False)
+            print(covariate_funcs)
+            for func in covariate_funcs:
+                funcs.append(func)
                 model = funcs[-1](model)
 
         #  Update parameters when model parameters have changed
@@ -308,16 +305,17 @@ class ModelState(Immutable):
         return model
 
     def _get_mfl_funcs(self, model_base):
-        mfl_start = get_model_features(model_base)
-        mfl_diff = self.mfl - mfl_start
-        return generate_transformations(mfl_diff)
+        # FIXME: assumes base model is PK, should detect PD as well
+        mfl_start = get_model_features(model_base, type='pk')
+        mfl_diff = self.mfl.filter(filter_on='pk') - mfl_start
+        mfl_structural = mfl_diff + self._get_pd_features()
+        return generate_transformations(mfl_structural)
 
     def _is_pd_model(self):
-        return (
-            len(self.mfl.direct_effects) > 0
-            or len(self.mfl.indirect_effects) > 0
-            or len(self.mfl.effect_compartments) > 0
-        )
+        return len(self._get_pd_features()) > 0
+
+    def _get_pd_features(self):
+        return self.mfl.direct_effects + self.mfl.indirect_effects + self.mfl.effect_compartments
 
     def __eq__(self, other):
         return (
@@ -338,16 +336,21 @@ def update_model_state(ms_old, mfl=None, **kwargs):
     rvs = kwargs.get('rvs')
     individual_parameters = kwargs.get('individual_parameters')
     block = kwargs.get('block')
-    covariates = kwargs.get('covariates')
 
     if not parameters:
         ms_old = ms_old.replace(parameters=Parameters())
 
-    if mfl:
+    if mfl is not None:
         mfl_parsed = ModelFeatures.create(mfl)
-        feature_types = [type(feature) for feature in mfl_parsed]
-        previous_features = [feature for feature in ms_old.mfl if type(feature in feature_types)]
-        mfl_new = ms_old.mfl - previous_features + mfl_parsed
+        mfl_old = ms_old.mfl
+        if mfl_parsed.covariates:
+            mfl_new = mfl_old - mfl_old.covariates + mfl_parsed.covariates
+        else:
+            feature_types = [type(feature) for feature in mfl_parsed]
+            previous_features = [
+                feature for feature in ms_old.mfl if type(feature in feature_types)
+            ]
+            mfl_new = ms_old.mfl - previous_features + mfl_parsed
         return ms_old.replace(mfl=mfl_new)
     if model_attrs:
         return ms_old.replace(model_attrs=model_attrs)
@@ -363,8 +366,6 @@ def update_model_state(ms_old, mfl=None, **kwargs):
         return ms_old.replace(individual_parameters=individual_parameters)
     if block is not None:
         return ms_old.replace(block=block)
-    if covariates is not None:
-        return ms_old.replace(covariates=covariates)
     raise ValueError
 
 
@@ -434,7 +435,7 @@ def _update_rvs_from_model(model):
 
 def _update_covariates(model, covariates):
     new_covariates = [
-        cov for cov in covariates if cov['parameter'] in get_individual_parameters(model)
+        cov for cov in covariates if cov.parameter in get_individual_parameters(model)
     ]
     return new_covariates
 
