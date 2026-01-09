@@ -17,7 +17,6 @@ from .style_elements import (
 
 def create_iov_params_component():
     iov_params_label_dict = {}
-    iov_params_badge = create_badge("Parameters")
     params_text = 'Select parameters to add to table:'
     params_text_component = create_text_component('params_text_id', params_text)
     iov_params_options = create_options_list(iov_params_label_dict)

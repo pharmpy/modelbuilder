@@ -34,7 +34,6 @@ def fix_blocks(data):
     blocks = [rv.parameter_names for rv in rvs if isinstance(rv, JointNormalDistribution)]
 
     for block in blocks:
-        old_param = old_params[block[0]].name
         old_fix = old_params[block[0]].fix
         for param in data:
             if param['name'] in block:

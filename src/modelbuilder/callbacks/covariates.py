@@ -5,7 +5,6 @@ from pharmpy.mfl import Covariate, ModelFeatures
 
 import modelbuilder.config as config
 from modelbuilder.design.style_elements import (
-    create_col_dict,
     create_dropdown,
     create_options_dict,
 )
@@ -33,13 +32,6 @@ def covariate_callbacks(app):
             covariates = config.model_state.mfl.covariates
 
             parameter_names = config.model_state.individual_parameters
-
-            columns = [
-                create_col_dict('Parameter', 'parameter', presentation='dropdown'),
-                create_col_dict('Covariate', 'covariate', presentation='dropdown'),
-                create_col_dict('Effect', 'effect', presentation='dropdown'),
-                create_col_dict('Operation', 'operation', presentation='dropdown'),
-            ]
 
             options_parameter = [
                 create_options_dict({i: i for i in parameter_names}, clearable=False)

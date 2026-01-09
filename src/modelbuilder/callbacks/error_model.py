@@ -70,28 +70,6 @@ def error_model_callbacks(app):
         raise PreventUpdate
 
     @app.callback(
-        Output("output-model", "value", allow_duplicate=True),
-        Output("output-python", "value", allow_duplicate=True),
-        Output("output-r", "value", allow_duplicate=True),
-        Input("additional-types-checklist-dv2", "value"),
-        State("additional-types-checklist", "value"),
-        prevent_initial_call=True,
-    )
-    def update_additional_error_model(additional_type, additional_type_1):
-        # FIXME: when power is added after iiv on ruv then the resulting error model will be wrong
-        # Issue https://github.com/pharmpy/pharmpy/issues/3102
-        if additional_type is not None:
-            additional_types = ';'.join(additional_type)
-            additional_types_1 = ';'.join(additional_type_1)
-            ms = update_model_state(
-                config.model_state, error={1: additional_types_1, 2: additional_types}
-            )
-            if ms != config.model_state:
-                config.model_state = ms
-                return render_model_code(ms)
-        raise PreventUpdate
-
-    @app.callback(
         Output("base-type-radio-dv2", "options"),
         Output("base-type-radio-dv2", "style"),
         Output("base-type-radio-dv2", "value"),

@@ -2,7 +2,6 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html
 
 from .covariates import covariate_tab
-from .datainfo import datainfo_tab
 from .error_model import error_tab
 from .general import general_tab
 from .model_view import model_format_div

@@ -182,7 +182,7 @@ def parameter_variability_callbacks(app):
     def set_iivs(data, selected_rows, iov_selected_rows, iov_data):
         selected_rows_changed = (
             'iiv_table.selected_rows' in ctx.triggered_prop_ids.keys()
-            and not 'iiv_table.data' in ctx.triggered_prop_ids.keys()
+            and 'iiv_table.data' not in ctx.triggered_prop_ids.keys()
         )
         features = []
         if selected_rows:

@@ -47,7 +47,8 @@ def test_create_model():
     assert has_proportional_error_model(model)
     assert (
         repr(model_state.mfl)
-        == 'ABSORPTION(FO);TRANSITS(0);LAGTIME(OFF);ELIMINATION(FO);PERIPHERALS(0);IIV([CL,MAT,VC],EXP);COVARIANCE(IIV,[CL,VC])'
+        == 'ABSORPTION(FO);TRANSITS(0);LAGTIME(OFF);ELIMINATION(FO);PERIPHERALS(0);'
+        'IIV([CL,MAT,VC],EXP);COVARIANCE(IIV,[CL,VC])'
     )
     assert model_state.error_funcs == {1: ['prop']}
     assert len(model_state.parameters) == len(model.parameters)
