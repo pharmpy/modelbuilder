@@ -9,21 +9,15 @@ from pharmpy.internals.immutable import Immutable
 from pharmpy.mfl import ModelFeatures
 from pharmpy.model import Parameter, Parameters
 from pharmpy.modeling import (
-    add_covariate_effect,
-    add_iiv,
     add_iov,
     convert_model,
     create_basic_pk_model,
-    create_joint_distribution,
     fix_parameters,
     get_individual_parameters,
-    get_parameter_rv,
     get_rv_parameters,
     has_additive_error_model,
     has_combined_error_model,
     has_proportional_error_model,
-    remove_iiv,
-    remove_iov,
     set_additive_error_model,
     set_combined_error_model,
     set_dataset,
@@ -36,7 +30,6 @@ from pharmpy.modeling import (
     set_proportional_error_model,
     set_time_varying_error_model,
     set_upper_bounds,
-    split_joint_distribution,
     unfix_parameters,
 )
 from pharmpy.modeling.mfl import generate_transformations, get_model_features
@@ -226,16 +219,17 @@ class ModelState(Immutable):
                 if param.fix != p.fix:
                     (parameter_transformations['fix' if param.fix else 'unfix']).append(param.name)
 
+        func_mapping = {
+            'inits': (set_initial_estimates, 'inits'),
+            'lower': (set_lower_bounds, 'bounds'),
+            'upper': (set_upper_bounds, 'bounds'),
+            'fix': (fix_parameters, 'parameter_names'),
+            'unfix': (unfix_parameters, 'parameter_names'),
+        }
         for attr, values in parameter_transformations.items():
             if values:
-                func_name = {
-                    'inits': ('set_initial_estimates', 'inits'),
-                    'lower': ('set_lower_bounds', 'bounds'),
-                    'upper': ('set_upper_bounds', 'bounds'),
-                    'fix': ('fix_parameters', 'parameter_names'),
-                    'unfix': ('unfix_parameters', 'parameter_names'),
-                }[attr]
-                func = partial(globals()[func_name[0]], **{func_name[1]: values})
+                func_name = func_mapping[attr]
+                func = partial(func_name[0], **{func_name[1]: values})
                 funcs.append(func)
                 model = func(model)
 
