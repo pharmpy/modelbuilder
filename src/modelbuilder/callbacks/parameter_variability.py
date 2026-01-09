@@ -4,6 +4,7 @@ import itertools
 import pandas as pd
 from dash import Input, Output, State, ctx
 from dash.exceptions import PreventUpdate
+from pharmpy.mfl import IIV, Covariance
 
 import modelbuilder.config as config
 from modelbuilder.design.style_elements import (
@@ -26,16 +27,14 @@ def parameter_variability_callbacks(app):
     )
     def render_iiv(tab):
         if tab == "par-var-tab":
-            rvs = config.model_state.rvs['iiv']
+            iivs = config.model_state.mfl.iiv
+            parameters_with_iiv = {iiv.parameter: iiv.fp.lower() for iiv in iivs}
             parameter_names = config.model_state.individual_parameters
-            if rvs:
-                parameter_etas = [rv['list_of_parameters'] for rv in config.model_state.rvs['iiv']]
+            if iivs:
                 expr = []
                 for param in parameter_names:
-                    if param in parameter_etas:
-                        for rv in rvs:
-                            if param == rv['list_of_parameters']:
-                                expr.append(rv['expression'])
+                    if param in parameters_with_iiv.keys():
+                        expr.append(parameters_with_iiv[param])
                     else:
                         expr.append('exp')
             else:
@@ -57,9 +56,9 @@ def parameter_variability_callbacks(app):
                 create_options_dict(
                     {
                         'Additive': 'add',
-                        'Proportional': 'prop',
+                        # 'Proportional': 'prop',
                         'Exponential': 'exp',
-                        'Logit': 'log',
+                        # 'Logit': 'log',
                     },
                     clearable=False,
                 )
@@ -73,18 +72,18 @@ def parameter_variability_callbacks(app):
             df = pd.DataFrame(table_dict)
             iiv_data = df.to_dict('records')
 
-            block = config.model_state.block
+            block = config.model_state.mfl.covariance
             if block:
-                for i in range(len(block)):
-                    bl = block[i]
+                for i, block in enumerate(block):
+                    parameters = block.parameters
                     for row in range(len(iiv_data)):
-                        if iiv_data[row]['list_of_parameters'] in bl:
+                        if iiv_data[row]['list_of_parameters'] in parameters:
                             iiv_data[row][f'corr_{i+1}'] = 'True'
 
             selected_rows = []
-            if rvs:
+            if iivs:
                 for row in range(len(iiv_data)):
-                    if iiv_data[row]['list_of_parameters'] in parameter_etas:
+                    if iiv_data[row]['list_of_parameters'] in parameters_with_iiv.keys():
                         selected_rows.append(row)
             return iiv_data, selected_rows, columns, dropdown
         else:
@@ -103,7 +102,7 @@ def parameter_variability_callbacks(app):
     )
     def render_iov(tab, data, filename):
         if tab == "par-var-tab":
-            parameter_names = [rv['list_of_parameters'] for rv in config.model_state.rvs['iiv']]
+            parameter_names = [rv['list_of_parameters'] for rv in config.model_state.iov]
             iov_checkboxes_options = config.model_state.individual_parameters
             iov_checkboxes_options = [
                 {'label': value, 'value': value, "disabled": True}
@@ -155,8 +154,8 @@ def parameter_variability_callbacks(app):
 
             iov_data = iov_data.to_dict('records')
 
-            if config.model_state.rvs['iov']:
-                iov_data = config.model_state.rvs['iov']
+            if config.model_state.iov:
+                iov_data = config.model_state.iov
                 # Lists must be converted to strings again
                 for dicts in iov_data:
                     for keys in dicts:
@@ -181,11 +180,11 @@ def parameter_variability_callbacks(app):
         prevent_initial_call=True,
     )
     def set_iivs(data, selected_rows, iov_selected_rows, iov_data):
-        rvs = config.model_state.rvs
         selected_rows_changed = (
             'iiv_table.selected_rows' in ctx.triggered_prop_ids.keys()
             and not 'iiv_table.data' in ctx.triggered_prop_ids.keys()
         )
+        features = []
         if selected_rows:
             # Remove/unselect IOV when IIV is removed
             if selected_rows_changed:
@@ -200,40 +199,36 @@ def parameter_variability_callbacks(app):
                         new_iovs.append(iov_data[iov_row])
                         new_iov_selected_rows.append(iov_row)
                 iov_selected_rows = new_iov_selected_rows
-                rvs['iov'] = new_iovs
+                iov = new_iovs
+            else:
+                iov = {}
 
-            new_data = []
             for row in selected_rows:
-                new_data.append({k: data[row][k] for k in ('list_of_parameters', 'expression')})
-            rvs['iiv'] = new_data
-            ms = update_model_state(config.model_state, rvs=rvs)
+                parameter = data[row]['list_of_parameters']
+                expression = data[row]['expression']
+                iiv = IIV.create(parameter, fp=expression, optional=False)
+                features.append(iiv)
+
         else:
-            rvs['iiv'] = {}
-            rvs['iov'] = {}
             iov_selected_rows = []
-            ms = update_model_state(config.model_state, rvs=rvs)
+            iov = {}
 
         if len(selected_rows) > 1:
-            block_all = []
             keys = list(data[row].keys())
             for corr_col in keys[2:]:
-                block = []
+                current_block = []
                 for row in selected_rows:
                     param = data[row]['list_of_parameters']
                     if data[row][corr_col] == 'True':
-                        if param not in itertools.chain.from_iterable(block_all):
-                            block.append(param)
-                block_all.append(block)
-        else:
-            block_all = []
+                        current_block.append(param)
+                if len(current_block) > 1:
+                    blocks_new = [
+                        Covariance.create(type='IIV', parameters=block)
+                        for block in itertools.combinations(current_block, 2)
+                    ]
+                    features.extend(blocks_new)
 
-        new_block = []
-        for bl in block_all:
-            if len(bl) < 2:
-                bl = []
-            new_block.append(bl)
-
-        ms = update_model_state(ms, block=new_block)
+        ms = update_model_state(config.model_state, mfl=features, iov=iov, type='variability')
 
         config.model_state = ms
         return *render_model_code(ms), data, iov_selected_rows
@@ -300,13 +295,13 @@ def parameter_variability_callbacks(app):
     )
     def set_iov(data, selected_rows, outtext):
         outtext = outtext
-        rvs = config.model_state.rvs
-        iiv_params = [iiv['list_of_parameters'] for iiv in rvs['iiv']]
+        iivs = config.model_state.mfl.iiv
+        iiv_params = [iiv.parameter for iiv in iivs]
         if selected_rows:
             new_data = []
             covariates = []
-            if config.model_state.covariates:
-                covariates = [cov['covariate'] for cov in config.model_state.covariates]
+            if config.model_state.mfl.covariates:
+                covariates = [cov.covariate for cov in config.model_state.mfl.covariates]
             for row in selected_rows:
                 param = data[row]['list_of_parameters']
                 if isinstance(param, str):
@@ -318,10 +313,10 @@ def parameter_variability_callbacks(app):
                 else:
                     outtext = ''
                     new_data.append(data[row])
-            rvs['iov'] = new_data
-            ms = update_model_state(config.model_state, rvs=rvs)
+            iov = new_data
+            ms = update_model_state(config.model_state, iov=iov)
         else:
-            rvs['iov'] = {}
-            ms = update_model_state(config.model_state, rvs=rvs)
+            iov = {}
+            ms = update_model_state(config.model_state, iov=iov)
         config.model_state = ms
         return *render_model_code(ms), outtext

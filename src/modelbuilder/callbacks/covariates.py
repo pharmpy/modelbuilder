@@ -125,8 +125,8 @@ def covariate_callbacks(app):
 
             # Check that covariate is not used as an occasion column
             occ = []
-            if config.model_state.rvs['iov']:
-                occ = [iov['occ'] for iov in config.model_state.rvs['iov']]
+            if config.model_state.iov:
+                occ = [iov['occ'] for iov in config.model_state.iov]
 
             new_data = [data[row] for row in selected_rows if all(data[row].values())]
             # Make sure that covariate cannot be added to a parameter twice
@@ -158,13 +158,13 @@ def covariate_callbacks(app):
                     )
                     covariates.append(cov)
                 mfl_new = ModelFeatures.create(covariates)
-                ms = update_model_state(config.model_state, mfl=mfl_new)
+                ms = update_model_state(config.model_state, mfl=mfl_new, type='covariate')
             else:
                 ms = config.model_state
         else:
             mfl_old = config.model_state.mfl
             mfl_new = mfl_old - mfl_old.covariates
-            ms = update_model_state(config.model_state, mfl=mfl_new)
+            ms = update_model_state(config.model_state, mfl=mfl_new, type='covariate')
         config.model_state = ms
         return *render_model_code(ms), error_message
 

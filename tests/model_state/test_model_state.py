@@ -1,5 +1,5 @@
 import pytest
-from pharmpy.mfl import Covariate, ModelFeatures
+from pharmpy.mfl import IIV, Covariance, Covariate, ModelFeatures
 from pharmpy.modeling import (
     create_basic_pk_model,
     has_additive_error_model,
@@ -32,7 +32,10 @@ def test_create_model():
     assert has_instantaneous_absorption(model)
     assert has_first_order_elimination(model)
     assert has_proportional_error_model(model)
-    assert repr(model_state.mfl) == 'ELIMINATION(FO);PERIPHERALS(0)'
+    assert (
+        repr(model_state.mfl)
+        == 'ELIMINATION(FO);PERIPHERALS(0);IIV([CL,VC],EXP);COVARIANCE(IIV,[CL,VC])'
+    )
     assert model_state.error_funcs == {1: ['prop']}
     assert len(model_state.parameters) == 6
     assert len(model_state.parameters) == len(model.parameters)
@@ -44,7 +47,7 @@ def test_create_model():
     assert has_proportional_error_model(model)
     assert (
         repr(model_state.mfl)
-        == 'ABSORPTION(FO);TRANSITS(0);LAGTIME(OFF);ELIMINATION(FO);PERIPHERALS(0)'
+        == 'ABSORPTION(FO);TRANSITS(0);LAGTIME(OFF);ELIMINATION(FO);PERIPHERALS(0);IIV([CL,MAT,VC],EXP);COVARIANCE(IIV,[CL,VC])'
     )
     assert model_state.error_funcs == {1: ['prop']}
     assert len(model_state.parameters) == len(model.parameters)
@@ -54,14 +57,14 @@ def test_update_model():
     model_state = ModelState.create('iv')
     model = model_state.generate_model()
     assert has_first_order_elimination(model)
-    model_state_new = update_model_state(model_state, 'ELIMINATION(MM)')
+    model_state_new = update_model_state(model_state, 'ELIMINATION(MM)', type='structural')
     model_new = model_state_new.generate_model()
     assert has_michaelis_menten_elimination(model_new)
 
     model_state = ModelState.create('oral')
     model = model_state.generate_model()
     assert has_first_order_absorption(model)
-    model_state_new = update_model_state(model_state, 'ABSORPTION(ZO)')
+    model_state_new = update_model_state(model_state, 'ABSORPTION(ZO)', type='structural')
     model_new = model_state_new.generate_model()
     assert has_zero_order_absorption(model_new)
 
@@ -70,7 +73,7 @@ def test_update_model():
     model_state = ModelState.create('oral')
     model = model_state.generate_model(dataset, datainfo)
     assert has_first_order_absorption(model)
-    model_state_new = update_model_state(model_state, 'COVARIATE(CL,WGT,exp)')
+    model_state_new = update_model_state(model_state, 'COVARIATE(CL,WGT,exp)', type='covariate')
     model_new = model_state_new.generate_model(dataset, datainfo)
     assert has_covariate_effect(model_new, 'CL', 'WGT')
 
@@ -80,7 +83,7 @@ def test_update_model_stepwise():
     model = model_state.generate_model()
     assert has_first_order_elimination(model)
     assert has_proportional_error_model(model)
-    model_state_new = update_model_state(model_state, 'ELIMINATION(MM)')
+    model_state_new = update_model_state(model_state, 'ELIMINATION(MM)', type='structural')
     model_state_new = update_model_state(model_state_new, error={1: 'add'})
     model_new = model_state_new.generate_model()
     assert has_michaelis_menten_elimination(model_new)
@@ -91,13 +94,14 @@ def test_update_model_structural():
     model_state = ModelState.create('iv')
     model = model_state.generate_model()
     assert has_first_order_elimination(model)
-    model_state_new = update_model_state(model_state, 'ELIMINATION(MM)')
+    model_state_new = update_model_state(model_state, 'ELIMINATION(MM)', type='structural')
+    assert len(model_state.mfl) == len(model_state_new.mfl)
     model_new = model_state_new.generate_model()
     assert has_michaelis_menten_elimination(model_new)
-    model_state_new = update_model_state(model_state_new, 'ELIMINATION(FO)')
+    model_state_new = update_model_state(model_state_new, 'ELIMINATION(FO)', type='structural')
     model_new = model_state_new.generate_model()
     assert has_first_order_elimination(model_new)
-    model_state_new = update_model_state(model_state_new, 'ELIMINATION(MM)')
+    model_state_new = update_model_state(model_state_new, 'ELIMINATION(MM)', type='structural')
     model_new = model_state_new.generate_model()
     assert has_michaelis_menten_elimination(model_new)
 
@@ -126,7 +130,7 @@ def test_update_model_error():
     assert 'ETA_RV1' not in model.random_variables.names
 
     model_state = ModelState.create('iv')
-    model_state = update_model_state(model_state, 'DIRECTEFFECT(LINEAR)')
+    model_state = update_model_state(model_state, 'DIRECTEFFECT(LINEAR)', type='structural')
     model_state = update_model_state(model_state, error={1: 'add', 2: 'add'})
     model = model_state.generate_model()
     assert has_additive_error_model(model, dv=1)
@@ -163,26 +167,32 @@ def test_update_model_attrs():
 
 def test_update_model_rvs():
     model_state = ModelState.create('iv')
-    rvs = {'iiv': [{'list_of_parameters': 'CL', 'expression': 'add'}], 'iov': []}
-    model_state_new = update_model_state(model_state, rvs=rvs)
-    model_state_new = update_model_state(model_state_new, block=[['CL']])
+    mfl_new = model_state.mfl - model_state.mfl.iiv
+    model_state_new = update_model_state(model_state, mfl=mfl_new, type='variability')
     model_new = model_state_new.generate_model()
-    assert model_new.random_variables.iiv.names == ('ETA_CL',)
+    assert model_new.random_variables.iiv.names == ('eta_dummy',)
+    assert len(model_state_new.mfl.covariance) == 0
+    iiv1 = IIV.create(parameter='CL', fp='exp', optional=False)
+    iiv2 = IIV.create(parameter='VC', fp='exp', optional=False)
+    mfl_new = ModelFeatures.create([iiv1, iiv2])
+    model_state_new = update_model_state(model_state_new, mfl=mfl_new, type='variability')
+    model_new = model_state_new.generate_model()
+    assert len(model_new.random_variables.iiv.names) == 2
 
 
 def test_update_model_block():
-    model_state = ModelState.create('iv')
+    model_state = ModelState.create('oral')
     model = model_state.generate_model()
-    assert len(model.random_variables.iiv[0].names) == 2
-    model_state_new = update_model_state(model_state, block=[['CL']])
+    assert len(model.random_variables.iiv) == 2
+    cov1 = Covariance.create(type='iiv', parameters=['CL', 'MAT'])
+    cov2 = Covariance.create(type='iiv', parameters=['CL', 'VC'])
+    cov3 = Covariance.create(type='iiv', parameters=['MAT', 'VC'])
+    mfl_new = ModelFeatures.create([cov1, cov2, cov3])
+    model_state_new = update_model_state(
+        model_state, mfl=model_state.mfl.iiv + mfl_new, type='variability'
+    )
     model_new = model_state_new.generate_model()
-    assert len(model_new.random_variables.iiv[0].names) == 1
-    model_state_new = update_model_state(model_state, block=[['CL'], ['VC']])
-    model_new = model_state_new.generate_model()
-    assert len(model_new.random_variables.iiv[0].names) == 1
-    model_state_new = update_model_state(model_state, block=[['CL', 'VC']])
-    model_new = model_state_new.generate_model()
-    assert len(model_new.random_variables.iiv[0].names) == 2
+    assert len(model_new.random_variables.iiv) == 1
 
 
 def test_update_model_covariates():
@@ -191,7 +201,7 @@ def test_update_model_covariates():
     model_state = ModelState.create('iv')
     covariate = Covariate.create('CL', 'AMT', 'exp', '*', optional=False)
     mfl_new = ModelFeatures.create([covariate])
-    model_state_new = update_model_state(model_state, mfl_new)
+    model_state_new = update_model_state(model_state, mfl_new, type='covariate')
     model_new = model_state_new.generate_model(dataset, datainfo)
     assert has_covariate_effect(model_new, 'CL', 'AMT')
 

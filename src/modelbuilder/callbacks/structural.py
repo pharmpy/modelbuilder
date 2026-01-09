@@ -20,7 +20,7 @@ def structural_callbacks(app):
     def update_abs_rate_on_click(abs_rate):
         if abs_rate:
             mfl = f'ABSORPTION({abs_rate})'
-            ms = update_model_state(config.model_state, mfl)
+            ms = update_model_state(config.model_state, mfl, type='structural')
             if ms != config.model_state:
                 config.model_state = ms
                 return render_model_code(ms)
@@ -51,7 +51,7 @@ def structural_callbacks(app):
     def update_elim_on_click(elim):
         if elim:
             mfl = f'ELIMINATION({elim})'
-            ms = update_model_state(config.model_state, mfl)
+            ms = update_model_state(config.model_state, mfl, type='structural')
             if ms != config.model_state:
                 config.model_state = ms
                 return render_model_code(ms)
@@ -78,7 +78,7 @@ def structural_callbacks(app):
                     mfl = 'LAGTIME(OFF);TRANSITS(0)'
             else:
                 mfl = abs_delay
-            ms = update_model_state(config.model_state, mfl)
+            ms = update_model_state(config.model_state, mfl, type='structural')
             if ms != config.model_state:
                 config.model_state = ms
                 return render_model_code(ms)
@@ -110,7 +110,7 @@ def structural_callbacks(app):
     def peripheral_compartments(n):
         if n is not None:
             mfl = f'PERIPHERALS({n})'
-            ms = update_model_state(config.model_state, mfl)
+            ms = update_model_state(config.model_state, mfl, type='structural')
             if ms != config.model_state:
                 config.model_state = ms
                 return render_model_code(ms)
@@ -134,7 +134,7 @@ def structural_callbacks(app):
                 mfl = f'{effect}({expr},{prod})'
             else:
                 mfl = f'{effect}({expr})'
-            ms = update_model_state(ms_pk, mfl)
+            ms = update_model_state(ms_pk, mfl, type='structural')
             config.model_state = ms
             return render_model_code(ms)
         else:

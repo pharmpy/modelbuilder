@@ -1,4 +1,5 @@
 import ast
+import builtins
 from dataclasses import dataclass
 from functools import partial
 
@@ -65,12 +66,9 @@ class ModelState(Immutable):
     mfl: ModelFeatures
     error_funcs: list[str]
     parameters: Parameters
-    rvs: dict
     col: list
     individual_parameters: list
     dataset: pd.DataFrame
-    block: list
-    covariates: list
 
     def __init__(
         self,
@@ -80,11 +78,10 @@ class ModelState(Immutable):
         mfl,
         error_funcs,
         parameters,
-        rvs=None,
+        iov=None,
         col=None,
         individual_parameters=None,
         dataset=None,
-        block=None,
     ):
         self.model_type = model_type
         self.model_format = model_format
@@ -92,11 +89,10 @@ class ModelState(Immutable):
         self.mfl = mfl
         self.error_funcs = error_funcs
         self.parameters = parameters
-        self.rvs = rvs
+        self.iov = iov
         self.col = col
         self.individual_parameters = individual_parameters
         self.dataset = dataset
-        self.block = block
 
     def replace(self, **kwargs):
         model_format = kwargs.get('model_format', self.model_format)
@@ -104,11 +100,10 @@ class ModelState(Immutable):
         model_attrs = kwargs.get('model_attrs', self.model_attrs)
         error_funcs = kwargs.get('error_funcs', self.error_funcs)
         parameters = kwargs.get('parameters', self.parameters)
-        rvs = kwargs.get('rvs', self.rvs)
+        iov = kwargs.get('iov', self.iov)
         col = kwargs.get('col', self.col)
         individual_parameters = kwargs.get('individual_parameters', self.individual_parameters)
         dataset = kwargs.get('dataset', self.dataset)
-        block = kwargs.get('block', self.block)
 
         return ModelState(
             model_type=self.model_type,
@@ -117,24 +112,22 @@ class ModelState(Immutable):
             mfl=mfl,
             error_funcs=error_funcs,
             parameters=parameters,
-            rvs=rvs,
+            iov=iov,
             col=col,
             individual_parameters=individual_parameters,
             dataset=dataset,
-            block=block,
         )
 
     @classmethod
     def create(cls, model_type):
         model = cls._create_base_model(model_type)
-        mfl = get_model_features(model, type='pk') + get_model_features(model, type='covariates')
+        mfl = get_model_features(model)
         error_funcs = {1: ['prop']}
         parameters = model.parameters
-        rvs = _update_rvs_from_model(model)[0]
         col = model.datainfo.names
+        iov = []
         individual_parameters = get_individual_parameters(model)
         dataset = None
-        block = [['CL', 'VC']]
         return cls(
             model_type,
             'nonmem',
@@ -142,11 +135,10 @@ class ModelState(Immutable):
             mfl,
             error_funcs,
             parameters,
-            rvs,
+            iov,
             col,
             individual_parameters,
             dataset,
-            block,
         )
 
     @staticmethod
@@ -191,12 +183,6 @@ class ModelState(Immutable):
             funcs.append(func)
             model = funcs[-1](model)
 
-        # Update rvs and covariates when individual parameters have changed
-        if self.individual_parameters != get_individual_parameters(model):
-            self.rvs, self.block = _update_rvs_from_model(model)
-            if self.mfl.covariates:
-                self.covariates = _update_covariates(model, self.mfl.covariates)
-
         for dv, func_names in self.error_funcs.items():
             for func_name in func_names:
                 if ERROR_FUNCS[func_name] not in ERROR_FUNCS_DICT.keys() or not ERROR_FUNCS_DICT[
@@ -205,61 +191,20 @@ class ModelState(Immutable):
                     funcs.append(partial(ERROR_FUNCS[func_name], dv=dv))
                     model = funcs[-1](model)
 
-        if self.rvs['iiv']:
-            params_to_get_iiv = {}
-            for rv in self.rvs['iiv']:
-                params_to_get_iiv[rv['list_of_parameters']] = rv['expression']
-            params_with_iiv = _get_params_with_iiv(model)
+        variability_funcs = self._get_mfl_funcs_variability(model)
+        for func in variability_funcs:
+            funcs.append(func)
+            model = funcs[-1](model)
 
-            to_remove = []
-            for key, value in params_with_iiv.items():
-                if params_to_get_iiv.get(key, None) != value:
-                    to_remove.append(key)
-            etas_to_remove = [get_parameter_rv(model, param)[0] for param in to_remove]
-
-            to_add = []
-            for key, value in params_to_get_iiv.items():
-                if params_with_iiv.get(key, None) != value:
-                    iiv_func = {}
-                    iiv_func['list_of_parameters'] = key
-                    iiv_func['expression'] = value
-                    to_add.append(iiv_func)
-
-            group_by_expr_add = _group_by_key(to_add, 'list_of_parameters', 'expression')
-
-            if to_remove:
-                funcs.append(partial(remove_iiv, to_remove=etas_to_remove))
-                model = funcs[-1](model)
-            for param in group_by_expr_add:
-                funcs.append(partial(add_iiv, **param))
-                model = funcs[-1](model)
-
-        if self.rvs['iov']:
-            for rv in self.rvs['iov']:
+        if self.iov:
+            for rv in self.iov:
                 if isinstance(rv['list_of_parameters'], str):
                     rv['list_of_parameters'] = ast.literal_eval(rv['list_of_parameters'])
                 funcs.append(partial(add_iov, **rv))
                 model = funcs[-1](model)
 
-        if self.block:
-            existing_block = [list(iiv.names) for iiv in model.random_variables.iiv]
-            should_be_block = []
-            for bl in self.block:
-                params = [get_parameter_rv(model, param)[0] for param in bl]
-                should_be_block.append(params)
-            for params in existing_block:
-                if params not in should_be_block and len(params) > 1:
-                    funcs.append(partial(split_joint_distribution, rvs=params))
-                    model = funcs[-1](model)
-            for params in should_be_block:
-                if params not in existing_block and len(params) > 1:
-                    funcs.append(partial(create_joint_distribution, rvs=params))
-                    model = funcs[-1](model)
-
         if self.mfl.covariates:
-            print(self.mfl.covariates)
             covariate_funcs = generate_transformations(self.mfl.covariates, include_remove=False)
-            print(covariate_funcs)
             for func in covariate_funcs:
                 funcs.append(func)
                 model = funcs[-1](model)
@@ -317,6 +262,39 @@ class ModelState(Immutable):
     def _get_pd_features(self):
         return self.mfl.direct_effects + self.mfl.indirect_effects + self.mfl.effect_compartments
 
+    def _get_mfl_funcs_variability(self, model_base):
+        potential_params = {symb.name for symb in model_base.statements.free_symbols}
+
+        def _filter_iiv(iivs, params):
+            return [iiv for iiv in iivs if iiv.parameter in params]
+
+        iivs_start = get_model_features(model_base, type='iiv')
+
+        to_remove = _filter_iiv(iivs_start - self.mfl.iiv, potential_params)
+        to_add = _filter_iiv(self.mfl.iiv - iivs_start, potential_params)
+
+        potential_params = potential_params - {iiv.parameter for iiv in to_remove}
+
+        def _filter_cov(covs, params):
+            return [cov for cov in covs if set(cov.parameters).issubset(params)]
+
+        covs_start = get_model_features(model_base, type='covariance')
+        if self.mfl.covariance - covs_start:
+            to_add += _filter_cov(self.mfl.covariance, potential_params)
+        to_remove += _filter_cov(covs_start - self.mfl.covariance, potential_params)
+        variability_funcs = []
+
+        if to_remove:
+            variability_funcs += generate_transformations(
+                to_remove, include_remove=True, include_add=False
+            )
+        if to_add:
+            variability_funcs += generate_transformations(
+                to_add, include_remove=False, include_add=True
+            )
+
+        return variability_funcs
+
     def __eq__(self, other):
         return (
             self.model_type == other.model_type
@@ -325,32 +303,21 @@ class ModelState(Immutable):
             and self.mfl == other.mfl
             and self.error_funcs == other.error_funcs
             and self.parameters == other.parameters
-            and self.rvs == other.rvs
+            and self.iov == other.iov
         )
 
 
-def update_model_state(ms_old, mfl=None, **kwargs):
+def update_model_state(ms_old, mfl=None, type=None, **kwargs):
     model_attrs = kwargs.get('model_attrs')
     error = kwargs.get('error')
     parameters = kwargs.get('parameters')
-    rvs = kwargs.get('rvs')
+    iov = kwargs.get('iov')
     individual_parameters = kwargs.get('individual_parameters')
-    block = kwargs.get('block')
-
     if not parameters:
         ms_old = ms_old.replace(parameters=Parameters())
-
     if mfl is not None:
         mfl_parsed = ModelFeatures.create(mfl)
-        mfl_old = ms_old.mfl
-        if mfl_parsed.covariates:
-            mfl_new = mfl_old - mfl_old.covariates + mfl_parsed.covariates
-        else:
-            feature_types = [type(feature) for feature in mfl_parsed]
-            previous_features = [
-                feature for feature in ms_old.mfl if type(feature in feature_types)
-            ]
-            mfl_new = ms_old.mfl - previous_features + mfl_parsed
+        mfl_new = _update_mfl(ms_old.mfl, mfl_parsed, type)
         return ms_old.replace(mfl=mfl_new)
     if model_attrs:
         return ms_old.replace(model_attrs=model_attrs)
@@ -360,13 +327,34 @@ def update_model_state(ms_old, mfl=None, **kwargs):
     if parameters:
         params_new = [Parameter.from_dict(d) for d in parameters]
         return ms_old.replace(parameters=Parameters.create(params_new))
-    if rvs:
-        return ms_old.replace(rvs=rvs)
+    if iov is not None:
+        return ms_old.replace(iov=iov)
     if individual_parameters:
         return ms_old.replace(individual_parameters=individual_parameters)
-    if block is not None:
-        return ms_old.replace(block=block)
     raise ValueError
+
+
+def _update_mfl(mfl_old, mfl_parsed, type):
+    if type == 'structural':
+        feature_types = [builtins.type(feature) for feature in mfl_parsed]
+        features_old = [feature for feature in mfl_old if builtins.type(feature) in feature_types]
+        features_new = mfl_parsed
+    elif type == 'variability':
+        features_old = mfl_old.iiv + mfl_old.iov + mfl_old.covariance
+        features_new = mfl_parsed.iiv + mfl_parsed.iov
+        params = {var.parameter for var in features_new}
+        covariances_new = [
+            cov for cov in mfl_parsed.covariance if set(cov.parameters).issubset(params)
+        ]
+        features_new += covariances_new
+    elif type == 'covariate':
+        features_old = mfl_old.covariates
+        features_new = mfl_parsed.covariates
+    else:
+        raise NotImplementedError
+
+    mfl_new = ModelFeatures.create(mfl_old - features_old + features_new)
+    return mfl_new
 
 
 # FIXME: remove relevant functions when MFL supports that feature
@@ -417,27 +405,11 @@ def _update_parameters_from_model(ms_parameters, model):
     return new_params, individual_parameters
 
 
-def _update_rvs_from_model(model):
-    iiv_names = model.random_variables.iiv.names
-    if iiv_names:
-        param_names = [get_rv_parameters(model, param)[0] for param in iiv_names]
-        iiv = [{'list_of_parameters': param, 'expression': 'exp'} for param in param_names]
-    else:
-        iiv = []
-    rvs = {'iiv': iiv, 'iov': []}
-
-    eta_block = [list(iiv.names) for iiv in model.random_variables.iiv]
-    existing_block = [
-        [get_rv_parameters(model, eta)[0] for eta in etas] for etas in eta_block if len(etas) > 1
-    ]
-    return rvs, existing_block
-
-
 def _update_covariates(model, covariates):
     new_covariates = [
         cov for cov in covariates if cov.parameter in get_individual_parameters(model)
     ]
-    return new_covariates
+    return ModelFeatures.create(new_covariates)
 
 
 def generate_code(funcs, language):
